@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Email — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+</head>
+<body>
+
+  <div class="auth-shell">
+    <div class="glass-card auth-card animate-fade-in-up text-center">
+      <a href="/index.html" class="auth-brand text-decoration-none">
+        <i class="fa-solid fa-bolt glow-text-primary"></i>
+        <span style="color:var(--text-primary);">EFootball <span class="glow-text-secondary">Arena</span></span>
+      </a>
+
+      <!-- Loading -->
+      <div id="loadingState" class="py-4">
+        <span class="spinner-arena" style="width:32px; height:32px; border-width:3px;"></span>
+        <p class="text-secondary-arena text-sm mt-3 mb-0">Verifying your email...</p>
+      </div>
+
+      <!-- Success -->
+      <div id="successState" class="d-none">
+        <i class="fa-solid fa-circle-check fa-3x mb-3" style="color:var(--color-success);"></i>
+        <h5>Email verified!</h5>
+        <p class="text-secondary-arena text-sm">Your account is fully active. You can log in now.</p>
+        <a href="/pages/login.html" class="btn-arena btn-arena--primary w-100 mt-2">Go to Login</a>
+      </div>
+
+      <!-- Failure -->
+      <div id="errorState" class="d-none">
+        <i class="fa-solid fa-circle-xmark fa-3x mb-3" style="color:var(--color-danger);"></i>
+        <h5>Verification failed</h5>
+        <p class="text-secondary-arena text-sm">This link may be invalid or expired.</p>
+        <a href="/pages/login.html" class="btn-arena btn-arena--secondary w-100 mt-2">Back to Login</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // TODO (Step 13): replace with a real call to
+    // GET /api/auth/verify-email?token=<token>. Left as a simulated
+    // 1.2s check for now so the three visual states above are all
+    // reachable and reviewable before the API is wired in.
+    const token = new URLSearchParams(window.location.search).get('token');
+
+    setTimeout(() => {
+      document.getElementById('loadingState').classList.add('d-none');
+      if (token) {
+        document.getElementById('successState').classList.remove('d-none');
+      } else {
+        document.getElementById('errorState').classList.remove('d-none');
+      }
+    }, 1200);
+  </script>
+</body>
+</html>

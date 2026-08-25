@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Features — EFootball Arena</title>
+  <meta name="description" content="Everything players and organizers get on EFootball Arena." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <link rel="stylesheet" href="/assets/css/marketing.css" />
+
+  <style>
+    .feature-tabs .nav-link {
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: var(--text-sm);
+      border-radius: 999px;
+      padding: 10px 24px;
+      border: 1px solid transparent;
+    }
+    .feature-tabs .nav-link.active {
+      background: var(--glass-bg);
+      border-color: var(--glass-border);
+      color: var(--text-primary);
+      box-shadow: inset 0 0 0 1px rgba(var(--color-primary-rgb), 0.3);
+    }
+    .feature-row {
+      display: flex;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .feature-row:last-child { border-bottom: none; }
+    .feature-row-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(var(--color-primary-rgb), 0.15);
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div data-include="/components/public-navbar.html"></div>
+
+  <!-- HERO -->
+  <section class="hero-arena hero-arena--compact text-center">
+    <div id="particles-bg"></div>
+    <div class="container-arena hero-content">
+      <span class="hero-eyebrow"><i class="fa-solid fa-layer-group"></i> Platform Features</span>
+      <h1 class="mt-4">Everything included, <span class="glow-text-primary">no add-ons</span></h1>
+      <p class="text-secondary-arena mx-auto" style="max-width:600px; font-size:var(--text-lg);">
+        One platform for players competing and admins running the show.
+      </p>
+    </div>
+  </section>
+
+  <!-- TABS -->
+  <section class="container-arena py-4">
+    <ul class="nav feature-tabs justify-content-center gap-2 mb-5" id="featureTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="player-tab" data-bs-toggle="pill" data-bs-target="#player-panel" type="button" role="tab" aria-selected="true">
+          <i class="fa-solid fa-gamepad"></i> For Players
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="admin-tab" data-bs-toggle="pill" data-bs-target="#admin-panel" type="button" role="tab" aria-selected="false">
+          <i class="fa-solid fa-shield-halved"></i> For Organizers
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- PLAYER FEATURES -->
+      <div class="tab-pane fade show active" id="player-panel" role="tabpanel">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="glass-card p-4">
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-user-plus"></i></div>
+                <div>
+                  <h6 class="mb-1">Quick Registration</h6>
+                  <p class="text-sm mb-0">Sign up with a gamer tag, verify your email, and you're in.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-trophy"></i></div>
+                <div>
+                  <h6 class="mb-1">Join Tournaments</h6>
+                  <p class="text-sm mb-0">Solo or as a team — browse open tournaments and register in a click.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-camera-retro"></i></div>
+                <div>
+                  <h6 class="mb-1">OCR Result Submission</h6>
+                  <p class="text-sm mb-0">Upload a match screenshot — the score is read automatically for your review.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-money-bill-transfer"></i></div>
+                <div>
+                  <h6 class="mb-1">Local Payments</h6>
+                  <p class="text-sm mb-0">Pay entry fees via M-Pesa, Airtel Money, Tigo Pesa, HaloPesa, or bank transfer.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-id-badge"></i></div>
+                <div>
+                  <h6 class="mb-1">Player Profile &amp; Avatar</h6>
+                  <p class="text-sm mb-0">Edit your profile, upload an avatar, and track your win/loss record.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="glass-card p-4">
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-ranking-star"></i></div>
+                <div>
+                  <h6 class="mb-1">Live Fixtures &amp; Standings</h6>
+                  <p class="text-sm mb-0">See your next match and where you rank, updated the moment a result is approved.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-comments"></i></div>
+                <div>
+                  <h6 class="mb-1">Live Chat</h6>
+                  <p class="text-sm mb-0">Global lobby plus a dedicated room per tournament, with online presence and typing indicators.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-bell"></i></div>
+                <div>
+                  <h6 class="mb-1">Real-Time Notifications</h6>
+                  <p class="text-sm mb-0">Get notified instantly when a payment clears, a match is scored, or your entry is approved.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div>
+                  <h6 class="mb-1">Match History</h6>
+                  <p class="text-sm mb-0">Every match, every score, permanently on record — download it as a report any time.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-users-rectangle"></i></div>
+                <div>
+                  <h6 class="mb-1">Teams</h6>
+                  <p class="text-sm mb-0">Create or join a team, manage the roster, and compete in team-format tournaments.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN FEATURES -->
+      <div class="tab-pane fade" id="admin-panel" role="tabpanel">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="glass-card p-4">
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-shuffle"></i></div>
+                <div>
+                  <h6 class="mb-1">Automatic Fixture Generation</h6>
+                  <p class="text-sm mb-0">League, knockout, round robin, Swiss, and group formats — generated from your approved entrants in one click.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-check-double"></i></div>
+                <div>
+                  <h6 class="mb-1">Result &amp; Payment Verification</h6>
+                  <p class="text-sm mb-0">Review OCR-assisted submissions and payment proofs from a single approval queue.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-users-gear"></i></div>
+                <div>
+                  <h6 class="mb-1">Player &amp; Tournament Management</h6>
+                  <p class="text-sm mb-0">Approve, suspend, or ban accounts; edit or cancel tournaments at any stage.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-photo-film"></i></div>
+                <div>
+                  <h6 class="mb-1">Media Management</h6>
+                  <p class="text-sm mb-0">Upload posters, banners, logos, and gallery images per tournament.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-bullhorn"></i></div>
+                <div>
+                  <h6 class="mb-1">Announcements</h6>
+                  <p class="text-sm mb-0">Push a message to everyone in a tournament, or the whole platform.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="glass-card p-4">
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-file-export"></i></div>
+                <div>
+                  <h6 class="mb-1">Reports in Any Format</h6>
+                  <p class="text-sm mb-0">Export standings, match history, and payment records as PDF, Excel, CSV, or JSON.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                <div>
+                  <h6 class="mb-1">Full Audit Log</h6>
+                  <p class="text-sm mb-0">Every payment approval, ban, and status change recorded with who, what, and when.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
+                <div>
+                  <h6 class="mb-1">Live Feed &amp; Global Chat</h6>
+                  <p class="text-sm mb-0">Moderate the community lobby and keep a pulse on every tournament in real time.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-sliders"></i></div>
+                <div>
+                  <h6 class="mb-1">Platform Settings</h6>
+                  <p class="text-sm mb-0">Control registration, currency, upload limits, and support contact details.</p>
+                </div>
+              </div>
+              <div class="feature-row">
+                <div class="feature-row-icon"><i class="fa-solid fa-user-shield"></i></div>
+                <div>
+                  <h6 class="mb-1">Role-Based Access</h6>
+                  <p class="text-sm mb-0">Separate Admin and Moderator permissions, so you can delegate without giving up control.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="container-arena py-5">
+    <div class="cta-band">
+      <h2>See it in action</h2>
+      <p class="text-secondary-arena mx-auto" style="max-width:480px;">
+        Browse live tournaments or create your account to try it yourself.
+      </p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap mt-2">
+        <a href="/pages/register.html" class="btn-arena btn-arena--primary"><i class="fa-solid fa-bolt"></i> Get Started Free</a>
+        <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary">Browse Tournaments</a>
+      </div>
+    </div>
+  </section>
+
+  <div data-include="/components/footer.html"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/particles-config.js"></script>
+</body>
+</html>

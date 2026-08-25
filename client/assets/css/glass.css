@@ -1,0 +1,85 @@
+/* =====================================================================
+   GLASS / NEUMORPHIC / NEON SURFACES
+   =====================================================================
+   The signature visual language: frosted glass panels floating over
+   the gradient background, soft neumorphic depth on interactive
+   surfaces, and neon glow as the accent for focus/hover/active states.
+   ===================================================================== */
+
+/* --- Glass panel: the base "floating card" used everywhere --- */
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.glass-card--interactive:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--color-primary-rgb), 0.35);
+}
+
+/* Smaller radius variant for compact widgets (stat tiles, list items) */
+.glass-card--compact {
+  border-radius: var(--radius-md);
+}
+
+/* --- Neumorphic button/surface: soft dual-shadow depth --- */
+.neu-surface {
+  background: linear-gradient(145deg, #131c2e, #0d1420);
+  border-radius: var(--radius-md);
+  box-shadow:
+    8px 8px 16px rgba(0, 0, 0, 0.4),
+    -6px -6px 14px rgba(255, 255, 255, 0.02);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+.neu-surface:active {
+  box-shadow:
+    inset 4px 4px 10px rgba(0, 0, 0, 0.45),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.02);
+  transform: scale(0.99);
+}
+
+/* --- Neon glow utilities — apply to any element for an accent halo --- */
+.glow-primary   { box-shadow: var(--shadow-glow-primary); }
+.glow-secondary { box-shadow: var(--shadow-glow-secondary); }
+.glow-success   { box-shadow: var(--shadow-glow-success); }
+.glow-danger    { box-shadow: var(--shadow-glow-danger); }
+
+.glow-text-primary {
+  color: var(--color-primary);
+  text-shadow: 0 0 16px rgba(var(--color-primary-rgb), 0.55);
+}
+.glow-text-secondary {
+  color: var(--color-secondary);
+  text-shadow: 0 0 16px rgba(var(--color-secondary-rgb), 0.55);
+}
+
+/* --- Gradient border trick: a glowing 1px edge without a real border --- */
+.gradient-border {
+  position: relative;
+  border-radius: var(--radius-lg);
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.6), rgba(var(--color-secondary-rgb), 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* --- Frosted section divider --- */
+.divider-arena {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+  border: none;
+  margin: 24px 0;
+}

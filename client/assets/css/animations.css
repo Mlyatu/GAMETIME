@@ -1,0 +1,67 @@
+/* =====================================================================
+   ANIMATIONS
+   =====================================================================
+   Keyframes + utility classes for page-load reveals, glow pulses, and
+   loading states. All timings key off the 300ms base transition from
+   tokens.css. Respect for prefers-reduced-motion is handled globally
+   in base.css, so nothing extra is needed per-animation here.
+   ===================================================================== */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp var(--transition-slow) both;
+}
+/* Stagger helper — pair with inline style="--delay: 2" on siblings */
+.animate-stagger { animation-delay: calc(var(--delay, 0) * 80ms); }
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.animate-float { animation: floatY 4s ease-in-out infinite; }
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(var(--color-primary-rgb), 0.35); }
+  50%      { box-shadow: 0 0 32px rgba(var(--color-primary-rgb), 0.6); }
+}
+.animate-glow-pulse { animation: glowPulse 2.4s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton-arena {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 37%, rgba(255,255,255,0.04) 63%);
+  background-size: 400px 100%;
+  animation: shimmer 1.6s linear infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner-arena {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+/* Typing indicator dots — used in chat (Step 8's real-time feature) */
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dots { display: inline-flex; gap: 4px; align-items: center; }
+.typing-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-secondary);
+  animation: typingBounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.3s; }

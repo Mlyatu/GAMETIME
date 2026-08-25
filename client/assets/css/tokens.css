@@ -1,0 +1,76 @@
+/* =====================================================================
+   DESIGN TOKENS
+   =====================================================================
+   Every other stylesheet in this project reads colors, radii, shadows,
+   and timing from these custom properties — never hardcode a hex value
+   or a blur amount directly in a component file. This is the one file
+   to edit if the brand palette ever changes.
+
+   Values here are taken directly from the project's design brief:
+   Cyber Dark theme, Glassmorphism, Neon Glow, 25px radius, 30px blur.
+   ===================================================================== */
+
+:root {
+  /* --- Brand colors --- */
+  --color-primary: #3476F6;
+  --color-primary-rgb: 52, 118, 246;
+  --color-secondary: #00F2FE;
+  --color-secondary-rgb: 0, 242, 254;
+  --color-success: #00E676;
+  --color-success-rgb: 0, 230, 118;
+  --color-danger: #FF4D6D;
+  --color-danger-rgb: 255, 77, 109;
+  --color-warning: #FFC857;
+  --color-warning-rgb: 255, 200, 87;
+
+  /* --- Backgrounds (darkest to lightest — layer cards on top of these) --- */
+  --bg-deepest: #090D16;
+  --bg-base: #101827;
+  --bg-elevated: #111827;
+
+  /* --- Glass surface --- */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-blur: 30px;
+
+  /* --- Text --- */
+  --text-primary: #F3F4F6;
+  --text-secondary: #9CA3AF;
+  --text-muted: #6B7280;
+
+  /* --- Shape & elevation --- */
+  --radius-lg: 25px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+  --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.45);
+  --shadow-glow-primary: 0 0 24px rgba(var(--color-primary-rgb), 0.45);
+  --shadow-glow-secondary: 0 0 24px rgba(var(--color-secondary-rgb), 0.45);
+  --shadow-glow-success: 0 0 20px rgba(var(--color-success-rgb), 0.4);
+  --shadow-glow-danger: 0 0 20px rgba(var(--color-danger-rgb), 0.4);
+
+  /* --- Motion --- */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Typography --- */
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+  /* Type scale — 1.25 (major third) ratio for clear hierarchy */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.563rem;
+  --text-2xl: 1.953rem;
+  --text-3xl: 2.441rem;
+  --text-4xl: 3.052rem;
+
+  /* --- Layout --- */
+  --sidebar-width: 272px;
+  --topbar-height: 76px;
+  --content-max-width: 1400px;
+}

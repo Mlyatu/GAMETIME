@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .welcome-banner {
+      background: linear-gradient(135deg, rgba(var(--color-primary-rgb),.2), rgba(var(--color-secondary-rgb),.08));
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .activity-item {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: var(--text-sm);
+    }
+    .match-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.02);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+
+        <!-- WELCOME BANNER -->
+        <div class="glass-card welcome-banner mb-4">
+          <div>
+            <h3 class="mb-1">Welcome back, <span class="glow-text-primary" id="dashboardUsername">StrikerX</span> 👋</h3>
+            <p class="text-secondary-arena mb-0">You have <strong class="text-primary" style="color:var(--color-primary);">2 matches</strong> scheduled this week.</p>
+          </div>
+          <a href="/pages/tournaments.html" class="btn-arena btn-arena--primary"><i class="fa-solid fa-trophy"></i> Browse Tournaments</a>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md-3">
+            <div class="glass-card glass-card--interactive stat-card">
+              <div class="stat-card__icon" style="background:rgba(var(--color-primary-rgb),.15); color:var(--color-primary);"><i class="fa-solid fa-trophy"></i></div>
+              <div class="stat-card__value">3</div>
+              <div class="stat-card__label">Active Tournaments</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="glass-card glass-card--interactive stat-card">
+              <div class="stat-card__icon" style="background:rgba(var(--color-success-rgb),.15); color:var(--color-success);"><i class="fa-solid fa-medal"></i></div>
+              <div class="stat-card__value">14</div>
+              <div class="stat-card__label">Wins</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="glass-card glass-card--interactive stat-card">
+              <div class="stat-card__icon" style="background:rgba(var(--color-warning-rgb),.15); color:var(--color-warning);"><i class="fa-solid fa-futbol"></i></div>
+              <div class="stat-card__value">42</div>
+              <div class="stat-card__label">Goals Scored</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="glass-card glass-card--interactive stat-card">
+              <div class="stat-card__icon" style="background:rgba(var(--color-danger-rgb),.15); color:var(--color-danger);"><i class="fa-solid fa-ranking-star"></i></div>
+              <div class="stat-card__value">#7</div>
+              <div class="stat-card__label">Global Rank</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- UPCOMING MATCHES -->
+          <div class="col-lg-7">
+            <div class="glass-card p-4 mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Upcoming Matches</h5>
+                <a href="/pages/fixtures.html" class="text-sm">View All</a>
+              </div>
+
+              <div class="match-row">
+                <div class="d-flex align-items-center gap-3">
+                  <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="36" height="36" alt="" />
+                  <div>
+                    <div class="text-sm fw-semibold">vs MidfieldMaestro</div>
+                    <div class="text-xs text-muted">Dodoma Winter Cup &middot; Round 2</div>
+                  </div>
+                </div>
+                <span class="badge-arena badge-arena--primary">Tomorrow, 6:00 PM</span>
+              </div>
+
+              <div class="match-row">
+                <div class="d-flex align-items-center gap-3">
+                  <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="36" height="36" alt="" />
+                  <div>
+                    <div class="text-sm fw-semibold">vs GoalMachine</div>
+                    <div class="text-xs text-muted">UDOM Campus League &middot; Round 4</div>
+                  </div>
+                </div>
+                <span class="badge-arena badge-arena--neutral">Sat, 3:00 PM</span>
+              </div>
+            </div>
+
+            <!-- MY TOURNAMENTS -->
+            <div class="glass-card p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">My Tournaments</h5>
+                <a href="/pages/tournaments.html" class="text-sm">View All</a>
+              </div>
+              <div class="table-responsive">
+                <table class="table-arena">
+                  <thead>
+                    <tr><th>Tournament</th><th>Format</th><th>Status</th><th>Rank</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Dodoma Winter Cup</td><td>Knockout</td>
+                      <td><span class="badge-arena badge-arena--success">Ongoing</span></td><td>Quarter Final</td>
+                    </tr>
+                    <tr>
+                      <td>UDOM Campus League</td><td>Round Robin</td>
+                      <td><span class="badge-arena badge-arena--success">Ongoing</span></td><td>#2 of 12</td>
+                    </tr>
+                    <tr>
+                      <td>Arena Champions Series</td><td>Groups</td>
+                      <td><span class="badge-arena badge-arena--warning">Pending</span></td><td>—</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACTIVITY + QUICK ACTIONS -->
+          <div class="col-lg-5">
+            <div class="glass-card p-4 mb-4">
+              <h5 class="mb-3">Recent Activity</h5>
+
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(var(--color-success-rgb),.15); color:var(--color-success);"><i class="fa-solid fa-check"></i></div>
+                <div>
+                  <div class="text-sm">Payment approved for <strong>Dodoma Winter Cup</strong></div>
+                  <div class="text-xs text-muted">2 hours ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(var(--color-primary-rgb),.15); color:var(--color-primary);"><i class="fa-solid fa-futbol"></i></div>
+                <div>
+                  <div class="text-sm">Match result recorded: <strong>3 - 1</strong> vs Player2</div>
+                  <div class="text-xs text-muted">Yesterday</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(var(--color-warning-rgb),.15); color:var(--color-warning);"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div>
+                  <div class="text-sm">Registration pending for <strong>Arena Champions Series</strong></div>
+                  <div class="text-xs text-muted">2 days ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(var(--color-secondary-rgb),.15); color:var(--color-secondary);"><i class="fa-solid fa-user-plus"></i></div>
+                <div>
+                  <div class="text-sm">You joined team <strong>Arena Wolves</strong></div>
+                  <div class="text-xs text-muted">5 days ago</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass-card p-4">
+              <h5 class="mb-3">Quick Actions</h5>
+              <div class="d-flex flex-column gap-2">
+                <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary w-100 justify-content-start"><i class="fa-solid fa-magnifying-glass"></i> Find a Tournament</a>
+                <a href="/pages/teams.html" class="btn-arena btn-arena--secondary w-100 justify-content-start"><i class="fa-solid fa-people-group"></i> Manage My Team</a>
+                <a href="/pages/profile.html" class="btn-arena btn-arena--secondary w-100 justify-content-start"><i class="fa-solid fa-id-badge"></i> Edit Profile</a>
+                <a href="/pages/chat.html" class="btn-arena btn-arena--secondary w-100 justify-content-start"><i class="fa-solid fa-comments"></i> Open Chat</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script>
+    // TODO (Step 13): replace all static content above with data from
+    // GET /api/player/me, GET /api/tournament?myTournaments=true,
+    // GET /api/notification, etc.
+    document.addEventListener('arena:includes-loaded', () => {
+      document.querySelectorAll('[data-nav]').forEach((link) => {
+        if (link.dataset.nav === 'dashboard') link.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<div class="topbar-arena">
+  <button class="btn-arena btn-arena--icon btn-arena--ghost d-lg-none" id="mobileSidebarToggle" aria-label="Open menu">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <div class="topbar-search">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="text" placeholder="Search players, teams, tournaments..." aria-label="Search" />
+  </div>
+
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn-arena btn-arena--icon btn-arena--ghost position-relative" id="notificationBell" aria-label="Notifications">
+      <i class="fa-solid fa-bell"></i>
+      <span class="badge-dot badge-dot--online position-absolute" style="top:8px; right:8px;" id="notificationDot" hidden></span>
+    </button>
+
+    <div class="dropdown">
+      <button class="btn-arena btn-arena--ghost d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false">
+        <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="Your avatar" id="topbarAvatar" />
+        <span class="d-none d-md-inline" id="topbarUsername">Player</span>
+        <i class="fa-solid fa-chevron-down text-xs"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end glass-card p-2 mt-2 border-0">
+        <li><a class="dropdown-item sidebar-link" href="/pages/profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+        <li><a class="dropdown-item sidebar-link" href="/pages/settings.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
+        <li><hr class="divider-arena my-1" /></li>
+        <li><button class="dropdown-item sidebar-link w-100 text-start border-0 bg-transparent" id="topbarLogoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</button></li>
+      </ul>
+    </div>
+  </div>
+</div>

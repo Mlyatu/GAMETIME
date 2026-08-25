@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teams — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .team-crest {
+      width: 56px; height: 56px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 800; font-size: var(--text-lg);
+      color: #06111f;
+    }
+    .team-avatars { display: flex; }
+    .team-avatars img { border-radius: 50%; border: 2px solid var(--bg-elevated); margin-left: -10px; }
+    .team-avatars img:first-child { margin-left: 0; }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+          <div>
+            <h1 class="mb-1">Teams</h1>
+            <p class="text-secondary-arena mb-0">Browse teams or create your own for team-format tournaments.</p>
+          </div>
+          <button class="btn-arena btn-arena--primary" data-bs-toggle="modal" data-bs-target="#createTeamModal">
+            <i class="fa-solid fa-plus"></i> Create Team
+          </button>
+        </div>
+
+        <!-- TODO (Step 13): replace with data from GET /api/team -->
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-4">
+            <div class="glass-card glass-card--interactive p-4">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="team-crest">AW</div>
+                <div>
+                  <h6 class="mb-0">Arena Wolves</h6>
+                  <span class="text-xs text-muted">Captain: StrikerX</span>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="team-avatars">
+                  <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
+                  <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
+                  <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
+                </div>
+                <span class="text-xs text-muted">5 members</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <div class="glass-card glass-card--interactive p-4">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="team-crest" style="background:linear-gradient(135deg, var(--color-success), var(--color-secondary));">TS</div>
+                <div>
+                  <h6 class="mb-0">Titan Strikers</h6>
+                  <span class="text-xs text-muted">Captain: GoalMachine</span>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="team-avatars">
+                  <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
+                  <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
+                </div>
+                <span class="text-xs text-muted">4 members</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <div class="glass-card glass-card--interactive p-4">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="team-crest" style="background:linear-gradient(135deg, var(--color-danger), var(--color-warning));">MK</div>
+                <div>
+                  <h6 class="mb-0">Midnight Kickers</h6>
+                  <span class="text-xs text-muted">Captain: DefenderD</span>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="team-avatars">
+                  <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
+                  <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
+                  <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
+                  <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
+                </div>
+                <span class="text-xs text-muted">7 members</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- CREATE TEAM MODAL -->
+  <div class="modal fade" id="createTeamModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-card border-0 p-2">
+        <div class="modal-header border-0">
+          <h5 class="modal-title">Create a Team</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="createTeamForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label-arena" for="teamName">Team Name</label>
+              <input type="text" id="teamName" class="form-control-arena" placeholder="e.g. Arena Wolves" required maxlength="100" />
+              <div class="form-error-arena d-none" data-error-for="teamName"></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-arena" for="teamTag">Team Tag <span class="text-muted">(optional, max 10 chars)</span></label>
+              <input type="text" id="teamTag" class="form-control-arena" placeholder="e.g. AWX" maxlength="10" />
+            </div>
+            <p class="text-xs text-muted">You'll automatically become the team's captain.</p>
+            <button type="submit" class="btn-arena btn-arena--primary w-100 mt-2">Create Team</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/form-utils.js"></script>
+  <script>
+    document.addEventListener('arena:includes-loaded', () => {
+      document.querySelectorAll('[data-nav]').forEach((link) => {
+        if (link.dataset.nav === 'teams') link.classList.add('active');
+      });
+    });
+
+    // TODO (Step 13): wire to POST /api/team
+    document.getElementById('createTeamForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearFormErrors(this);
+      const name = document.getElementById('teamName').value.trim();
+      if (!name) {
+        showFieldError('teamName', 'Team name is required');
+        return;
+      }
+      // Placeholder confirmation until API wiring lands.
+      alert(`Team "${name}" would be created here once the API is wired up in Step 13.`);
+    });
+  </script>
+</body>
+</html>

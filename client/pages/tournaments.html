@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tournaments — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .filter-pill {
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .filter-pill.active, .filter-pill:hover {
+      background: rgba(var(--color-primary-rgb), .15);
+      border-color: rgba(var(--color-primary-rgb), .4);
+      color: var(--text-primary);
+    }
+    .tournament-banner {
+      height: 150px;
+      position: relative;
+    }
+    .tournament-banner .badge-arena { position: absolute; top: 14px; left: 14px; }
+    .tournament-meta { margin: 10px 0 16px; }
+    .tournament-meta span { font-size: var(--text-xs); color: var(--text-muted); margin-right: 16px; display: inline-block; }
+    .tournament-meta span i { margin-right: 6px; }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+          <div>
+            <h1 class="mb-1">Tournaments</h1>
+            <p class="text-secondary-arena mb-0">Browse open, ongoing, and completed competitions.</p>
+          </div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="glass-card p-3 mb-4 d-flex flex-wrap gap-2 align-items-center">
+          <button class="filter-pill active" data-filter="status" data-value="all">All</button>
+          <button class="filter-pill" data-filter="status" data-value="registration_open">Registration Open</button>
+          <button class="filter-pill" data-filter="status" data-value="ongoing">Ongoing</button>
+          <button class="filter-pill" data-filter="status" data-value="completed">Completed</button>
+          <div class="ms-auto">
+            <select class="form-control-arena py-2" id="formatFilter" style="width:auto;">
+              <option value="">All Formats</option>
+              <option value="league">League</option>
+              <option value="knockout">Knockout</option>
+              <option value="round_robin">Round Robin</option>
+              <option value="swiss">Swiss</option>
+              <option value="groups">Groups</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- GRID -->
+        <!-- TODO (Step 13): replace static cards with data from GET /api/tournament -->
+        <div class="row g-4" id="tournamentGrid">
+          <div class="col-md-6 col-lg-4">
+            <a href="/pages/tournament-detail.html?id=dodoma-winter-cup" class="text-decoration-none">
+              <div class="glass-card glass-card--interactive overflow-hidden h-100">
+                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(var(--color-primary-rgb),.35), rgba(var(--color-secondary-rgb),.15));">
+                  <span class="badge-arena badge-arena--primary">Registration Open</span>
+                </div>
+                <div class="p-4">
+                  <h5 style="color:var(--text-primary);">Dodoma Winter Cup</h5>
+                  <div class="tournament-meta">
+                    <span><i class="fa-solid fa-sitemap"></i> Knockout</span>
+                    <span><i class="fa-solid fa-users"></i> 18/32</span>
+                    <span><i class="fa-solid fa-coins"></i> TZS 5,000</span>
+                  </div>
+                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</div>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <a href="/pages/tournament-detail.html?id=udom-campus-league" class="text-decoration-none">
+              <div class="glass-card glass-card--interactive overflow-hidden h-100">
+                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(var(--color-success-rgb),.3), rgba(var(--color-primary-rgb),.15));">
+                  <span class="badge-arena badge-arena--success">Ongoing</span>
+                </div>
+                <div class="p-4">
+                  <h5 style="color:var(--text-primary);">UDOM Campus League</h5>
+                  <div class="tournament-meta">
+                    <span><i class="fa-solid fa-sitemap"></i> Round Robin</span>
+                    <span><i class="fa-solid fa-users"></i> 12/12</span>
+                    <span><i class="fa-solid fa-coins"></i> Free</span>
+                  </div>
+                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</div>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <a href="/pages/tournament-detail.html?id=arena-champions-series" class="text-decoration-none">
+              <div class="glass-card glass-card--interactive overflow-hidden h-100">
+                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(var(--color-danger-rgb),.25), rgba(var(--color-secondary-rgb),.2));">
+                  <span class="badge-arena badge-arena--success">Ongoing</span>
+                </div>
+                <div class="p-4">
+                  <h5 style="color:var(--text-primary);">Arena Champions Series</h5>
+                  <div class="tournament-meta">
+                    <span><i class="fa-solid fa-sitemap"></i> Groups</span>
+                    <span><i class="fa-solid fa-users"></i> 24/24</span>
+                    <span><i class="fa-solid fa-coins"></i> TZS 10,000</span>
+                  </div>
+                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</div>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <a href="/pages/tournament-detail.html?id=swiss-showdown" class="text-decoration-none">
+              <div class="glass-card glass-card--interactive overflow-hidden h-100">
+                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(var(--color-warning-rgb),.25), rgba(var(--color-primary-rgb),.15));">
+                  <span class="badge-arena badge-arena--warning">Starting Soon</span>
+                </div>
+                <div class="p-4">
+                  <h5 style="color:var(--text-primary);">Swiss Showdown</h5>
+                  <div class="tournament-meta">
+                    <span><i class="fa-solid fa-sitemap"></i> Swiss</span>
+                    <span><i class="fa-solid fa-users"></i> 9/16</span>
+                    <span><i class="fa-solid fa-coins"></i> TZS 3,000</span>
+                  </div>
+                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</div>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <a href="/pages/tournament-detail.html?id=league-of-legends-cup" class="text-decoration-none">
+              <div class="glass-card glass-card--interactive overflow-hidden h-100" style="opacity:.7;">
+                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(120,120,120,.25), rgba(80,80,80,.15));">
+                  <span class="badge-arena badge-arena--neutral">Completed</span>
+                </div>
+                <div class="p-4">
+                  <h5 style="color:var(--text-primary);">Season 3 Grand Finals</h5>
+                  <div class="tournament-meta">
+                    <span><i class="fa-solid fa-sitemap"></i> Knockout</span>
+                    <span><i class="fa-solid fa-users"></i> 64/64</span>
+                    <span><i class="fa-solid fa-coins"></i> TZS 20,000</span>
+                  </div>
+                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Results</div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- PAGINATION -->
+        <nav class="d-flex justify-content-center mt-5">
+          <ul class="pagination" style="gap:8px;">
+            <li><button class="btn-arena btn-arena--secondary btn-arena--sm"><i class="fa-solid fa-chevron-left"></i></button></li>
+            <li><button class="btn-arena btn-arena--primary btn-arena--sm">1</button></li>
+            <li><button class="btn-arena btn-arena--secondary btn-arena--sm">2</button></li>
+            <li><button class="btn-arena btn-arena--secondary btn-arena--sm">3</button></li>
+            <li><button class="btn-arena btn-arena--secondary btn-arena--sm"><i class="fa-solid fa-chevron-right"></i></button></li>
+          </ul>
+        </nav>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script>
+    document.addEventListener('arena:includes-loaded', () => {
+      document.querySelectorAll('[data-nav]').forEach((link) => {
+        if (link.dataset.nav === 'tournaments') link.classList.add('active');
+      });
+    });
+
+    // Filter pill UI state — TODO (Step 13): trigger a real
+    // GET /api/tournament?status=... request on change.
+    document.querySelectorAll('.filter-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.filter-pill').forEach((p) => p.classList.remove('active'));
+        pill.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

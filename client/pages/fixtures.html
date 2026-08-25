@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fixtures — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .fixture-row {
+      display: grid;
+      grid-template-columns: 100px 1fr auto 1fr 140px;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.02);
+      margin-bottom: 10px;
+    }
+    .fixture-row .player { display: flex; align-items: center; gap: 10px; font-size: var(--text-sm); font-weight: 600; }
+    .fixture-row .player.away { justify-content: flex-end; flex-direction: row-reverse; }
+    .fixture-score { font-family: var(--font-display); font-weight: 800; font-size: var(--text-lg); text-align: center; min-width: 70px; }
+    @media (max-width: 768px) {
+      .fixture-row { grid-template-columns: 1fr; text-align:center; gap: 8px; }
+      .fixture-row .player.away { flex-direction: row; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+          <div>
+            <h1 class="mb-1">Fixtures</h1>
+            <p class="text-secondary-arena mb-0">Your upcoming and completed matches across all tournaments.</p>
+          </div>
+          <select class="form-control-arena py-2" style="width:auto;">
+            <option>All Tournaments</option>
+            <option>Dodoma Winter Cup</option>
+            <option>UDOM Campus League</option>
+          </select>
+        </div>
+
+        <!-- TODO (Step 13): replace with GET /api/tournament/:uuid/fixtures for the player's tournaments -->
+
+        <h6 class="text-muted mb-3">Upcoming</h6>
+        <div class="fixture-row glass-card--compact glow-primary" style="box-shadow:inset 0 0 0 1px rgba(var(--color-primary-rgb),.3);">
+          <div class="text-xs text-muted">Tomorrow<br />6:00 PM</div>
+          <div class="player"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> StrikerX (You)</div>
+          <div class="fixture-score text-muted">VS</div>
+          <div class="player away"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> MidfieldMaestro</div>
+          <div class="text-end"><span class="badge-arena badge-arena--primary">Round 2</span></div>
+        </div>
+
+        <div class="fixture-row">
+          <div class="text-xs text-muted">Sat<br />3:00 PM</div>
+          <div class="player"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> StrikerX (You)</div>
+          <div class="fixture-score text-muted">VS</div>
+          <div class="player away"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> GoalMachine</div>
+          <div class="text-end"><span class="badge-arena badge-arena--neutral">Round 4</span></div>
+        </div>
+
+        <h6 class="text-muted mb-3 mt-5">Completed</h6>
+        <div class="fixture-row">
+          <div class="text-xs text-muted">Aug 3<br />5:30 PM</div>
+          <div class="player" style="color:var(--color-success);"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> StrikerX (You)</div>
+          <div class="fixture-score">3 - 1</div>
+          <div class="player away"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> Player2</div>
+          <div class="text-end"><span class="badge-arena badge-arena--success">Won</span></div>
+        </div>
+
+        <div class="fixture-row">
+          <div class="text-xs text-muted">Jul 28<br />7:00 PM</div>
+          <div class="player"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> StrikerX (You)</div>
+          <div class="fixture-score">1 - 1</div>
+          <div class="player away"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> DefenderD</div>
+          <div class="text-end"><span class="badge-arena badge-arena--neutral">Draw</span></div>
+        </div>
+
+        <div class="fixture-row">
+          <div class="text-xs text-muted">Jul 21<br />6:15 PM</div>
+          <div class="player" style="color:var(--color-danger);"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> StrikerX (You)</div>
+          <div class="fixture-score">0 - 2</div>
+          <div class="player away"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> KeeperK</div>
+          <div class="text-end"><span class="badge-arena badge-arena--danger">Lost</span></div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script>
+    document.addEventListener('arena:includes-loaded', () => {
+      document.querySelectorAll('[data-nav]').forEach((link) => {
+        if (link.dataset.nav === 'fixtures') link.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

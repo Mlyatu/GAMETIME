@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dodoma Winter Cup — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .tournament-hero {
+      height: 220px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(var(--color-primary-rgb),.4), rgba(var(--color-secondary-rgb),.2)), var(--bg-elevated);
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      padding: 24px;
+      margin-bottom: -40px;
+    }
+    .detail-tabs .nav-link {
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: var(--text-sm);
+      border: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      padding: 12px 20px;
+    }
+    .detail-tabs .nav-link.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--color-primary);
+      background: transparent;
+    }
+    .bracket-match {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      min-width: 200px;
+    }
+    .bracket-match .side { display: flex; justify-content: space-between; padding: 4px 0; font-size: var(--text-sm); }
+    .bracket-match .side.winner { color: var(--color-success); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+
+        <!-- TODO (Step 13): load real data via GET /api/tournament/:uuid using ?id= from the URL -->
+        <div class="tournament-hero mb-5">
+          <div>
+            <span class="badge-arena badge-arena--primary mb-2"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Registration Open</span>
+            <h2 class="mb-0">Dodoma Winter Cup</h2>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-lg-8">
+            <div class="glass-card p-4 d-flex flex-wrap gap-4 align-items-center justify-content-between">
+              <div class="d-flex flex-wrap gap-4">
+                <div>
+                  <div class="text-xs text-muted">Format</div>
+                  <div class="fw-semibold"><i class="fa-solid fa-sitemap text-sm"></i> Knockout</div>
+                </div>
+                <div>
+                  <div class="text-xs text-muted">Entrants</div>
+                  <div class="fw-semibold"><i class="fa-solid fa-users text-sm"></i> 18 / 32</div>
+                </div>
+                <div>
+                  <div class="text-xs text-muted">Entry Fee</div>
+                  <div class="fw-semibold"><i class="fa-solid fa-coins text-sm"></i> TZS 5,000</div>
+                </div>
+                <div>
+                  <div class="text-xs text-muted">Prize Pool</div>
+                  <div class="fw-semibold" style="color:var(--color-success);"><i class="fa-solid fa-trophy text-sm"></i> TZS 120,000</div>
+                </div>
+                <div>
+                  <div class="text-xs text-muted">Deadline</div>
+                  <div class="fw-semibold"><i class="fa-solid fa-calendar text-sm"></i> Aug 20, 2026</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <button class="btn-arena btn-arena--primary w-100 h-100" id="joinTournamentBtn" style="min-height:64px;">
+              <i class="fa-solid fa-bolt"></i> Join Tournament
+            </button>
+          </div>
+        </div>
+
+        <!-- TABS -->
+        <ul class="nav detail-tabs mb-4" role="tablist">
+          <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview-pane" type="button">Overview</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#fixtures-pane" type="button">Fixtures</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#standings-pane" type="button">Standings</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#participants-pane" type="button">Participants</button></li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- OVERVIEW -->
+          <div class="tab-pane fade show active" id="overview-pane">
+            <div class="glass-card p-4">
+              <h5>About this tournament</h5>
+              <p class="text-secondary-arena">
+                A single-elimination cup open to all registered players. Matches
+                are best-of-one; submit your result screenshot within 24 hours
+                of your scheduled match time. Top 4 finishers split the prize pool.
+              </p>
+              <h6 class="mt-4">Rules</h6>
+              <ul class="text-secondary-arena text-sm">
+                <li>All matches played on default settings, 8-minute halves.</li>
+                <li>Screenshot must clearly show the final scoreline.</li>
+                <li>No-shows after 15 minutes forfeit the match.</li>
+                <li>Disputes are resolved by tournament admins — decisions are final.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- FIXTURES -->
+          <div class="tab-pane fade" id="fixtures-pane">
+            <div class="glass-card p-4">
+              <h6 class="mb-3">Quarter Finals</h6>
+              <div class="d-flex flex-wrap gap-3 mb-4">
+                <div class="bracket-match">
+                  <div class="side winner"><span>StrikerX</span><span>3</span></div>
+                  <div class="side"><span>Player2</span><span>1</span></div>
+                </div>
+                <div class="bracket-match">
+                  <div class="side"><span>MidfieldMaestro</span><span>—</span></div>
+                  <div class="side"><span>GoalMachine</span><span>—</span></div>
+                </div>
+                <div class="bracket-match">
+                  <div class="side"><span>DefenderD</span><span>—</span></div>
+                  <div class="side"><span>WingerW</span><span>—</span></div>
+                </div>
+                <div class="bracket-match">
+                  <div class="side"><span>KeeperK</span><span>—</span></div>
+                  <div class="side"><span>CaptainC</span><span>—</span></div>
+                </div>
+              </div>
+              <p class="text-xs text-muted mb-0">Full bracket view is available once the round of 16 completes.</p>
+            </div>
+          </div>
+
+          <!-- STANDINGS -->
+          <div class="tab-pane fade" id="standings-pane">
+            <div class="glass-card p-2">
+              <table class="table-arena">
+                <thead>
+                  <tr><th>#</th><th>Player</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>1</td><td>StrikerX</td><td>3</td><td>3</td><td>0</td><td>0</td><td>+7</td><td><strong>9</strong></td></tr>
+                  <tr><td>2</td><td>MidfieldMaestro</td><td>3</td><td>2</td><td>0</td><td>1</td><td>+3</td><td><strong>6</strong></td></tr>
+                  <tr><td>3</td><td>GoalMachine</td><td>3</td><td>1</td><td>1</td><td>1</td><td>0</td><td><strong>4</strong></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PARTICIPANTS -->
+          <div class="tab-pane fade" id="participants-pane">
+            <div class="glass-card p-2">
+              <table class="table-arena">
+                <thead><tr><th>Player</th><th>Joined</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> StrikerX</td>
+                    <td>Aug 1, 2026</td><td><span class="badge-arena badge-arena--success">Approved</span></td>
+                  </tr>
+                  <tr>
+                    <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> MidfieldMaestro</td>
+                    <td>Aug 2, 2026</td><td><span class="badge-arena badge-arena--success">Approved</span></td>
+                  </tr>
+                  <tr>
+                    <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> NewPlayer99</td>
+                    <td>Aug 5, 2026</td><td><span class="badge-arena badge-arena--warning">Pending</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script>
+    document.addEventListener('arena:includes-loaded', () => {
+      document.querySelectorAll('[data-nav]').forEach((link) => {
+        if (link.dataset.nav === 'tournaments') link.classList.add('active');
+      });
+    });
+
+    // TODO (Step 13): POST /api/tournament/:uuid/join, then flip this
+    // button to a "Pending Approval" / "Registered" state.
+    const joinBtn = document.getElementById('joinTournamentBtn');
+    joinBtn.addEventListener('click', () => {
+      joinBtn.innerHTML = '<span class="spinner-arena"></span>';
+      joinBtn.disabled = true;
+      setTimeout(() => {
+        joinBtn.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Pending Approval';
+        joinBtn.classList.remove('btn-arena--primary');
+        joinBtn.classList.add('btn-arena--secondary');
+      }, 600);
+    });
+  </script>
+</body>
+</html>

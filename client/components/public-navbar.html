@@ -1,0 +1,49 @@
+<nav class="public-nav-arena">
+  <div class="container-arena d-flex align-items-center justify-content-between py-3">
+    <a href="/index.html" class="sidebar-brand p-0 m-0">
+      <i class="fa-solid fa-bolt glow-text-primary"></i>
+      <span>EFootball <span class="glow-text-secondary">Arena</span></span>
+    </a>
+
+    <button class="btn-arena btn-arena--icon btn-arena--ghost d-lg-none" id="publicNavToggle" aria-label="Open menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="d-none d-lg-flex align-items-center gap-4" id="publicNavLinks">
+      <a href="/index.html" class="text-sm text-secondary-arena">Home</a>
+      <a href="/pages/about.html" class="text-sm text-secondary-arena">About</a>
+      <a href="/pages/features.html" class="text-sm text-secondary-arena">Features</a>
+      <a href="/pages/tournaments.html" class="text-sm text-secondary-arena">Tournaments</a>
+      <a href="/pages/leaderboard.html" class="text-sm text-secondary-arena">Leaderboard</a>
+    </div>
+
+    <div class="d-none d-lg-flex align-items-center gap-3">
+      <a href="/pages/login.html" class="btn-arena btn-arena--ghost btn-arena--sm">Log In</a>
+      <a href="/pages/register.html" class="btn-arena btn-arena--primary btn-arena--sm">Get Started</a>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="d-lg-none px-3 pb-3" id="publicNavMobile" hidden>
+    <div class="glass-card p-3 d-flex flex-column gap-2">
+      <a href="/index.html" class="sidebar-link">Home</a>
+      <a href="/pages/about.html" class="sidebar-link">About</a>
+      <a href="/pages/features.html" class="sidebar-link">Features</a>
+      <a href="/pages/tournaments.html" class="sidebar-link">Tournaments</a>
+      <a href="/pages/leaderboard.html" class="sidebar-link">Leaderboard</a>
+      <hr class="divider-arena my-1" />
+      <a href="/pages/login.html" class="btn-arena btn-arena--secondary w-100">Log In</a>
+      <a href="/pages/register.html" class="btn-arena btn-arena--primary w-100">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  (function () {
+    const toggle = document.getElementById('publicNavToggle');
+    const mobile = document.getElementById('publicNavMobile');
+    if (toggle && mobile) {
+      toggle.addEventListener('click', () => { mobile.hidden = !mobile.hidden; });
+    }
+  })();
+</script>

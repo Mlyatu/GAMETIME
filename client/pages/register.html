@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+</head>
+<body>
+
+  <div class="auth-shell">
+    <div id="particles-bg"></div>
+
+    <div class="glass-card auth-card animate-fade-in-up">
+      <a href="/index.html" class="auth-brand text-decoration-none">
+        <i class="fa-solid fa-bolt glow-text-primary"></i>
+        <span class="text-primary" style="color:var(--text-primary);">EFootball <span class="glow-text-secondary">Arena</span></span>
+      </a>
+      <p class="text-center text-secondary-arena mb-4">Create your free account and start competing.</p>
+
+      <form id="registerForm" novalidate>
+        <div class="mb-3">
+          <label class="form-label-arena" for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="fullName" class="form-control-arena" placeholder="John Doe" required maxlength="100" />
+          <div class="form-error-arena d-none" data-error-for="fullName"></div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label-arena" for="username">Username</label>
+          <input type="text" id="username" name="username" class="form-control-arena" placeholder="johndoe1" required minlength="3" maxlength="50" pattern="[a-zA-Z0-9_]+" />
+          <div class="form-error-arena d-none" data-error-for="username">Letters, numbers, and underscores only.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label-arena" for="gamerTag">Gamer Tag</label>
+          <input type="text" id="gamerTag" name="gamerTag" class="form-control-arena" placeholder="StrikerX" required maxlength="50" />
+          <div class="form-error-arena d-none" data-error-for="gamerTag"></div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label-arena" for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-control-arena" placeholder="you@email.com" required />
+          <div class="form-error-arena d-none" data-error-for="email"></div>
+        </div>
+
+        <div class="mb-3 position-relative">
+          <label class="form-label-arena" for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-control-arena" placeholder="At least 8 characters" required minlength="8" />
+          <button type="button" class="password-toggle-arena" data-toggle-password="password" style="top: 38px; transform:none;" aria-label="Show password">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          <div class="form-error-arena d-none" data-error-for="password">Minimum 8 characters, must include a number.</div>
+        </div>
+
+        <div class="form-check d-flex align-items-start gap-2 mb-4">
+          <input type="checkbox" class="checkbox-arena mt-1" id="agreeTerms" required />
+          <label for="agreeTerms" class="text-sm text-secondary-arena mb-0">
+            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+          </label>
+        </div>
+
+        <div class="alert-arena-error d-none glow-danger" id="formError" style="background:rgba(var(--color-danger-rgb),.12); border:1px solid rgba(var(--color-danger-rgb),.3); border-radius:var(--radius-sm); padding:12px 16px; color:var(--color-danger); font-size:var(--text-sm); margin-bottom:16px;"></div>
+
+        <button type="submit" class="btn-arena btn-arena--primary w-100" id="registerSubmitBtn">
+          <span id="registerBtnText">Create Account</span>
+          <span class="spinner-arena d-none" id="registerBtnSpinner"></span>
+        </button>
+      </form>
+
+      <div class="auth-divider">OR</div>
+
+      <p class="text-center text-sm mb-0">
+        Already have an account? <a href="/pages/login.html">Log in</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+  <script src="/assets/js/particles-config.js"></script>
+  <script src="/assets/js/form-utils.js"></script>
+  <script>
+    // ---------------------------------------------------------------
+    // Client-side validation only for now — this mirrors the exact
+    // rules the backend enforces (server/validators/auth.validator.js)
+    // so users get instant feedback. The actual POST /api/auth/register
+    // call is wired up in Step 13 alongside the rest of the API
+    // integration; for now, submitting just validates and shows a
+    // "not yet connected" state rather than silently doing nothing.
+    // ---------------------------------------------------------------
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearFormErrors(this);
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const gamerTag = document.getElementById('gamerTag').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      let hasError = false;
+      if (!fullName) { showFieldError('fullName', 'Full name is required'); hasError = true; }
+      if (!/^[a-zA-Z0-9_]{3,50}$/.test(username)) { showFieldError('username', 'Letters, numbers, and underscores only (3-50 chars)'); hasError = true; }
+      if (!gamerTag) { showFieldError('gamerTag', 'Gamer tag is required'); hasError = true; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError('email', 'Enter a valid email address'); hasError = true; }
+      if (password.length < 8 || !/\d/.test(password)) { showFieldError('password', 'Minimum 8 characters, must include a number'); hasError = true; }
+      if (!document.getElementById('agreeTerms').checked) {
+        document.getElementById('formError').textContent = 'You must agree to the Terms of Service to continue.';
+        document.getElementById('formError').classList.remove('d-none');
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      // TODO (Step 13): replace with a real fetch('/api/auth/register', ...)
+      setSubmitLoading(true);
+      setTimeout(() => {
+        setSubmitLoading(false);
+        document.getElementById('formError').classList.remove('d-none');
+        document.getElementById('formError').style.color = 'var(--color-warning)';
+        document.getElementById('formError').style.background = 'rgba(var(--color-warning-rgb),.12)';
+        document.getElementById('formError').textContent = 'Form validated successfully — API wiring lands in Step 13.';
+      }, 600);
+    });
+
+    function setSubmitLoading(isLoading) {
+      document.getElementById('registerSubmitBtn').disabled = isLoading;
+      document.getElementById('registerBtnText').classList.toggle('d-none', isLoading);
+      document.getElementById('registerBtnSpinner').classList.toggle('d-none', !isLoading);
+    }
+  </script>
+</body>
+</html>

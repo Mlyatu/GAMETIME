@@ -1,0 +1,63 @@
+<!--
+  DASHBOARD LAYOUT SHELL
+  ======================
+  Copy this file's structure when building any page that needs the
+  sidebar + topbar chrome (dashboard, tournaments, fixtures, profile,
+  admin panel, etc). Public marketing pages (landing, about) use their
+  own simpler shell instead — see /pages/design-system.html for the
+  full component reference either way.
+
+  This file is a template to copy from, not included via data-include
+  itself (unlike sidebar.html/topbar.html, which are genuinely shared).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page Title — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+</head>
+<body>
+
+  <div class="d-flex">
+    <!-- Shared sidebar -->
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+      <!-- Shared topbar -->
+      <div data-include="/components/topbar.html"></div>
+
+      <!-- Page content goes here -->
+      <main class="container-arena py-4">
+        <h1>Page Title</h1>
+        <div class="glass-card p-4 animate-fade-in-up">
+          Replace this with the page's real content.
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script>
+    // Highlight the current sidebar link once the include has loaded.
+    document.addEventListener('arena:includes-loaded', () => {
+      const current = 'dashboard'; // set this per-page
+      document.querySelectorAll('[data-nav]').forEach((link) => {
+        if (link.dataset.nav === current) link.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

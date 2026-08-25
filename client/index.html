@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EFootball Arena - Compete. Win. Repeat.</title>
+  <meta name="description" content="The competitive home for eFootball tournaments — fair fixtures, verified results, real prizes." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <link rel="stylesheet" href="/assets/css/marketing.css" />
+</head>
+<body>
+
+  <div data-include="/components/public-navbar.html"></div>
+
+  <!-- HERO -->
+  <section class="hero-arena">
+    <div id="particles-bg"></div>
+    <div class="container-arena hero-content text-center">
+      <div class="animate-fade-in-up">
+        <span class="hero-eyebrow"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Registration open for Season 4</span>
+      </div>
+      <h1 class="mt-4 animate-fade-in-up animate-stagger" style="--delay:1; font-size: clamp(2.5rem, 6vw, 4.5rem);">
+        Compete. <span class="glow-text-primary">Win.</span> <span class="glow-text-secondary">Repeat.</span>
+      </h1>
+      <p class="text-secondary-arena mx-auto animate-fade-in-up animate-stagger" style="--delay:2; max-width: 560px; font-size: var(--text-lg);">
+        Join fair, verified eFootball tournaments with real prize pools —
+        auto-generated fixtures, live standings, and instant payouts.
+      </p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap mt-4 animate-fade-in-up animate-stagger" style="--delay:3;">
+        <a href="/pages/register.html" class="btn-arena btn-arena--primary"><i class="fa-solid fa-bolt"></i> Get Started Free</a>
+        <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary"><i class="fa-solid fa-trophy"></i> Browse Tournaments</a>
+      </div>
+
+      <!-- Live stat strip -->
+      <div class="row g-3 mt-5 animate-fade-in-up animate-stagger" style="--delay:4;">
+        <div class="col-6 col-md-3">
+          <div class="glass-card glass-card--compact p-3">
+            <div class="stat-card__value" data-stat="tournaments">128</div>
+            <div class="stat-card__label">Active Tournaments</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="glass-card glass-card--compact p-3">
+            <div class="stat-card__value" data-stat="players">4,302</div>
+            <div class="stat-card__label">Registered Players</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="glass-card glass-card--compact p-3">
+            <div class="stat-card__value" data-stat="matches">18,940</div>
+            <div class="stat-card__label">Matches Played</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="glass-card glass-card--compact p-3">
+            <div class="stat-card__value" data-stat="prize">TZS 42M</div>
+            <div class="stat-card__label">Prizes Paid Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="container-arena py-5">
+    <div class="text-center mb-5">
+      <h2>Everything a tournament needs</h2>
+      <p class="text-secondary-arena">Built for organizers and players who take competition seriously.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="glass-card glass-card--interactive p-4 h-100">
+          <div class="feature-icon-box"><i class="fa-solid fa-shuffle"></i></div>
+          <h5>Auto-Generated Fixtures</h5>
+          <p class="text-sm mb-0">League, knockout, round robin, Swiss, and group formats — brackets build themselves.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="glass-card glass-card--interactive p-4 h-100">
+          <div class="feature-icon-box" style="background:rgba(var(--color-secondary-rgb),.15); color:var(--color-secondary);"><i class="fa-solid fa-camera-retro"></i></div>
+          <h5>OCR Result Verification</h5>
+          <p class="text-sm mb-0">Submit a screenshot — we read the score automatically and queue it for approval.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="glass-card glass-card--interactive p-4 h-100">
+          <div class="feature-icon-box" style="background:rgba(var(--color-success-rgb),.15); color:var(--color-success);"><i class="fa-solid fa-money-bill-transfer"></i></div>
+          <h5>Local Payment Support</h5>
+          <p class="text-sm mb-0">M-Pesa, Airtel Money, Tigo Pesa, HaloPesa, and bank transfer entry fees.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="glass-card glass-card--interactive p-4 h-100">
+          <div class="feature-icon-box" style="background:rgba(var(--color-warning-rgb),.15); color:var(--color-warning);"><i class="fa-solid fa-ranking-star"></i></div>
+          <h5>Live Standings</h5>
+          <p class="text-sm mb-0">Points, goal difference, and rank recalculate the instant a result is approved.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="glass-card glass-card--interactive p-4 h-100">
+          <div class="feature-icon-box" style="background:rgba(var(--color-danger-rgb),.15); color:var(--color-danger);"><i class="fa-solid fa-comments"></i></div>
+          <h5>Live Chat &amp; Notifications</h5>
+          <p class="text-sm mb-0">Global lobby and per-tournament chat, plus real-time alerts on your matches.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="glass-card glass-card--interactive p-4 h-100">
+          <div class="feature-icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+          <h5>Admin Oversight</h5>
+          <p class="text-sm mb-0">Full audit trail on payments, results, and registrations — nothing happens silently.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED TOURNAMENTS -->
+  <section class="container-arena py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+      <div>
+        <h2 class="mb-1">Featured Tournaments</h2>
+        <p class="text-secondary-arena mb-0">Jump into a competition happening right now.</p>
+      </div>
+      <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary btn-arena--sm">View All <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div class="row g-4" id="featuredTournaments">
+      <!-- Static preview cards — Step 13 replaces this with live data from GET /api/tournament -->
+      <div class="col-md-4">
+        <div class="glass-card glass-card--interactive overflow-hidden h-100">
+          <div style="height:140px; background:linear-gradient(135deg, rgba(var(--color-primary-rgb),.3), rgba(var(--color-secondary-rgb),.15));"></div>
+          <div class="p-4">
+            <span class="badge-arena badge-arena--primary mb-2">Registration Open</span>
+            <h5>Dodoma Winter Cup</h5>
+            <p class="text-sm">Knockout &middot; 32 players &middot; Entry TZS 5,000</p>
+            <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="glass-card glass-card--interactive overflow-hidden h-100">
+          <div style="height:140px; background:linear-gradient(135deg, rgba(var(--color-success-rgb),.25), rgba(var(--color-primary-rgb),.15));"></div>
+          <div class="p-4">
+            <span class="badge-arena badge-arena--warning mb-2">Starting Soon</span>
+            <h5>UDOM Campus League</h5>
+            <p class="text-sm">Round Robin &middot; 12 players &middot; Free Entry</p>
+            <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="glass-card glass-card--interactive overflow-hidden h-100">
+          <div style="height:140px; background:linear-gradient(135deg, rgba(var(--color-danger-rgb),.2), rgba(var(--color-secondary-rgb),.2));"></div>
+          <div class="p-4">
+            <span class="badge-arena badge-arena--success mb-2">Ongoing</span>
+            <h5>Arena Champions Series</h5>
+            <p class="text-sm">Groups &middot; 24 players &middot; Prize TZS 500,000</p>
+            <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="container-arena py-5">
+    <div class="cta-band animate-glow-pulse">
+      <h2>Ready to compete?</h2>
+      <p class="text-secondary-arena mx-auto" style="max-width:480px;">
+        Create your free account in under a minute and join your first tournament today.
+      </p>
+      <a href="/pages/register.html" class="btn-arena btn-arena--primary mt-2"><i class="fa-solid fa-bolt"></i> Create Free Account</a>
+    </div>
+  </section>
+
+  <div data-include="/components/footer.html"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/particles-config.js"></script>
+</body>
+</html>
