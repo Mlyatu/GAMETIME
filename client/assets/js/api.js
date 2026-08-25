@@ -17,7 +17,11 @@
   let refreshPromise = null;
 
   function getTokenStorage() {
-    return localStorage.getItem(config.TOKEN_STORAGE_KEY) === 'session' ? sessionStorage : localStorage;
+    // Tokens live in the storage that actually has an access token
+    // (localStorage when "Remember me" is checked, sessionStorage otherwise).
+    if (localStorage.getItem(config.ACCESS_TOKEN_KEY)) return localStorage;
+    if (sessionStorage.getItem(config.ACCESS_TOKEN_KEY)) return sessionStorage;
+    return localStorage;
   }
 
   function getAccessToken() {
