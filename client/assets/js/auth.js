@@ -94,7 +94,7 @@
     if (!isAuthenticated()) return null;
     const data = await api.get('/auth/me');
     const user = data.data.user;
-    const rememberMe = localStorage.getItem(config.TOKEN_STORAGE_KEY) !== 'session';
+    const rememberMe = getTokenStorage() === localStorage;
     setStoredUser(user, rememberMe);
     return user;
   }
