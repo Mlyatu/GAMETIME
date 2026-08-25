@@ -27,6 +27,7 @@ function toPublicUser(user) {
     fullName: user.full_name,
     username: user.username,
     email: user.email,
+    avatarUrl: user.avatar_url || null,
     role: user.role,
     isEmailVerified: user.is_email_verified,
   };
@@ -264,6 +265,31 @@ async function resetPassword(req, res, next) {
 }
 
 // ---------------------------------------------------------------------
+// POST /api/auth/change-password  (requires requireAuth middleware)
+// ---------------------------------------------------------------------
+async function changePassword(req, res, next) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await userModel.findByUuid(req.user.uuid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const matches = await comparePassword(currentPassword, user.password_hash);
+    if (!matches) {
+      return res.status(401).json({ success: false, code: 'INVALID_CREDENTIALS', message: 'Current password is incorrect' });
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+    await userModel.updatePassword(user.id, passwordHash);
+
+    return res.status(200).json({ success: true, message: 'Password changed successfully' });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+// ---------------------------------------------------------------------
 // GET /api/auth/me  (requires requireAuth middleware)
 // ---------------------------------------------------------------------
 async function me(req, res, next) {
@@ -305,6 +331,7 @@ module.exports = {
   refreshToken,
   forgotPassword,
   resetPassword,
+  changePassword,
   me,
   logout,
 };

@@ -118,6 +118,8 @@
       });
     }
 
+    updateNotificationBadge();
+
     document.querySelectorAll('#logoutBtn, #topbarLogoutBtn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -130,6 +132,20 @@
     return getStoredUser();
   }
 
+  async function updateNotificationBadge() {
+    if (!isAuthenticated()) return;
+    const dot = document.getElementById('notificationDot');
+    if (!dot) return;
+    try {
+      const data = await api.get('/notification?limit=1&unreadOnly=true');
+      const count = data.data && data.data.unreadCount ? Number(data.data.unreadCount) : 0;
+      dot.hidden = count === 0;
+      dot.title = `${count} unread notification${count === 1 ? '' : 's'}`;
+    } catch {
+      dot.hidden = true;
+    }
+  }
+
   root.auth = {
     login,
     register,
@@ -140,5 +156,6 @@
     getUser,
     fetchCurrentUser,
     updateAuthUI,
+    updateNotificationBadge,
   };
 })(window);

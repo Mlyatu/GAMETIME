@@ -75,29 +75,29 @@
           <div class="col-6 col-md-3">
             <div class="glass-card glass-card--interactive stat-card">
               <div class="stat-card__icon" style="background:rgba(var(--color-primary-rgb),.15); color:var(--color-primary);"><i class="fa-solid fa-trophy"></i></div>
-              <div class="stat-card__value">3</div>
-              <div class="stat-card__label">Active Tournaments</div>
+              <div class="stat-card__value" id="statMatches">—</div>
+              <div class="stat-card__label">Matches Played</div>
             </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="glass-card glass-card--interactive stat-card">
               <div class="stat-card__icon" style="background:rgba(var(--color-success-rgb),.15); color:var(--color-success);"><i class="fa-solid fa-medal"></i></div>
-              <div class="stat-card__value">14</div>
+              <div class="stat-card__value" id="statWins">—</div>
               <div class="stat-card__label">Wins</div>
             </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="glass-card glass-card--interactive stat-card">
               <div class="stat-card__icon" style="background:rgba(var(--color-warning-rgb),.15); color:var(--color-warning);"><i class="fa-solid fa-futbol"></i></div>
-              <div class="stat-card__value">42</div>
+              <div class="stat-card__value" id="statGoals">—</div>
               <div class="stat-card__label">Goals Scored</div>
             </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="glass-card glass-card--interactive stat-card">
               <div class="stat-card__icon" style="background:rgba(var(--color-danger-rgb),.15); color:var(--color-danger);"><i class="fa-solid fa-ranking-star"></i></div>
-              <div class="stat-card__value">#7</div>
-              <div class="stat-card__label">Global Rank</div>
+              <div class="stat-card__value" id="statWinRate">—</div>
+              <div class="stat-card__label">Win Rate</div>
             </div>
           </div>
         </div>
@@ -110,28 +110,7 @@
                 <h5 class="mb-0">Upcoming Matches</h5>
                 <a href="/pages/fixtures.html" class="text-sm">View All</a>
               </div>
-
-              <div class="match-row">
-                <div class="d-flex align-items-center gap-3">
-                  <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="36" height="36" alt="" />
-                  <div>
-                    <div class="text-sm fw-semibold">vs MidfieldMaestro</div>
-                    <div class="text-xs text-muted">Dodoma Winter Cup &middot; Round 2</div>
-                  </div>
-                </div>
-                <span class="badge-arena badge-arena--primary">Tomorrow, 6:00 PM</span>
-              </div>
-
-              <div class="match-row">
-                <div class="d-flex align-items-center gap-3">
-                  <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="36" height="36" alt="" />
-                  <div>
-                    <div class="text-sm fw-semibold">vs GoalMachine</div>
-                    <div class="text-xs text-muted">UDOM Campus League &middot; Round 4</div>
-                  </div>
-                </div>
-                <span class="badge-arena badge-arena--neutral">Sat, 3:00 PM</span>
-              </div>
+              <div id="upcomingMatches"></div>
             </div>
 
             <!-- MY TOURNAMENTS -->
@@ -140,25 +119,12 @@
                 <h5 class="mb-0">My Tournaments</h5>
                 <a href="/pages/tournaments.html" class="text-sm">View All</a>
               </div>
-              <div class="table-responsive">
-                <table class="table-arena">
+              <div class="table-responsive" id="myTournamentsContainer">
+                <table class="table-arena" id="myTournamentsTable">
                   <thead>
-                    <tr><th>Tournament</th><th>Format</th><th>Status</th><th>Rank</th></tr>
+                    <tr><th>Tournament</th><th>Format</th><th>Status</th><th>Action</th></tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td>Dodoma Winter Cup</td><td>Knockout</td>
-                      <td><span class="badge-arena badge-arena--success">Ongoing</span></td><td>Quarter Final</td>
-                    </tr>
-                    <tr>
-                      <td>UDOM Campus League</td><td>Round Robin</td>
-                      <td><span class="badge-arena badge-arena--success">Ongoing</span></td><td>#2 of 12</td>
-                    </tr>
-                    <tr>
-                      <td>Arena Champions Series</td><td>Groups</td>
-                      <td><span class="badge-arena badge-arena--warning">Pending</span></td><td>—</td>
-                    </tr>
-                  </tbody>
+                  <tbody id="myTournamentsBody"></tbody>
                 </table>
               </div>
             </div>
@@ -168,35 +134,7 @@
           <div class="col-lg-5">
             <div class="glass-card p-4 mb-4">
               <h5 class="mb-3">Recent Activity</h5>
-
-              <div class="activity-item">
-                <div class="activity-icon" style="background:rgba(var(--color-success-rgb),.15); color:var(--color-success);"><i class="fa-solid fa-check"></i></div>
-                <div>
-                  <div class="text-sm">Payment approved for <strong>Dodoma Winter Cup</strong></div>
-                  <div class="text-xs text-muted">2 hours ago</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon" style="background:rgba(var(--color-primary-rgb),.15); color:var(--color-primary);"><i class="fa-solid fa-futbol"></i></div>
-                <div>
-                  <div class="text-sm">Match result recorded: <strong>3 - 1</strong> vs Player2</div>
-                  <div class="text-xs text-muted">Yesterday</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon" style="background:rgba(var(--color-warning-rgb),.15); color:var(--color-warning);"><i class="fa-solid fa-hourglass-half"></i></div>
-                <div>
-                  <div class="text-sm">Registration pending for <strong>Arena Champions Series</strong></div>
-                  <div class="text-xs text-muted">2 days ago</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon" style="background:rgba(var(--color-secondary-rgb),.15); color:var(--color-secondary);"><i class="fa-solid fa-user-plus"></i></div>
-                <div>
-                  <div class="text-sm">You joined team <strong>Arena Wolves</strong></div>
-                  <div class="text-xs text-muted">5 days ago</div>
-                </div>
-              </div>
+              <div id="activityList"></div>
             </div>
 
             <div class="glass-card p-4">
@@ -222,26 +160,164 @@
   <script src="/assets/js/ui.js"></script>
   <script src="/assets/js/auth.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.auth) auth.requireAuth();
-    });
+    (function () {
+      function formatDate(iso) {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        if (isNaN(d)) return iso;
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      }
 
-    document.addEventListener('arena:includes-loaded', async () => {
-      document.querySelectorAll('[data-nav]').forEach((link) => {
-        if (link.dataset.nav === 'dashboard') link.classList.add('active');
+      function titleCase(str) {
+        return String(str || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      }
+
+      function relativeTime(iso) {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d)) return '';
+        const diff = Date.now() - d.getTime();
+        const sec = Math.floor(diff / 1000);
+        if (sec < 60) return 'just now';
+        const min = Math.floor(sec / 60);
+        if (min < 60) return `${min}m ago`;
+        const hr = Math.floor(min / 60);
+        if (hr < 24) return `${hr}h ago`;
+        const day = Math.floor(hr / 24);
+        if (day < 7) return `${day}d ago`;
+        return formatDate(iso);
+      }
+
+      function notificationIcon(type) {
+        if (type.includes('payment')) return { icon: 'fa-money-bill', bg: 'var(--color-success-rgb)', fg: 'var(--color-success)' };
+        if (type.includes('match')) return { icon: 'fa-futbol', bg: 'var(--color-primary-rgb)', fg: 'var(--color-primary)' };
+        if (type.includes('tournament') || type.includes('registration')) return { icon: 'fa-trophy', bg: 'var(--color-warning-rgb)', fg: 'var(--color-warning)' };
+        if (type.includes('result')) return { icon: 'fa-xmark', bg: 'var(--color-danger-rgb)', fg: 'var(--color-danger)' };
+        return { icon: 'fa-bell', bg: 'var(--color-secondary-rgb)', fg: 'var(--color-secondary)' };
+      }
+
+      async function loadProfile() {
+        try {
+          const data = await api.get('/player/me');
+          const p = data.data.profile;
+          document.getElementById('statMatches').textContent = p.total_matches || 0;
+          document.getElementById('statWins').textContent = p.wins || 0;
+          document.getElementById('statGoals').textContent = p.goals_scored || 0;
+          const total = Number(p.total_matches || 0);
+          const wins = Number(p.wins || 0);
+          document.getElementById('statWinRate').textContent = total > 0 ? `${Math.round((wins / total) * 100)}%` : '—';
+          const usernameEl = document.getElementById('dashboardUsername');
+          if (usernameEl) usernameEl.textContent = p.username || p.full_name || 'Player';
+        } catch (err) {
+          ui.showToast(err.message || 'Failed to load profile', 'error');
+        }
+      }
+
+      async function loadActivity() {
+        const list = document.getElementById('activityList');
+        try {
+          const data = await api.get('/notification?limit=5');
+          const notifications = data.data.notifications || [];
+          if (notifications.length === 0) {
+            list.innerHTML = '<p class="text-secondary-arena text-sm mb-0">No recent activity yet.</p>';
+            return;
+          }
+          list.innerHTML = notifications.map((n) => {
+            const iconCfg = notificationIcon(n.type || '');
+            return `
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(${iconCfg.bg},0.15); color:${iconCfg.fg};"><i class="fa-solid ${iconCfg.icon}"></i></div>
+                <div>
+                  <div class="text-sm">${ui.escapeHtml(n.title || n.message || 'Notification')}</div>
+                  <div class="text-xs text-muted">${ui.escapeHtml(n.body || n.message || '')} &middot; ${relativeTime(n.created_at || n.createdAt)}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } catch (err) {
+          list.innerHTML = `<p class="text-danger text-sm mb-0">${ui.escapeHtml(err.message || 'Could not load activity')}</p>`;
+        }
+      }
+
+      async function loadUpcoming() {
+        const container = document.getElementById('upcomingMatches');
+        try {
+          const data = await api.get('/tournament?status=ongoing&limit=5');
+          const tournaments = data.data.tournaments || [];
+          if (tournaments.length === 0) {
+            container.innerHTML = '<p class="text-secondary-arena text-sm mb-0">No upcoming matches scheduled.</p>';
+            return;
+          }
+          const matchLists = await Promise.all(tournaments.map((t) =>
+            api.get(`/tournament/${encodeURIComponent(t.uuid)}/fixtures`).then((d) => (d.data.matches || []).map((m) => ({ ...m, tournamentName: t.name }))).catch(() => [])
+          ));
+          const upcoming = matchLists.flat().filter((m) => m.status !== 'completed' && m.status !== 'cancelled');
+          if (upcoming.length === 0) {
+            container.innerHTML = '<p class="text-secondary-arena text-sm mb-0">No upcoming matches scheduled.</p>';
+            return;
+          }
+          upcoming.sort((a, b) => new Date(a.scheduled_at || 0) - new Date(b.scheduled_at || 0));
+          container.innerHTML = upcoming.slice(0, 2).map((m) => {
+            const opponent = m.home_username || m.home_team_name || 'TBD';
+            return `
+              <div class="match-row">
+                <div class="d-flex align-items-center gap-3">
+                  <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="36" height="36" alt="" />
+                  <div>
+                    <div class="text-sm fw-semibold">vs ${ui.escapeHtml(opponent)}</div>
+                    <div class="text-xs text-muted">${ui.escapeHtml(m.tournamentName)} &middot; Round ${m.round || '—'}</div>
+                  </div>
+                </div>
+                <span class="badge-arena badge-arena--primary">${m.scheduled_at ? formatDate(m.scheduled_at) : 'TBD'}</span>
+              </div>
+            `;
+          }).join('');
+        } catch (err) {
+          container.innerHTML = `<p class="text-danger text-sm mb-0">${ui.escapeHtml(err.message || 'Could not load matches')}</p>`;
+        }
+      }
+
+      async function loadMyTournaments() {
+        const tbody = document.getElementById('myTournamentsBody');
+        try {
+          const data = await api.get('/tournament?limit=50');
+          const tournaments = data.data.tournaments || [];
+          if (tournaments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-secondary-arena text-sm">No tournaments yet.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = tournaments.slice(0, 5).map((t) => `
+            <tr>
+              <td>${ui.escapeHtml(t.name)}</td>
+              <td>${titleCase(t.format)}</td>
+              <td><span class="badge-arena badge-arena--primary">${titleCase(t.status)}</span></td>
+              <td><a href="/pages/tournament-detail.html?id=${encodeURIComponent(t.uuid)}" class="text-sm">View</a></td>
+            </tr>
+          `).join('');
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-danger text-sm">${ui.escapeHtml(err.message || 'Could not load tournaments')}</td></tr>`;
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        if (window.auth) auth.requireAuth();
       });
 
-      try {
-        await auth.updateAuthUI();
-        const user = auth.getUser();
-        if (user) {
-          const usernameEl = document.getElementById('dashboardUsername');
-          if (usernameEl) usernameEl.textContent = user.username || user.fullName || 'Player';
+      document.addEventListener('arena:includes-loaded', async () => {
+        document.querySelectorAll('[data-nav]').forEach((link) => {
+          if (link.dataset.nav === 'dashboard') link.classList.add('active');
+        });
+        try {
+          await auth.updateAuthUI();
+        } catch (err) {
+          ui.showToast(err.message || 'Failed to load account', 'error');
         }
-      } catch (err) {
-        ui.showToast(err.message || 'Failed to load account', 'error');
-      }
-    });
+        loadProfile();
+        loadActivity();
+        loadUpcoming();
+        loadMyTournaments();
+      });
+    })();
   </script>
 </body>
 </html>

@@ -187,6 +187,7 @@
     get: (endpoint, options) => request('GET', endpoint, null, options),
     post: (endpoint, body, options) => request('POST', endpoint, body, options),
     put: (endpoint, body, options) => request('PUT', endpoint, body, options),
+    patch: (endpoint, body, options) => request('PATCH', endpoint, body, options),
     delete: (endpoint, options) => request('DELETE', endpoint, null, options),
     upload: (endpoint, formData, options) => request('POST', endpoint, formData, options),
     setTokens,
