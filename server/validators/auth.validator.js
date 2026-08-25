@@ -36,6 +36,12 @@ const resetPasswordValidator = [
     .matches(/\d/).withMessage('Password must contain at least one number'),
 ];
 
+const changePasswordValidator = [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+    .matches(/\d/).withMessage('Password must contain at least one number'),
+];
+
 const refreshTokenValidator = [
   body('refreshToken').notEmpty().withMessage('Refresh token is required'),
 ];
@@ -58,6 +64,7 @@ module.exports = {
   loginValidator,
   forgotPasswordValidator,
   resetPasswordValidator,
+  changePasswordValidator,
   refreshTokenValidator,
   handleValidationErrors,
 };

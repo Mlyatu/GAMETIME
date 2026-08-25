@@ -228,7 +228,7 @@
       }
 
       document.addEventListener('arena:includes-loaded', () => {
-        if (window.auth) auth.requireAuth();
+        if (window.auth) { auth.requireAuth(); auth.updateAuthUI(); }
         document.querySelectorAll('[data-nav]').forEach((link) => {
           if (link.dataset.nav === 'tournaments') link.classList.add('active');
         });

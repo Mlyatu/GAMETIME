@@ -18,6 +18,7 @@ const {
   loginValidator,
   forgotPasswordValidator,
   resetPasswordValidator,
+  changePasswordValidator,
   refreshTokenValidator,
   handleValidationErrors,
 } = require('../validators/auth.validator');
@@ -33,5 +34,6 @@ router.post('/reset-password', authLimiter, resetPasswordValidator, handleValida
 // Protected routes — require a valid access token
 router.get('/me', requireAuth, asyncHandler(authController.me));
 router.post('/logout', requireAuth, asyncHandler(authController.logout));
+router.post('/change-password', requireAuth, authLimiter, changePasswordValidator, handleValidationErrors, asyncHandler(authController.changePassword));
 
 module.exports = router;

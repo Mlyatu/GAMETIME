@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .profile-avatar {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--color-primary);
+      cursor: pointer;
+      background: var(--bg-elevated);
+    }
+    .stat-number { font-size: 1.5rem; font-weight: 800; }
+    .avatar-edit {
+      position: relative; display: inline-block;
+    }
+    .avatar-edit::after {
+      content: '\f030'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+      position: absolute; bottom: 8px; right: 8px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--color-primary); color: #06111f;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+
+        <div class="glass-card p-4 mb-4 text-center text-lg-start">
+          <div class="d-flex flex-column flex-lg-row align-items-center gap-4">
+            <div class="avatar-edit">
+              <img id="profileAvatar" src="/assets/images/avatar-placeholder.svg" class="profile-avatar" alt="Profile avatar" />
+              <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" class="d-none" />
+            </div>
+            <div class="flex-grow-1 text-center text-lg-start">
+              <h2 class="mb-1" id="profileName">Player</h2>
+              <div class="text-secondary-arena mb-2">@<span id="profileUsername">player</span> &middot; <span id="profileRole">player</span></div>
+              <div class="text-sm text-muted" id="profileMeta">Member since —</div>
+            </div>
+            <a href="/pages/settings.html" class="btn-arena btn-arena--secondary"><i class="fa-solid fa-gear"></i> Settings</a>
+          </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="row g-3 mb-4" id="statsGrid"></div>
+
+        <div class="row g-4">
+          <!-- EDIT PROFILE -->
+          <div class="col-lg-8">
+            <div class="glass-card p-4">
+              <h5 class="mb-3">Edit Profile</h5>
+              <form id="profileForm" novalidate>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label-arena" for="fullName">Full Name</label>
+                    <input type="text" id="fullName" class="form-control-arena" maxlength="100" />
+                    <div class="form-error-arena d-none" data-error-for="fullName"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label-arena" for="gamerTag">Gamer Tag</label>
+                    <input type="text" id="gamerTag" class="form-control-arena" maxlength="50" />
+                    <div class="form-error-arena d-none" data-error-for="gamerTag"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label-arena" for="platform">Platform</label>
+                    <select id="platform" class="form-control-arena">
+                      <option value="mobile">Mobile</option>
+                      <option value="ps">PlayStation</option>
+                      <option value="xbox">Xbox</option>
+                      <option value="pc">PC</option>
+                    </select>
+                    <div class="form-error-arena d-none" data-error-for="platform"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label-arena" for="country">Country</label>
+                    <input type="text" id="country" class="form-control-arena" maxlength="60" />
+                    <div class="form-error-arena d-none" data-error-for="country"></div>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label-arena" for="bio">Bio</label>
+                    <textarea id="bio" class="form-control-arena" rows="4" maxlength="1000"></textarea>
+                    <div class="form-error-arena d-none" data-error-for="bio"></div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                  <button type="submit" class="btn-arena btn-arena--primary" id="saveProfileBtn">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- ACCOUNT INFO -->
+          <div class="col-lg-4">
+            <div class="glass-card p-4">
+              <h5 class="mb-3">Account</h5>
+              <div class="mb-3"><div class="text-xs text-muted">Email</div><div id="accountEmail" class="text-sm"></div></div>
+              <div class="mb-3"><div class="text-xs text-muted">Status</div><div id="accountStatus" class="text-sm"></div></div>
+              <div class="mb-3"><div class="text-xs text-muted">Verified</div><div id="accountVerified" class="text-sm"></div></div>
+              <a href="/pages/settings.html" class="btn-arena btn-arena--ghost w-100">Change Password</a>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/form-utils.js"></script>
+  <script>
+    (function () {
+      let profile = null;
+
+      function capitalize(str) {
+        if (!str) return '';
+        return String(str).charAt(0).toUpperCase() + String(str).slice(1);
+      }
+
+      function formatDate(iso) {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      }
+
+      function renderStats(p) {
+        const stats = [
+          { label: 'Matches', value: p.total_matches || 0, icon: 'fa-futbol', color: 'var(--color-primary)' },
+          { label: 'Wins', value: p.wins || 0, icon: 'fa-trophy', color: 'var(--color-success)' },
+          { label: 'Draws', value: p.draws || 0, icon: 'fa-handshake', color: 'var(--color-warning)' },
+          { label: 'Losses', value: p.losses || 0, icon: 'fa-skull', color: 'var(--color-danger)' },
+          { label: 'Goals Scored', value: p.goals_scored || 0, icon: 'fa-bullseye', color: 'var(--color-secondary)' },
+          { label: 'Goals Conceded', value: p.goals_conceded || 0, icon: 'fa-shield-halved', color: 'var(--color-info)' },
+        ];
+        const grid = document.getElementById('statsGrid');
+        grid.innerHTML = stats.map((s) => `
+          <div class="col-6 col-md-4 col-lg-2">
+            <div class="glass-card glass-card--interactive p-3 text-center">
+              <div class="stat-number" style="color:${s.color}">${Number(s.value).toLocaleString()}</div>
+              <div class="text-xs text-muted">${s.label}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function renderProfile(p) {
+        profile = p;
+        document.getElementById('profileName').textContent = p.full_name || p.fullName || p.username;
+        document.getElementById('profileUsername').textContent = p.username || '';
+        document.getElementById('profileRole').textContent = capitalize(p.role || 'player');
+        document.getElementById('profileMeta').textContent = `Member since ${formatDate(p.created_at || p.createdAt)}`;
+        document.getElementById('accountEmail').textContent = p.email || '—';
+        document.getElementById('accountStatus').textContent = capitalize(p.status || 'active');
+        document.getElementById('accountVerified').textContent = (p.is_email_verified || p.isEmailVerified) ? 'Verified' : 'Not verified';
+
+        const avatar = p.avatar_url || p.avatarUrl;
+        if (avatar) document.getElementById('profileAvatar').src = avatar;
+
+        document.getElementById('fullName').value = p.full_name || p.fullName || '';
+        document.getElementById('gamerTag').value = p.gamer_tag || p.gamerTag || '';
+        document.getElementById('platform').value = p.platform || 'mobile';
+        document.getElementById('country').value = p.country || '';
+        document.getElementById('bio').value = p.bio || '';
+
+        renderStats(p);
+      }
+
+      async function loadProfile() {
+        try {
+          const data = await api.get('/player/me');
+          const p = data.data && data.data.profile;
+          if (!p) throw new Error('Profile not found');
+          renderProfile(p);
+        } catch (err) {
+          ui.showToast(err.message || 'Failed to load profile', 'error');
+        }
+      }
+
+      async function handleAvatarChange(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) {
+          ui.showToast('Image must be under 10MB', 'error');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        try {
+          const data = await api.upload('/player/me/avatar', formData);
+          const avatarUrl = data.data && data.data.avatarUrl;
+          if (avatarUrl) {
+            document.getElementById('profileAvatar').src = avatarUrl;
+            // Refresh stored user so the topbar picks up the new avatar.
+            try { await auth.fetchCurrentUser(); await auth.updateAuthUI(); } catch {}
+          }
+          ui.showToast('Avatar updated', 'success');
+        } catch (err) {
+          ui.showToast(err.message || 'Failed to upload avatar', 'error');
+        }
+      }
+
+      async function handleSave(e) {
+        e.preventDefault();
+        const form = document.getElementById('profileForm');
+        clearFormErrors(form);
+
+        const payload = {
+          fullName: document.getElementById('fullName').value.trim() || undefined,
+          gamerTag: document.getElementById('gamerTag').value.trim() || undefined,
+          platform: document.getElementById('platform').value,
+          country: document.getElementById('country').value.trim() || undefined,
+          bio: document.getElementById('bio').value.trim() || undefined,
+        };
+
+        const btn = document.getElementById('saveProfileBtn');
+        ui.setButtonLoading(btn, true);
+        try {
+          const data = await api.patch('/player/me', payload);
+          const p = data.data && data.data.profile;
+          if (p) renderProfile(p);
+          ui.showToast('Profile saved', 'success');
+          // Update topbar/stored user in case full name changed.
+          try { await auth.fetchCurrentUser(); await auth.updateAuthUI(); } catch {}
+        } catch (err) {
+          ui.handleApiFormError(err, form);
+        } finally {
+          ui.setButtonLoading(btn, false);
+        }
+      }
+
+      document.addEventListener('arena:includes-loaded', () => {
+        if (window.auth) { auth.requireAuth(); auth.updateAuthUI(); }
+        document.querySelectorAll('[data-nav]').forEach((link) => {
+          if (link.dataset.nav === 'profile') link.classList.add('active');
+        });
+
+        document.getElementById('profileAvatar').addEventListener('click', () => document.getElementById('avatarInput').click());
+        document.getElementById('avatarInput').addEventListener('change', handleAvatarChange);
+        document.getElementById('profileForm').addEventListener('submit', handleSave);
+
+        loadProfile();
+      });
+    })();
+  </script>
+</body>
+</html>
