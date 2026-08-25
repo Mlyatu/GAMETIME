@@ -9,7 +9,9 @@
 
 const nodemailer = require('nodemailer');
 
+const isProduction = process.env.NODE_ENV === 'production';
 const isConfigured = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+const sendRealEmail = isProduction && isConfigured;
 
 const transporter = isConfigured
   ? nodemailer.createTransport({
@@ -23,10 +25,14 @@ const transporter = isConfigured
     })
   : null;
 
-async function sendMail({ to, subject, html }) {
-  if (!transporter) {
+async function sendMail({ to, subject, html, link }) {
+  if (!sendRealEmail) {
     // eslint-disable-next-line no-console
-    console.log(`[email service - SMTP not configured] Would send to ${to}: ${subject}\n${html}`);
+    console.log(`[email bypass - local dev] To: ${to} | Subject: ${subject}`);
+    if (link) {
+      // eslint-disable-next-line no-console
+      console.log(`  Link: ${link}`);
+    }
     return;
   }
   await transporter.sendMail({
@@ -42,6 +48,7 @@ async function sendVerificationEmail(toEmail, rawToken) {
   await sendMail({
     to: toEmail,
     subject: 'Verify your EFootball Arena account',
+    link: verifyUrl,
     html: `
       <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; max-width: 480px; margin: auto;">
         <h2>Welcome to EFootball Arena</h2>
@@ -58,6 +65,7 @@ async function sendPasswordResetEmail(toEmail, rawToken) {
   await sendMail({
     to: toEmail,
     subject: 'Reset your EFootball Arena password',
+    link: resetUrl,
     html: `
       <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; max-width: 480px; margin: auto;">
         <h2>Password Reset Request</h2>
