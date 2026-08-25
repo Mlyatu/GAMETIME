@@ -217,14 +217,30 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
   <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
   <script>
-    // TODO (Step 13): replace all static content above with data from
-    // GET /api/player/me, GET /api/tournament?myTournaments=true,
-    // GET /api/notification, etc.
-    document.addEventListener('arena:includes-loaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.auth) auth.requireAuth();
+    });
+
+    document.addEventListener('arena:includes-loaded', async () => {
       document.querySelectorAll('[data-nav]').forEach((link) => {
         if (link.dataset.nav === 'dashboard') link.classList.add('active');
       });
+
+      try {
+        await auth.updateAuthUI();
+        const user = auth.getUser();
+        if (user) {
+          const usernameEl = document.getElementById('dashboardUsername');
+          if (usernameEl) usernameEl.textContent = user.username || user.fullName || 'Player';
+        }
+      } catch (err) {
+        ui.showToast(err.message || 'Failed to load account', 'error');
+      }
     });
   </script>
 </body>

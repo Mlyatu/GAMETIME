@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dodoma Winter Cup — EFootball Arena</title>
+  <title>Tournament — EFootball Arena</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -50,6 +50,25 @@
     }
     .bracket-match .side { display: flex; justify-content: space-between; padding: 4px 0; font-size: var(--text-sm); }
     .bracket-match .side.winner { color: var(--color-success); font-weight: 700; }
+    .fixture-row {
+      display: grid;
+      grid-template-columns: 100px 1fr auto 1fr 120px;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.02);
+      margin-bottom: 10px;
+    }
+    .fixture-row .player { display: flex; align-items: center; gap: 10px; font-size: var(--text-sm); font-weight: 600; }
+    .fixture-row .player.away { justify-content: flex-end; flex-direction: row-reverse; }
+    .fixture-score { font-family: var(--font-display); font-weight: 800; font-size: var(--text-lg); text-align: center; min-width: 60px; }
+    @media (max-width: 768px) {
+      .fixture-row { grid-template-columns: 1fr; text-align: center; gap: 8px; }
+      .fixture-row .player.away { flex-direction: row; justify-content: center; }
+    }
+    .standings-table th { font-size: var(--text-xs); }
+    .standings-table td { font-size: var(--text-sm); }
   </style>
 </head>
 <body>
@@ -62,37 +81,36 @@
 
       <main class="container-arena py-4">
 
-        <!-- TODO (Step 13): load real data via GET /api/tournament/:uuid using ?id= from the URL -->
         <div class="tournament-hero mb-5">
           <div>
-            <span class="badge-arena badge-arena--primary mb-2"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Registration Open</span>
-            <h2 class="mb-0">Dodoma Winter Cup</h2>
+            <span class="badge-arena badge-arena--primary mb-2" id="tournamentStatusBadge"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Loading</span>
+            <h2 class="mb-0" id="tournamentName">Tournament</h2>
           </div>
         </div>
 
         <div class="row g-4 mb-4">
           <div class="col-lg-8">
-            <div class="glass-card p-4 d-flex flex-wrap gap-4 align-items-center justify-content-between">
+            <div class="glass-card p-4 d-flex flex-wrap gap-4 align-items-center justify-content-between" id="tournamentStats">
               <div class="d-flex flex-wrap gap-4">
                 <div>
                   <div class="text-xs text-muted">Format</div>
-                  <div class="fw-semibold"><i class="fa-solid fa-sitemap text-sm"></i> Knockout</div>
+                  <div class="fw-semibold" id="statFormat"><i class="fa-solid fa-sitemap text-sm"></i> —</div>
                 </div>
                 <div>
                   <div class="text-xs text-muted">Entrants</div>
-                  <div class="fw-semibold"><i class="fa-solid fa-users text-sm"></i> 18 / 32</div>
+                  <div class="fw-semibold" id="statEntrants"><i class="fa-solid fa-users text-sm"></i> —</div>
                 </div>
                 <div>
                   <div class="text-xs text-muted">Entry Fee</div>
-                  <div class="fw-semibold"><i class="fa-solid fa-coins text-sm"></i> TZS 5,000</div>
+                  <div class="fw-semibold" id="statEntryFee"><i class="fa-solid fa-coins text-sm"></i> —</div>
                 </div>
                 <div>
                   <div class="text-xs text-muted">Prize Pool</div>
-                  <div class="fw-semibold" style="color:var(--color-success);"><i class="fa-solid fa-trophy text-sm"></i> TZS 120,000</div>
+                  <div class="fw-semibold" style="color:var(--color-success);" id="statPrizePool"><i class="fa-solid fa-trophy text-sm"></i> —</div>
                 </div>
                 <div>
                   <div class="text-xs text-muted">Deadline</div>
-                  <div class="fw-semibold"><i class="fa-solid fa-calendar text-sm"></i> Aug 20, 2026</div>
+                  <div class="fw-semibold" id="statDeadline"><i class="fa-solid fa-calendar text-sm"></i> —</div>
                 </div>
               </div>
             </div>
@@ -117,11 +135,7 @@
           <div class="tab-pane fade show active" id="overview-pane">
             <div class="glass-card p-4">
               <h5>About this tournament</h5>
-              <p class="text-secondary-arena">
-                A single-elimination cup open to all registered players. Matches
-                are best-of-one; submit your result screenshot within 24 hours
-                of your scheduled match time. Top 4 finishers split the prize pool.
-              </p>
+              <p class="text-secondary-arena" id="tournamentDescription">Loading tournament details...</p>
               <h6 class="mt-4">Rules</h6>
               <ul class="text-secondary-arena text-sm">
                 <li>All matches played on default settings, 8-minute halves.</li>
@@ -134,66 +148,22 @@
 
           <!-- FIXTURES -->
           <div class="tab-pane fade" id="fixtures-pane">
-            <div class="glass-card p-4">
-              <h6 class="mb-3">Quarter Finals</h6>
-              <div class="d-flex flex-wrap gap-3 mb-4">
-                <div class="bracket-match">
-                  <div class="side winner"><span>StrikerX</span><span>3</span></div>
-                  <div class="side"><span>Player2</span><span>1</span></div>
-                </div>
-                <div class="bracket-match">
-                  <div class="side"><span>MidfieldMaestro</span><span>—</span></div>
-                  <div class="side"><span>GoalMachine</span><span>—</span></div>
-                </div>
-                <div class="bracket-match">
-                  <div class="side"><span>DefenderD</span><span>—</span></div>
-                  <div class="side"><span>WingerW</span><span>—</span></div>
-                </div>
-                <div class="bracket-match">
-                  <div class="side"><span>KeeperK</span><span>—</span></div>
-                  <div class="side"><span>CaptainC</span><span>—</span></div>
-                </div>
-              </div>
-              <p class="text-xs text-muted mb-0">Full bracket view is available once the round of 16 completes.</p>
+            <div class="glass-card p-4" id="fixturesContainer">
+              <p class="text-secondary-arena">Loading fixtures...</p>
             </div>
           </div>
 
           <!-- STANDINGS -->
           <div class="tab-pane fade" id="standings-pane">
-            <div class="glass-card p-2">
-              <table class="table-arena">
-                <thead>
-                  <tr><th>#</th><th>Player</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td>1</td><td>StrikerX</td><td>3</td><td>3</td><td>0</td><td>0</td><td>+7</td><td><strong>9</strong></td></tr>
-                  <tr><td>2</td><td>MidfieldMaestro</td><td>3</td><td>2</td><td>0</td><td>1</td><td>+3</td><td><strong>6</strong></td></tr>
-                  <tr><td>3</td><td>GoalMachine</td><td>3</td><td>1</td><td>1</td><td>1</td><td>0</td><td><strong>4</strong></td></tr>
-                </tbody>
-              </table>
+            <div class="glass-card p-2" id="standingsContainer">
+              <p class="text-secondary-arena p-3">Loading standings...</p>
             </div>
           </div>
 
           <!-- PARTICIPANTS -->
           <div class="tab-pane fade" id="participants-pane">
-            <div class="glass-card p-2">
-              <table class="table-arena">
-                <thead><tr><th>Player</th><th>Joined</th><th>Status</th></tr></thead>
-                <tbody>
-                  <tr>
-                    <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> StrikerX</td>
-                    <td>Aug 1, 2026</td><td><span class="badge-arena badge-arena--success">Approved</span></td>
-                  </tr>
-                  <tr>
-                    <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> MidfieldMaestro</td>
-                    <td>Aug 2, 2026</td><td><span class="badge-arena badge-arena--success">Approved</span></td>
-                  </tr>
-                  <tr>
-                    <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> NewPlayer99</td>
-                    <td>Aug 5, 2026</td><td><span class="badge-arena badge-arena--warning">Pending</span></td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="glass-card p-2" id="participantsContainer">
+              <p class="text-secondary-arena p-3">Loading participants...</p>
             </div>
           </div>
         </div>
@@ -204,25 +174,270 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
   <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
   <script>
-    document.addEventListener('arena:includes-loaded', () => {
-      document.querySelectorAll('[data-nav]').forEach((link) => {
-        if (link.dataset.nav === 'tournaments') link.classList.add('active');
-      });
-    });
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const tournamentUuid = params.get('id');
 
-    // TODO (Step 13): POST /api/tournament/:uuid/join, then flip this
-    // button to a "Pending Approval" / "Registered" state.
-    const joinBtn = document.getElementById('joinTournamentBtn');
-    joinBtn.addEventListener('click', () => {
-      joinBtn.innerHTML = '<span class="spinner-arena"></span>';
-      joinBtn.disabled = true;
-      setTimeout(() => {
-        joinBtn.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Pending Approval';
-        joinBtn.classList.remove('btn-arena--primary');
-        joinBtn.classList.add('btn-arena--secondary');
-      }, 600);
-    });
+      if (!tournamentUuid) {
+        ui.showToast('Tournament not found', 'error');
+        window.location.href = '/pages/tournaments.html';
+        return;
+      }
+
+      let tournament = null;
+
+      function titleCase(str) {
+        return String(str || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      }
+
+      function formatMoney(n) {
+        const num = Number(n || 0);
+        if (num === 0) return 'Free';
+        return `TZS ${num.toLocaleString('en-US')}`;
+      }
+
+      function formatDate(iso) {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        return isNaN(d) ? iso : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      function formatDateTime(iso) {
+        if (!iso) return 'TBD';
+        const d = new Date(iso);
+        if (isNaN(d)) return iso;
+        return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      }
+
+      function statusConfig(status) {
+        const map = {
+          registration_open: { label: 'Registration Open', class: 'badge-arena--primary' },
+          ongoing: { label: 'Ongoing', class: 'badge-arena--success' },
+          completed: { label: 'Completed', class: 'badge-arena--neutral' },
+          cancelled: { label: 'Cancelled', class: 'badge-arena--danger' },
+          draft: { label: 'Draft', class: 'badge-arena--warning' },
+        };
+        return map[status] || { label: titleCase(status), class: 'badge-arena--neutral' };
+      }
+
+      function participantStatusConfig(status) {
+        const map = {
+          pending: { label: 'Pending', class: 'badge-arena--warning' },
+          approved: { label: 'Approved', class: 'badge-arena--success' },
+          rejected: { label: 'Rejected', class: 'badge-arena--danger' },
+          withdrawn: { label: 'Withdrawn', class: 'badge-arena--neutral' },
+        };
+        return map[status] || { label: titleCase(status), class: 'badge-arena--neutral' };
+      }
+
+      function setText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      }
+
+      async function loadTournament() {
+        try {
+          const data = await api.get(`/tournament/${encodeURIComponent(tournamentUuid)}`);
+          tournament = data.data.tournament;
+
+          document.title = `${ui.escapeHtml(tournament.name)} — EFootball Arena`;
+          setText('tournamentName', tournament.name);
+          const cfg = statusConfig(tournament.status);
+          const badge = document.getElementById('tournamentStatusBadge');
+          if (badge) {
+            badge.className = `badge-arena ${cfg.class} mb-2`;
+            badge.innerHTML = `<i class="fa-solid fa-circle" style="font-size:6px;"></i> ${cfg.label}`;
+          }
+
+          setText('statFormat', `Format: ${titleCase(tournament.format)}`);
+          setText('statEntrants', `Entrants: ${Number(tournament.approved_count || 0)} / ${tournament.max_participants || '∞'}`);
+          setText('statEntryFee', `Entry: ${formatMoney(tournament.entry_fee)}`);
+          setText('statPrizePool', `Prize: ${formatMoney(tournament.prize_pool)}`);
+          setText('statDeadline', `Deadline: ${formatDate(tournament.registration_deadline)}`);
+
+          const desc = document.getElementById('tournamentDescription');
+          if (desc) desc.textContent = tournament.description || 'No description provided.';
+
+          updateJoinButton();
+        } catch (err) {
+          ui.showToast(err.message || 'Failed to load tournament', 'error');
+          window.location.href = '/pages/tournaments.html';
+        }
+      }
+
+      function updateJoinButton() {
+        const btn = document.getElementById('joinTournamentBtn');
+        if (!btn || !tournament) return;
+        if (tournament.status !== 'registration_open') {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-lock"></i> Registration Closed';
+          btn.classList.remove('btn-arena--primary');
+          btn.classList.add('btn-arena--secondary');
+          return;
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Join Tournament';
+        btn.classList.add('btn-arena--primary');
+        btn.classList.remove('btn-arena--secondary');
+      }
+
+      function setJoinPending() {
+        const btn = document.getElementById('joinTournamentBtn');
+        if (!btn) return;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-arena"></span> Joining...';
+      }
+
+      async function handleJoin() {
+        if (!tournament || tournament.status !== 'registration_open') return;
+        setJoinPending();
+        try {
+          await api.post(`/tournament/${encodeURIComponent(tournamentUuid)}/join`, {});
+          ui.showToast('Registration submitted — awaiting approval', 'success');
+          const btn = document.getElementById('joinTournamentBtn');
+          if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Pending Approval';
+            btn.classList.remove('btn-arena--primary');
+            btn.classList.add('btn-arena--secondary');
+          }
+          await Promise.all([loadParticipants(), loadTournament()]);
+        } catch (err) {
+          ui.showToast(err.message || 'Failed to join tournament', 'error');
+          updateJoinButton();
+        }
+      }
+
+      async function loadFixtures() {
+        const container = document.getElementById('fixturesContainer');
+        try {
+          const data = await api.get(`/tournament/${encodeURIComponent(tournamentUuid)}/fixtures`);
+          const matches = data.data.matches || [];
+          if (matches.length === 0) {
+            container.innerHTML = '<p class="text-secondary-arena p-3 mb-0">No fixtures yet.</p>';
+            return;
+          }
+
+          const byRound = matches.reduce((acc, m) => {
+            const r = m.round || 'TBD';
+            (acc[r] = acc[r] || []).push(m);
+            return acc;
+          }, {});
+
+          container.innerHTML = Object.entries(byRound).map(([round, roundMatches]) => `
+            <h6 class="mb-3">Round ${round}</h6>
+            ${roundMatches.map((m) => {
+              const homeName = m.home_team_name || m.home_username || 'TBD';
+              const awayName = m.away_team_name || m.away_username || 'TBD';
+              const isCompleted = m.status === 'completed';
+              const isBye = homeName === 'TBD' || awayName === 'TBD';
+              const scoreText = isCompleted ? `${m.home_score ?? 0} - ${m.away_score ?? 0}` : 'VS';
+              const homeClass = isCompleted && m.home_score > m.away_score ? ' style="color:var(--color-success);"' : '';
+              const awayClass = isCompleted && m.away_score > m.home_score ? ' style="color:var(--color-success);"' : '';
+              const badge = isBye ? '<span class="badge-arena badge-arena--neutral">Bye</span>' : `<span class="badge-arena badge-arena--primary">${titleCase(m.status)}</span>`;
+              return `
+                <div class="fixture-row">
+                  <div class="text-xs text-muted">${formatDateTime(m.scheduled_at)}</div>
+                  <div class="player"${homeClass}><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> ${ui.escapeHtml(homeName)}</div>
+                  <div class="fixture-score${!isCompleted ? ' text-muted' : ''}">${scoreText}</div>
+                  <div class="player away"${awayClass}><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> ${ui.escapeHtml(awayName)}</div>
+                  <div class="text-end">${badge}</div>
+                </div>
+              `;
+            }).join('')}
+          `).join('');
+        } catch (err) {
+          container.innerHTML = `<p class="text-danger p-3 mb-0">${ui.escapeHtml(err.message || 'Could not load fixtures')}</p>`;
+        }
+      }
+
+      async function loadStandings() {
+        const container = document.getElementById('standingsContainer');
+        try {
+          const data = await api.get(`/tournament/${encodeURIComponent(tournamentUuid)}/standings`);
+          const rows = data.data.standings || [];
+          if (rows.length === 0) {
+            container.innerHTML = '<p class="text-secondary-arena p-3 mb-0">Standings not available yet.</p>';
+            return;
+          }
+          container.innerHTML = `
+            <table class="table-arena standings-table">
+              <thead>
+                <tr><th>#</th><th>Player / Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
+              </thead>
+              <tbody>
+                ${rows.map((r) => `
+                  <tr>
+                    <td>${r.rank || '—'}</td>
+                    <td>${ui.escapeHtml(r.team_name || r.player_username || 'Unknown')}</td>
+                    <td>${r.played || 0}</td>
+                    <td>${r.won || 0}</td>
+                    <td>${r.drawn || 0}</td>
+                    <td>${r.lost || 0}</td>
+                    <td>${(r.goal_difference >= 0 ? '+' : '') + (r.goal_difference || 0)}</td>
+                    <td><strong>${r.points || 0}</strong></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        } catch (err) {
+          container.innerHTML = `<p class="text-danger p-3 mb-0">${ui.escapeHtml(err.message || 'Could not load standings')}</p>`;
+        }
+      }
+
+      async function loadParticipants() {
+        const container = document.getElementById('participantsContainer');
+        try {
+          const data = await api.get(`/tournament/${encodeURIComponent(tournamentUuid)}/participants`);
+          const participants = data.data.participants || [];
+          if (participants.length === 0) {
+            container.innerHTML = '<p class="text-secondary-arena p-3 mb-0">No participants yet.</p>';
+            return;
+          }
+          container.innerHTML = `
+            <table class="table-arena standings-table">
+              <thead>
+                <tr><th>Player / Team</th><th>Joined</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                ${participants.map((p) => {
+                  const name = p.team_name || p.user_username || 'Unknown';
+                  const cfg = participantStatusConfig(p.status);
+                  return `
+                    <tr>
+                      <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> ${ui.escapeHtml(name)}</td>
+                      <td>${formatDate(p.joined_at)}</td>
+                      <td><span class="badge-arena ${cfg.class}">${cfg.label}</span></td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          `;
+        } catch (err) {
+          container.innerHTML = `<p class="text-danger p-3 mb-0">${ui.escapeHtml(err.message || 'Could not load participants')}</p>`;
+        }
+      }
+
+      async function loadAll() {
+        await loadTournament();
+        await Promise.all([loadFixtures(), loadStandings(), loadParticipants()]);
+      }
+
+      document.addEventListener('arena:includes-loaded', () => {
+        if (window.auth) auth.requireAuth();
+        document.querySelectorAll('[data-nav]').forEach((link) => {
+          if (link.dataset.nav === 'tournaments') link.classList.add('active');
+        });
+        document.getElementById('joinTournamentBtn').addEventListener('click', handleJoin);
+        loadAll();
+      });
+    })();
   </script>
 </body>
 </html>

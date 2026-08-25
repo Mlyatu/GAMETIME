@@ -89,16 +89,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
   <script src="/assets/js/particles-config.js"></script>
   <script src="/assets/js/form-utils.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
   <script>
-    // ---------------------------------------------------------------
-    // Client-side validation only for now — this mirrors the exact
-    // rules the backend enforces (server/validators/auth.validator.js)
-    // so users get instant feedback. The actual POST /api/auth/register
-    // call is wired up in Step 13 alongside the rest of the API
-    // integration; for now, submitting just validates and shows a
-    // "not yet connected" state rather than silently doing nothing.
-    // ---------------------------------------------------------------
-    document.getElementById('registerForm').addEventListener('submit', function (e) {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.auth && auth.redirectIfAuthenticated) auth.redirectIfAuthenticated();
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       clearFormErrors(this);
 
@@ -115,29 +115,34 @@
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError('email', 'Enter a valid email address'); hasError = true; }
       if (password.length < 8 || !/\d/.test(password)) { showFieldError('password', 'Minimum 8 characters, must include a number'); hasError = true; }
       if (!document.getElementById('agreeTerms').checked) {
-        document.getElementById('formError').textContent = 'You must agree to the Terms of Service to continue.';
-        document.getElementById('formError').classList.remove('d-none');
+        const formError = document.getElementById('formError');
+        formError.textContent = 'You must agree to the Terms of Service to continue.';
+        formError.style.color = 'var(--color-danger)';
+        formError.style.background = 'rgba(var(--color-danger-rgb),.12)';
+        formError.classList.remove('d-none');
         hasError = true;
       }
 
       if (hasError) return;
 
-      // TODO (Step 13): replace with a real fetch('/api/auth/register', ...)
-      setSubmitLoading(true);
-      setTimeout(() => {
-        setSubmitLoading(false);
-        document.getElementById('formError').classList.remove('d-none');
-        document.getElementById('formError').style.color = 'var(--color-warning)';
-        document.getElementById('formError').style.background = 'rgba(var(--color-warning-rgb),.12)';
-        document.getElementById('formError').textContent = 'Form validated successfully — API wiring lands in Step 13.';
-      }, 600);
-    });
+      const btn = document.getElementById('registerSubmitBtn');
+      ui.setButtonLoading(btn, true);
 
-    function setSubmitLoading(isLoading) {
-      document.getElementById('registerSubmitBtn').disabled = isLoading;
-      document.getElementById('registerBtnText').classList.toggle('d-none', isLoading);
-      document.getElementById('registerBtnSpinner').classList.toggle('d-none', !isLoading);
-    }
+      try {
+        await auth.register({ fullName, username, gamerTag, email, password });
+        ui.showModal({
+          title: 'Account created',
+          message: 'Check your email and click the verification link to activate your account.',
+          showCancel: false,
+          confirmText: 'Go to Login',
+          onConfirm: () => { window.location.href = '/pages/login.html'; },
+        });
+      } catch (err) {
+        ui.handleApiFormError(err, this);
+      } finally {
+        ui.setButtonLoading(btn, false);
+      }
+    });
   </script>
 </body>
 </html>

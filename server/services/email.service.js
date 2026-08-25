@@ -38,7 +38,7 @@ async function sendMail({ to, subject, html }) {
 }
 
 async function sendVerificationEmail(toEmail, rawToken) {
-  const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${rawToken}`;
+  const verifyUrl = `${process.env.CLIENT_URL}/pages/verify-email.html?token=${rawToken}`;
   await sendMail({
     to: toEmail,
     subject: 'Verify your EFootball Arena account',
@@ -54,7 +54,7 @@ async function sendVerificationEmail(toEmail, rawToken) {
 }
 
 async function sendPasswordResetEmail(toEmail, rawToken) {
-  const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${rawToken}`;
+  const resetUrl = `${process.env.CLIENT_URL}/pages/reset-password.html?token=${rawToken}`;
   await sendMail({
     to: toEmail,
     subject: 'Reset your EFootball Arena password',

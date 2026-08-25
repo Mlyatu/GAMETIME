@@ -49,21 +49,33 @@
     </div>
   </div>
 
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
   <script>
-    // TODO (Step 13): replace with a real call to
-    // GET /api/auth/verify-email?token=<token>. Left as a simulated
-    // 1.2s check for now so the three visual states above are all
-    // reachable and reviewable before the API is wired in.
-    const token = new URLSearchParams(window.location.search).get('token');
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = new URLSearchParams(window.location.search).get('token');
+      const loading = document.getElementById('loadingState');
+      const success = document.getElementById('successState');
+      const error = document.getElementById('errorState');
 
-    setTimeout(() => {
-      document.getElementById('loadingState').classList.add('d-none');
-      if (token) {
-        document.getElementById('successState').classList.remove('d-none');
-      } else {
-        document.getElementById('errorState').classList.remove('d-none');
+      if (!token) {
+        loading.classList.add('d-none');
+        error.classList.remove('d-none');
+        return;
       }
-    }, 1200);
+
+      try {
+        await api.get(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+        loading.classList.add('d-none');
+        success.classList.remove('d-none');
+      } catch (err) {
+        loading.classList.add('d-none');
+        error.classList.remove('d-none');
+        ui.showToast(err.message || 'Verification failed', 'error');
+      }
+    });
   </script>
 </body>
 </html>

@@ -8,6 +8,7 @@
 // =====================================================================
 
 const { v4: uuidv4 } = require('uuid');
+const jwt = require('jsonwebtoken');
 
 const userModel = require('../models/user.model');
 const authTokenModel = require('../models/authToken.model');
@@ -113,7 +114,7 @@ async function login(req, res, next) {
     // Deliberately identical error for "no such user" and "wrong
     // password" — telling them apart lets an attacker enumerate which
     // emails have accounts.
-    const invalidMessage = { success: false, message: 'Invalid email or password' };
+    const invalidMessage = { success: false, code: 'INVALID_CREDENTIALS', message: 'Invalid email or password' };
     if (!user) {
       return res.status(401).json(invalidMessage);
     }
@@ -123,12 +124,32 @@ async function login(req, res, next) {
       return res.status(401).json(invalidMessage);
     }
 
+    if (!user.is_email_verified) {
+      return res.status(403).json({
+        success: false,
+        code: 'EMAIL_NOT_VERIFIED',
+        message: 'Please verify your email before logging in. Check your inbox for the verification link.',
+      });
+    }
+
     if (user.status !== 'active') {
-      return res.status(403).json({ success: false, message: `Your account is ${user.status}. Contact support for help.` });
+      return res.status(403).json({
+        success: false,
+        code: `ACCOUNT_${user.status.toUpperCase()}`,
+        message: `Your account is ${user.status}. Contact support for help.`,
+      });
     }
 
     const accessToken = signAccessToken(user);
     const refreshToken = signRefreshToken(user);
+
+    const decodedRefresh = jwt.decode(refreshToken);
+    await authTokenModel.createToken(
+      user.id,
+      hashToken(refreshToken),
+      'refresh',
+      new Date(decodedRefresh.exp * 1000)
+    );
     await userModel.recordLogin(user.id);
 
     return res.status(200).json({
@@ -148,20 +169,36 @@ async function refreshToken(req, res, next) {
   try {
     const { refreshToken: incomingToken } = req.body;
 
+    const tokenRecord = await authTokenModel.findValidToken(hashToken(incomingToken), 'refresh');
+    if (!tokenRecord) {
+      return res.status(401).json({ success: false, code: 'INVALID_REFRESH_TOKEN', message: 'Invalid or expired refresh token' });
+    }
+
     let decoded;
     try {
       decoded = verifyRefreshToken(incomingToken);
     } catch (err) {
-      return res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
+      return res.status(401).json({ success: false, code: 'INVALID_REFRESH_TOKEN', message: 'Invalid or expired refresh token' });
     }
 
     const user = await userModel.findByUuid(decoded.sub);
     if (!user || user.status !== 'active') {
-      return res.status(401).json({ success: false, message: 'Account no longer available' });
+      return res.status(401).json({ success: false, code: 'ACCOUNT_INACTIVE', message: 'Account no longer available' });
     }
 
+    await authTokenModel.markTokenUsed(tokenRecord.id);
+
     const newAccessToken = signAccessToken(user);
-    return res.status(200).json({ success: true, data: { accessToken: newAccessToken } });
+    const newRefreshToken = signRefreshToken(user);
+    const decodedRefresh = jwt.decode(newRefreshToken);
+    await authTokenModel.createToken(
+      user.id,
+      hashToken(newRefreshToken),
+      'refresh',
+      new Date(decodedRefresh.exp * 1000)
+    );
+
+    return res.status(200).json({ success: true, data: { accessToken: newAccessToken, refreshToken: newRefreshToken } });
   } catch (err) {
     return next(err);
   }
@@ -244,15 +281,21 @@ async function me(req, res, next) {
 // ---------------------------------------------------------------------
 // POST /api/auth/logout
 // ---------------------------------------------------------------------
-// Stateless JWTs can't be "deleted" server-side without a blocklist.
-// Since refresh tokens aren't persisted per-session in this design
-// (only email/reset tokens are), logout is handled by the client
-// discarding both tokens. This endpoint exists for a consistent API
-// shape and as the natural place to add token-blocklisting later if
-// needed (e.g. storing revoked JTIs in Redis).
+// Revoke the provided refresh token server-side so it can no longer be
+// used to mint new access tokens. Access tokens remain valid until they
+// expire — the client must discard them too.
 // ---------------------------------------------------------------------
-async function logout(req, res) {
-  return res.status(200).json({ success: true, message: 'Logged out successfully' });
+async function logout(req, res, next) {
+  try {
+    const { refreshToken } = req.body;
+    if (refreshToken) {
+      const tokenRecord = await authTokenModel.findValidToken(hashToken(refreshToken), 'refresh');
+      if (tokenRecord) await authTokenModel.markTokenUsed(tokenRecord.id);
+    }
+    return res.status(200).json({ success: true, message: 'Logged out successfully' });
+  } catch (err) {
+    return next(err);
+  }
 }
 
 module.exports = {

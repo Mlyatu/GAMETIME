@@ -59,4 +59,11 @@ function shutdown(signal) {
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 
+process.on('unhandledRejection', (reason) => {
+  // eslint-disable-next-line no-console
+  console.error('Unhandled rejection:', reason);
+  // Graceful exit lets the process manager restart with a clean state.
+  shutdown('unhandledRejection');
+});
+
 start();

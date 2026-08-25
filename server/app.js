@@ -19,6 +19,7 @@ const fs = require('fs');
 const { generalLimiter } = require('./middleware/rateLimiter');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
+const { testConnection } = require('./config/database');
 
 const app = express();
 
@@ -90,8 +91,15 @@ app.use(generalLimiter);
 // ---------------------------------------------------------------------
 // Health check — used by uptime monitors / load balancers
 // ---------------------------------------------------------------------
-app.get('/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'EFootball Arena API is running' });
+app.get('/health', async (req, res) => {
+  let db = 'ok';
+  try {
+    await testConnection();
+  } catch {
+    db = 'down';
+  }
+  const status = db === 'ok' ? 200 : 503;
+  res.status(status).json({ success: db === 'ok', db, message: 'EFootball Arena API is running' });
 });
 
 // ---------------------------------------------------------------------

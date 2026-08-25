@@ -11,7 +11,13 @@
 
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
-  let statusCode = err.statusCode || 500;
+  let statusCode = err.statusCode || err.status || 500;
+
+  // CORS rejections should be 403 and never include a stack trace.
+  const isCorsError = err.message === 'Not allowed by CORS';
+  if (isCorsError) {
+    statusCode = 403;
+  }
 
   // Multer throws MulterError instances (file too large, wrong field
   // name — these carry a `code` like LIMIT_FILE_SIZE) or plain Errors
@@ -26,18 +32,36 @@ function errorHandler(err, req, res, next) {
   // production — that can reveal schema details to an attacker.
   const isProduction = process.env.NODE_ENV === 'production';
 
+  const code =
+    err.code ||
+    (isCorsError ? 'CORS_REJECTED' : null) ||
+    (isMulterError ? err.code : null) ||
+    (statusCode === 422 ? 'VALIDATION_ERROR' : null) ||
+    (statusCode === 404 ? 'NOT_FOUND' : null) ||
+    (statusCode === 401 ? 'UNAUTHORIZED' : null) ||
+    (statusCode === 403 ? 'FORBIDDEN' : null) ||
+    (statusCode === 409 ? 'CONFLICT' : null) ||
+    (statusCode === 429 ? 'RATE_LIMIT' : null) ||
+    (statusCode >= 500 ? 'SERVER_ERROR' : `HTTP_${statusCode}`);
+
   const response = {
     success: false,
+    code,
     message: err.message || 'Internal server error',
   };
 
-  if (!isProduction) {
+  if (err.errors) {
+    response.errors = err.errors;
+  }
+
+  if (!isProduction && !isCorsError) {
     response.stack = err.stack;
   }
 
   // Postgres unique-violation code — surface a friendlier message
   // than the raw constraint error.
   if (err.code === '23505') {
+    response.code = 'DUPLICATE_RECORD';
     response.message = 'A record with these details already exists.';
   }
 

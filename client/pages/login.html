@@ -71,12 +71,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
   <script src="/assets/js/particles-config.js"></script>
   <script src="/assets/js/form-utils.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
   <script>
-    // TODO (Step 13): wire this to POST /api/auth/login and store the
-    // returned accessToken/refreshToken (localStorage if "remember me"
-    // is checked, sessionStorage otherwise), then redirect to
-    // /pages/dashboard.html.
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.auth && auth.redirectIfAuthenticated) auth.redirectIfAuthenticated();
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       clearFormErrors(this);
 
@@ -89,20 +93,17 @@
       if (hasError) return;
 
       const btn = document.getElementById('loginSubmitBtn');
-      btn.disabled = true;
-      document.getElementById('loginBtnText').classList.add('d-none');
-      document.getElementById('loginBtnSpinner').classList.remove('d-none');
+      ui.setButtonLoading(btn, true);
 
-      setTimeout(() => {
-        btn.disabled = false;
-        document.getElementById('loginBtnText').classList.remove('d-none');
-        document.getElementById('loginBtnSpinner').classList.add('d-none');
-        const err = document.getElementById('formError');
-        err.textContent = 'Form validated successfully — API wiring lands in Step 13.';
-        err.style.color = 'var(--color-warning)';
-        err.style.background = 'rgba(var(--color-warning-rgb),.12)';
-        err.classList.remove('d-none');
-      }, 600);
+      try {
+        await auth.login(email, password, document.getElementById('rememberMe').checked);
+        const next = new URLSearchParams(window.location.search).get('next') || '/pages/dashboard.html';
+        window.location.href = next;
+      } catch (err) {
+        ui.handleApiFormError(err, this);
+      } finally {
+        ui.setButtonLoading(btn, false);
+      }
     });
   </script>
 </body>

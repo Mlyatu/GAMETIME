@@ -79,114 +79,10 @@
         </div>
 
         <!-- GRID -->
-        <!-- TODO (Step 13): replace static cards with data from GET /api/tournament -->
-        <div class="row g-4" id="tournamentGrid">
-          <div class="col-md-6 col-lg-4">
-            <a href="/pages/tournament-detail.html?id=dodoma-winter-cup" class="text-decoration-none">
-              <div class="glass-card glass-card--interactive overflow-hidden h-100">
-                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(var(--color-primary-rgb),.35), rgba(var(--color-secondary-rgb),.15));">
-                  <span class="badge-arena badge-arena--primary">Registration Open</span>
-                </div>
-                <div class="p-4">
-                  <h5 style="color:var(--text-primary);">Dodoma Winter Cup</h5>
-                  <div class="tournament-meta">
-                    <span><i class="fa-solid fa-sitemap"></i> Knockout</span>
-                    <span><i class="fa-solid fa-users"></i> 18/32</span>
-                    <span><i class="fa-solid fa-coins"></i> TZS 5,000</span>
-                  </div>
-                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</div>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="col-md-6 col-lg-4">
-            <a href="/pages/tournament-detail.html?id=udom-campus-league" class="text-decoration-none">
-              <div class="glass-card glass-card--interactive overflow-hidden h-100">
-                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(var(--color-success-rgb),.3), rgba(var(--color-primary-rgb),.15));">
-                  <span class="badge-arena badge-arena--success">Ongoing</span>
-                </div>
-                <div class="p-4">
-                  <h5 style="color:var(--text-primary);">UDOM Campus League</h5>
-                  <div class="tournament-meta">
-                    <span><i class="fa-solid fa-sitemap"></i> Round Robin</span>
-                    <span><i class="fa-solid fa-users"></i> 12/12</span>
-                    <span><i class="fa-solid fa-coins"></i> Free</span>
-                  </div>
-                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</div>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="col-md-6 col-lg-4">
-            <a href="/pages/tournament-detail.html?id=arena-champions-series" class="text-decoration-none">
-              <div class="glass-card glass-card--interactive overflow-hidden h-100">
-                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(var(--color-danger-rgb),.25), rgba(var(--color-secondary-rgb),.2));">
-                  <span class="badge-arena badge-arena--success">Ongoing</span>
-                </div>
-                <div class="p-4">
-                  <h5 style="color:var(--text-primary);">Arena Champions Series</h5>
-                  <div class="tournament-meta">
-                    <span><i class="fa-solid fa-sitemap"></i> Groups</span>
-                    <span><i class="fa-solid fa-users"></i> 24/24</span>
-                    <span><i class="fa-solid fa-coins"></i> TZS 10,000</span>
-                  </div>
-                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</div>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="col-md-6 col-lg-4">
-            <a href="/pages/tournament-detail.html?id=swiss-showdown" class="text-decoration-none">
-              <div class="glass-card glass-card--interactive overflow-hidden h-100">
-                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(var(--color-warning-rgb),.25), rgba(var(--color-primary-rgb),.15));">
-                  <span class="badge-arena badge-arena--warning">Starting Soon</span>
-                </div>
-                <div class="p-4">
-                  <h5 style="color:var(--text-primary);">Swiss Showdown</h5>
-                  <div class="tournament-meta">
-                    <span><i class="fa-solid fa-sitemap"></i> Swiss</span>
-                    <span><i class="fa-solid fa-users"></i> 9/16</span>
-                    <span><i class="fa-solid fa-coins"></i> TZS 3,000</span>
-                  </div>
-                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Details</div>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="col-md-6 col-lg-4">
-            <a href="/pages/tournament-detail.html?id=league-of-legends-cup" class="text-decoration-none">
-              <div class="glass-card glass-card--interactive overflow-hidden h-100" style="opacity:.7;">
-                <div class="tournament-banner" style="background:linear-gradient(135deg, rgba(120,120,120,.25), rgba(80,80,80,.15));">
-                  <span class="badge-arena badge-arena--neutral">Completed</span>
-                </div>
-                <div class="p-4">
-                  <h5 style="color:var(--text-primary);">Season 3 Grand Finals</h5>
-                  <div class="tournament-meta">
-                    <span><i class="fa-solid fa-sitemap"></i> Knockout</span>
-                    <span><i class="fa-solid fa-users"></i> 64/64</span>
-                    <span><i class="fa-solid fa-coins"></i> TZS 20,000</span>
-                  </div>
-                  <div class="btn-arena btn-arena--secondary btn-arena--sm w-100">View Results</div>
-                </div>
-              </div>
-            </a>
-          </div>
-        </div>
+        <div class="row g-4" id="tournamentGrid"></div>
 
         <!-- PAGINATION -->
-        <nav class="d-flex justify-content-center mt-5">
-          <ul class="pagination" style="gap:8px;">
-            <li><button class="btn-arena btn-arena--secondary btn-arena--sm"><i class="fa-solid fa-chevron-left"></i></button></li>
-            <li><button class="btn-arena btn-arena--primary btn-arena--sm">1</button></li>
-            <li><button class="btn-arena btn-arena--secondary btn-arena--sm">2</button></li>
-            <li><button class="btn-arena btn-arena--secondary btn-arena--sm">3</button></li>
-            <li><button class="btn-arena btn-arena--secondary btn-arena--sm"><i class="fa-solid fa-chevron-right"></i></button></li>
-          </ul>
-        </nav>
+        <nav class="d-flex justify-content-center mt-5" id="tournamentPagination"></nav>
 
       </main>
     </div>
@@ -194,21 +90,152 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
   <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
   <script>
-    document.addEventListener('arena:includes-loaded', () => {
-      document.querySelectorAll('[data-nav]').forEach((link) => {
-        if (link.dataset.nav === 'tournaments') link.classList.add('active');
-      });
-    });
+    (function () {
+      const LIMIT = 12;
+      let state = { status: 'all', format: '', page: 1 };
 
-    // Filter pill UI state — TODO (Step 13): trigger a real
-    // GET /api/tournament?status=... request on change.
-    document.querySelectorAll('.filter-pill').forEach((pill) => {
-      pill.addEventListener('click', () => {
-        document.querySelectorAll('.filter-pill').forEach((p) => p.classList.remove('active'));
-        pill.classList.add('active');
+      function titleCase(str) {
+        return str.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      }
+
+      function formatMoney(n) {
+        const num = Number(n || 0);
+        if (num === 0) return 'Free';
+        return `TZS ${num.toLocaleString('en-US')}`;
+      }
+
+      function formatDate(iso) {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        return isNaN(d) ? iso : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      function statusBadge(status) {
+        const map = {
+          registration_open: { label: 'Registration Open', class: 'badge-arena--primary' },
+          ongoing: { label: 'Ongoing', class: 'badge-arena--success' },
+          completed: { label: 'Completed', class: 'badge-arena--neutral' },
+          cancelled: { label: 'Cancelled', class: 'badge-arena--danger' },
+          draft: { label: 'Draft', class: 'badge-arena--warning' },
+        };
+        const cfg = map[status] || { label: titleCase(status || 'Unknown'), class: 'badge-arena--neutral' };
+        return `<span class="badge-arena ${cfg.class}">${cfg.label}</span>`;
+      }
+
+      function bannerGradient(status) {
+        switch (status) {
+          case 'registration_open':
+            return 'linear-gradient(135deg, rgba(var(--color-primary-rgb),.35), rgba(var(--color-secondary-rgb),.15))';
+          case 'ongoing':
+            return 'linear-gradient(135deg, rgba(var(--color-success-rgb),.3), rgba(var(--color-primary-rgb),.15))';
+          case 'completed':
+            return 'linear-gradient(135deg, rgba(120,120,120,.25), rgba(80,80,80,.15))';
+          case 'cancelled':
+            return 'linear-gradient(135deg, rgba(var(--color-danger-rgb),.25), rgba(var(--color-warning-rgb),.15))';
+          default:
+            return 'linear-gradient(135deg, rgba(var(--color-warning-rgb),.25), rgba(var(--color-primary-rgb),.15))';
+        }
+      }
+
+      function renderTournaments(tournaments) {
+        const grid = document.getElementById('tournamentGrid');
+        if (!tournaments || tournaments.length === 0) {
+          return ui.renderEmpty(grid, 'No tournaments found.', '<a href="/pages/dashboard.html" class="btn-arena btn-arena--primary btn-arena--sm">Back to Dashboard</a>');
+        }
+        grid.innerHTML = tournaments.map((t) => {
+          const entrants = `${Number(t.approved_count || 0)} / ${t.max_participants || '∞'}`;
+          return `
+            <div class="col-md-6 col-lg-4">
+              <a href="/pages/tournament-detail.html?id=${encodeURIComponent(t.uuid)}" class="text-decoration-none">
+                <div class="glass-card glass-card--interactive overflow-hidden h-100">
+                  <div class="tournament-banner" style="background:${bannerGradient(t.status)};">
+                    ${statusBadge(t.status)}
+                  </div>
+                  <div class="p-4">
+                    <h5 style="color:var(--text-primary);">${ui.escapeHtml(t.name)}</h5>
+                    <div class="tournament-meta">
+                      <span><i class="fa-solid fa-sitemap"></i> ${titleCase(t.format)}</span>
+                      <span><i class="fa-solid fa-users"></i> ${entrants}</span>
+                      <span><i class="fa-solid fa-coins"></i> ${formatMoney(t.entry_fee)}</span>
+                    </div>
+                    <div class="btn-arena btn-arena--secondary btn-arena--sm w-100 mt-2">View Details</div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderPagination(page, hasMore) {
+        const nav = document.getElementById('tournamentPagination');
+        const prevDisabled = page <= 1 ? 'disabled' : '';
+        const nextDisabled = !hasMore ? 'disabled' : '';
+        nav.innerHTML = `
+          <ul class="pagination" style="gap:8px;">
+            <li><button class="btn-arena btn-arena--secondary btn-arena--sm" data-page="${page - 1}" ${prevDisabled}><i class="fa-solid fa-chevron-left"></i></button></li>
+            <li><span class="btn-arena btn-arena--ghost btn-arena--sm" style="cursor:default;">Page ${page}</span></li>
+            <li><button class="btn-arena btn-arena--secondary btn-arena--sm" data-page="${page + 1}" ${nextDisabled}><i class="fa-solid fa-chevron-right"></i></button></li>
+          </ul>
+        `;
+        nav.querySelectorAll('button[data-page]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            if (btn.disabled) return;
+            state.page = Number(btn.dataset.page);
+            loadTournaments();
+          });
+        });
+      }
+
+      async function loadTournaments() {
+        const grid = document.getElementById('tournamentGrid');
+        ui.renderSkeleton(grid, 6, 'skeleton-arena');
+        try {
+          const params = new URLSearchParams({ page: state.page, limit: LIMIT });
+          if (state.status && state.status !== 'all') params.set('status', state.status);
+          if (state.format) params.set('format', state.format);
+          const data = await api.get(`/tournament?${params.toString()}`);
+          const tournaments = data.data.tournaments || [];
+          renderTournaments(tournaments);
+          renderPagination(state.page, tournaments.length === LIMIT);
+        } catch (err) {
+          ui.renderEmpty(grid, err.message || 'Failed to load tournaments.', '<button class="btn-arena btn-arena--secondary btn-arena--sm" onclick="location.reload()">Retry</button>');
+          ui.showToast(err.message || 'Failed to load tournaments', 'error');
+        }
+      }
+
+      function bindFilters() {
+        document.querySelectorAll('.filter-pill').forEach((pill) => {
+          pill.addEventListener('click', () => {
+            document.querySelectorAll('.filter-pill').forEach((p) => p.classList.remove('active'));
+            pill.classList.add('active');
+            state.status = pill.dataset.value;
+            state.page = 1;
+            loadTournaments();
+          });
+        });
+
+        document.getElementById('formatFilter').addEventListener('change', (e) => {
+          state.format = e.target.value;
+          state.page = 1;
+          loadTournaments();
+        });
+      }
+
+      document.addEventListener('arena:includes-loaded', () => {
+        if (window.auth) auth.requireAuth();
+        document.querySelectorAll('[data-nav]').forEach((link) => {
+          if (link.dataset.nav === 'tournaments') link.classList.add('active');
+        });
+        bindFilters();
+        loadTournaments();
       });
-    });
+    })();
   </script>
 </body>
 </html>
