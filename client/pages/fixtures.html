@@ -90,7 +90,7 @@
 
       async function loadTournaments() {
         try {
-          const data = await api.get('/tournament?limit=200');
+          const data = await api.get('/tournament?limit=100');
           tournaments = data.data.tournaments || [];
           tournamentSelect.innerHTML = '<option value="">Select a tournament</option>' + tournaments.map((t) =>
             `<option value="${t.uuid}">${ui.escapeHtml(t.name)}</option>`
@@ -163,7 +163,7 @@
       });
 
       document.addEventListener('arena:includes-loaded', () => {
-        if (window.auth) auth.requireAuth();
+        if (window.auth) { auth.requireAuth(); auth.updateAuthUI(); }
         document.querySelectorAll('[data-nav]').forEach((link) => {
           if (link.dataset.nav === 'fixtures') link.classList.add('active');
         });

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Result — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .preview-img { max-height: 220px; object-fit: contain; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05); }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-5">
+        <div class="row justify-content-center">
+          <div class="col-lg-6 col-md-8">
+            <div class="glass-card p-4 p-md-5">
+              <h2 class="mb-1">Submit Match Result</h2>
+              <p class="text-secondary-arena mb-4">Upload a screenshot of the final score. Add the score below if OCR cannot read it.</p>
+
+              <form id="resultForm">
+                <div id="formError" class="alert-arena alert-arena--danger d-none mb-3"></div>
+
+                <div class="mb-3">
+                  <label class="form-label-arena">Tournament</label>
+                  <select id="tournamentUuid" class="form-control-arena" required>
+                    <option value="">Select a tournament</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label-arena">Match</label>
+                  <select id="matchUuid" name="matchUuid" class="form-control-arena" required disabled>
+                    <option value="">Select a match</option>
+                  </select>
+                </div>
+
+                <div class="row g-3 mb-3">
+                  <div class="col-6">
+                    <label class="form-label-arena">Home Score</label>
+                    <input type="number" id="claimedHomeScore" name="claimedHomeScore" class="form-control-arena" min="0" step="1" />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label-arena">Away Score</label>
+                    <input type="number" id="claimedAwayScore" name="claimedAwayScore" class="form-control-arena" min="0" step="1" />
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label-arena">Match Screenshot</label>
+                  <input type="file" id="screenshot" name="screenshot" class="form-control-arena" accept="image/png,image/jpeg,image/jpg,image/webp" required />
+                  <div id="screenshotPreview" class="mt-3"></div>
+                  <div class="form-text-arena text-muted">Max 5 MB. PNG, JPG or WebP. Final score must be visible.</div>
+                </div>
+
+                <button type="submit" class="btn-arena btn-arena--primary w-100" id="submitBtn">
+                  <span><i class="fa-solid fa-futbol me-2"></i>Submit Result</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script>
+    (function () {
+      const tournamentSelect = document.getElementById('tournamentUuid');
+      const matchSelect = document.getElementById('matchUuid');
+      const screenshotInput = document.getElementById('screenshot');
+      const previewContainer = document.getElementById('screenshotPreview');
+      const form = document.getElementById('resultForm');
+      const formError = document.getElementById('formError');
+      const submitBtn = document.getElementById('submitBtn');
+
+      function showError(msg) {
+        formError.textContent = msg;
+        formError.classList.remove('d-none');
+      }
+
+      function clearError() {
+        formError.classList.add('d-none');
+      }
+
+      function setLoading(loading) {
+        submitBtn.disabled = loading;
+        const span = submitBtn.querySelector('span');
+        if (span) span.innerHTML = loading ? '<span class="spinner-arena me-2"></span>Submitting...' : '<i class="fa-solid fa-futbol me-2"></i>Submit Result';
+      }
+
+      async function loadTournaments() {
+        try {
+          const data = await api.get('/tournament?limit=100');
+          const tournaments = data.data.tournaments || [];
+          tournaments.forEach((t) => {
+            const opt = document.createElement('option');
+            opt.value = t.uuid;
+            opt.textContent = t.name;
+            tournamentSelect.appendChild(opt);
+          });
+          const params = new URLSearchParams(window.location.search);
+          const prefill = params.get('tournament');
+          if (prefill) {
+            tournamentSelect.value = prefill;
+            await loadMatches(prefill);
+          }
+        } catch (err) {
+          showError(err.message || 'Could not load tournaments');
+        }
+      }
+
+      async function loadMatches(tournamentUuid) {
+        matchSelect.innerHTML = '<option value="">Select a match</option>';
+        matchSelect.disabled = true;
+        if (!tournamentUuid) return;
+        try {
+          const data = await api.get(`/tournament/${encodeURIComponent(tournamentUuid)}/fixtures`);
+          const matches = data.data.matches || [];
+          const openMatches = matches.filter((m) => m.status !== 'completed');
+          if (openMatches.length === 0) {
+            const opt = document.createElement('option');
+            opt.textContent = 'No open matches available';
+            matchSelect.appendChild(opt);
+            return;
+          }
+          openMatches.forEach((m) => {
+            const home = m.home_username || m.home_team_name || 'TBD';
+            const away = m.away_username || m.away_team_name || 'TBD';
+            const opt = document.createElement('option');
+            opt.value = m.uuid;
+            opt.textContent = `Round ${m.round || '—'}: ${home} vs ${away}`;
+            matchSelect.appendChild(opt);
+          });
+          matchSelect.disabled = false;
+          const params = new URLSearchParams(window.location.search);
+          const matchPrefill = params.get('match');
+          if (matchPrefill) matchSelect.value = matchPrefill;
+        } catch (err) {
+          showError(err.message || 'Could not load matches');
+        }
+      }
+
+      tournamentSelect.addEventListener('change', () => loadMatches(tournamentSelect.value));
+
+      screenshotInput.addEventListener('change', () => {
+        previewContainer.innerHTML = '';
+        const file = screenshotInput.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          showError('Please select an image file');
+          screenshotInput.value = '';
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          showError('Image must be smaller than 5 MB');
+          screenshotInput.value = '';
+          return;
+        }
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.className = 'preview-img';
+        previewContainer.appendChild(img);
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearError();
+        const file = screenshotInput.files[0];
+        if (!file) return showError('A screenshot is required');
+        if (!file.type.startsWith('image/')) return showError('Screenshot must be an image');
+        if (file.size > 5 * 1024 * 1024) return showError('Image must be smaller than 5 MB');
+
+        const formData = new FormData(form);
+        setLoading(true);
+        try {
+          const data = await api.upload('/result', formData);
+          const confidence = data.data && data.data.ocr ? Math.round((data.data.ocr.confidence || 0) * 100) : null;
+          ui.showToast(`Result submitted${confidence != null ? ' (OCR confidence ' + confidence + '%)' : ''}`, 'success');
+          form.reset();
+          previewContainer.innerHTML = '';
+          matchSelect.innerHTML = '<option value="">Select a match</option>';
+          matchSelect.disabled = true;
+          setTimeout(() => window.location.href = '/pages/dashboard.html', 1000);
+        } catch (err) {
+          showError(err.message || 'Failed to submit result');
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      document.addEventListener('arena:includes-loaded', () => {
+        if (window.auth) { auth.requireAuth(); auth.updateAuthUI(); }
+        loadTournaments();
+      });
+    })();
+  </script>
+</body>
+</html>

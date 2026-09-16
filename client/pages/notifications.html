@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .notification-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 16px; border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.02); margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    .notification-item:hover { background: rgba(255,255,255,0.04); }
+    .notification-item.unread { border-left: 3px solid var(--color-primary); }
+    .notification-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; background: rgba(var(--color-primary-rgb),0.15); color: var(--color-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+          <div>
+            <h1 class="mb-1">Notifications</h1>
+            <p class="text-secondary-arena mb-0" id="unreadSummary">Loading...</p>
+          </div>
+          <button class="btn-arena btn-arena--secondary" id="markAllReadBtn"><i class="fa-solid fa-check-double"></i> Mark all read</button>
+        </div>
+
+        <div id="notificationsList"></div>
+        <nav class="d-flex justify-content-center mt-4" id="notificationsPagination"></nav>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script>
+    (function () {
+      const LIMIT = 15;
+      let state = { page: 1 };
+
+      const icons = {
+        payment_approved: 'fa-check',
+        payment_rejected: 'fa-xmark',
+        result_recorded: 'fa-futbol',
+        match_scheduled: 'fa-calendar-days',
+        tournament_invite: 'fa-trophy',
+        default: 'fa-bell',
+      };
+
+      function timeAgo(iso) {
+        if (!iso) return '';
+        const date = new Date(iso);
+        const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+        if (seconds < 60) return 'just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days}d ago`;
+        return date.toLocaleDateString();
+      }
+
+      function iconFor(type) {
+        return icons[type] || icons.default;
+      }
+
+      function render(notifications, unreadCount) {
+        const container = document.getElementById('notificationsList');
+        document.getElementById('unreadSummary').textContent = unreadCount > 0
+          ? `You have ${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}.`
+          : 'No new notifications.';
+
+        if (!notifications || notifications.length === 0) {
+          ui.renderEmpty(container, 'Your inbox is empty.', '<a href="/pages/tournaments.html" class="btn-arena btn-arena--primary btn-arena--sm">Browse tournaments</a>');
+          return;
+        }
+
+        container.innerHTML = notifications.map((n) => `
+          <div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}">
+            <div class="notification-icon"><i class="fa-solid ${iconFor(n.type)}"></i></div>
+            <div class="flex-grow-1" style="min-width:0;">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div class="text-sm fw-semibold" style="color:${n.is_read ? 'var(--text-secondary)' : '#fff'}">${ui.escapeHtml(n.title)}</div>
+                <span class="text-xs text-muted text-nowrap">${timeAgo(n.created_at || n.createdAt)}</span>
+              </div>
+              <div class="text-sm text-muted">${ui.escapeHtml(n.body || '')}</div>
+              <div class="d-flex gap-2 mt-2">
+                ${n.link_url || n.linkUrl ? `<a href="${n.link_url || n.linkUrl}" class="text-sm text-primary">View</a>` : ''}
+                ${!n.is_read ? `<button class="text-sm text-secondary bg-transparent border-0 p-0 mark-read" data-id="${n.id}">Mark read</button>` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        container.querySelectorAll('.mark-read').forEach((btn) => {
+          btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await markRead(btn.dataset.id);
+          });
+        });
+      }
+
+      function renderPagination(page, hasMore) {
+        const nav = document.getElementById('notificationsPagination');
+        nav.innerHTML = `
+          <ul class="pagination" style="gap:8px;">
+            <li><button class="btn-arena btn-arena--secondary btn-arena--sm" data-page="${page - 1}" ${page <= 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button></li>
+            <li><span class="btn-arena btn-arena--ghost btn-arena--sm" style="cursor:default;">Page ${page}</span></li>
+            <li><button class="btn-arena btn-arena--secondary btn-arena--sm" data-page="${page + 1}" ${!hasMore ? 'disabled' : ''}><i class="fa-solid fa-chevron-right"></i></button></li>
+          </ul>
+        `;
+        nav.querySelectorAll('button[data-page]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            if (btn.disabled) return;
+            state.page = Number(btn.dataset.page);
+            loadNotifications();
+          });
+        });
+      }
+
+      async function loadNotifications() {
+        const container = document.getElementById('notificationsList');
+        ui.renderSkeleton(container, 5, 'skeleton-arena');
+        try {
+          const params = new URLSearchParams({ page: state.page, limit: LIMIT });
+          const data = await api.get(`/notification?${params.toString()}`);
+          const notifications = data.data.notifications || [];
+          const unreadCount = data.data.unreadCount || 0;
+          render(notifications, unreadCount);
+          renderPagination(state.page, notifications.length === LIMIT);
+        } catch (err) {
+          ui.renderEmpty(container, err.message || 'Failed to load notifications.', '<button class="btn-arena btn-arena--secondary btn-arena--sm" onclick="location.reload()">Retry</button>');
+          ui.showToast(err.message || 'Failed to load notifications', 'error');
+        }
+      }
+
+      async function markRead(id) {
+        try {
+          await api.patch(`/notification/${id}/read`);
+          loadNotifications();
+          try { auth.updateNotificationBadge(); } catch {}
+        } catch (err) {
+          ui.showToast(err.message || 'Failed to mark read', 'error');
+        }
+      }
+
+      async function markAllRead() {
+        try {
+          await api.patch('/notification/read-all');
+          loadNotifications();
+          try { auth.updateNotificationBadge(); } catch {}
+        } catch (err) {
+          ui.showToast(err.message || 'Failed to mark all read', 'error');
+        }
+      }
+
+      document.addEventListener('arena:includes-loaded', () => {
+        if (window.auth) { auth.requireAuth(); auth.updateAuthUI(); }
+        document.querySelectorAll('[data-nav]').forEach((link) => {
+          if (link.dataset.nav === 'notifications') link.classList.add('active');
+        });
+        document.getElementById('markAllReadBtn').addEventListener('click', markAllRead);
+        loadNotifications();
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -9,6 +9,9 @@
 // Usage:
 //   npm run db:migrate
 //   node database/create-admin.js
+//
+// The script prompts for credentials by default. To automate, set env vars:
+//   ADMIN_EMAIL, ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_FULL_NAME, ADMIN_GAMER_TAG
 // =====================================================================
 
 require('dotenv').config();
@@ -86,12 +89,17 @@ async function main() {
     // eslint-disable-next-line no-console
     console.log('Create the first admin account\n');
 
-    const email = await ask('Admin email');
-    const username = await ask('Admin username');
-    const fullName = await ask('Full name', username);
-    const gamerTag = await ask('Gamer tag', username);
-    const password = await askHidden('Password');
-    const confirm = await askHidden('Confirm password');
+    const envEmail = process.env.ADMIN_EMAIL;
+    const envUsername = process.env.ADMIN_USERNAME;
+    const envPassword = process.env.ADMIN_PASSWORD;
+    const automated = Boolean(envEmail && envUsername && envPassword);
+
+    const email = envEmail || await ask('Admin email');
+    const username = envUsername || await ask('Admin username');
+    const fullName = process.env.ADMIN_FULL_NAME || await ask('Full name', username);
+    const gamerTag = process.env.ADMIN_GAMER_TAG || await ask('Gamer tag', username);
+    const password = envPassword || await askHidden('Password');
+    const confirm = envPassword || await askHidden('Confirm password');
 
     if (!email || !username || !password) {
       // eslint-disable-next-line no-console

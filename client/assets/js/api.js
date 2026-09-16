@@ -17,7 +17,11 @@
   let refreshPromise = null;
 
   function getTokenStorage() {
-    return localStorage.getItem(config.TOKEN_STORAGE_KEY) === 'session' ? sessionStorage : localStorage;
+    // Tokens live in the storage that actually has an access token
+    // (localStorage when "Remember me" is checked, sessionStorage otherwise).
+    if (localStorage.getItem(config.ACCESS_TOKEN_KEY)) return localStorage;
+    if (sessionStorage.getItem(config.ACCESS_TOKEN_KEY)) return sessionStorage;
+    return localStorage;
   }
 
   function getAccessToken() {
@@ -187,6 +191,7 @@
     get: (endpoint, options) => request('GET', endpoint, null, options),
     post: (endpoint, body, options) => request('POST', endpoint, body, options),
     put: (endpoint, body, options) => request('PUT', endpoint, body, options),
+    patch: (endpoint, body, options) => request('PATCH', endpoint, body, options),
     delete: (endpoint, options) => request('DELETE', endpoint, null, options),
     upload: (endpoint, formData, options) => request('POST', endpoint, formData, options),
     setTokens,

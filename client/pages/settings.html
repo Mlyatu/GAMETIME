@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .settings-section { max-width: 640px; }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+        <h1 class="mb-1">Settings</h1>
+        <p class="text-secondary-arena mb-4">Manage your account security and preferences.</p>
+
+        <div class="settings-section">
+          <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="fa-solid fa-lock me-2"></i>Change Password</h5>
+            <form id="changePasswordForm" novalidate>
+              <div class="mb-3">
+                <label class="form-label-arena" for="currentPassword">Current Password</label>
+                <div class="input-group">
+                  <input type="password" id="currentPassword" class="form-control-arena" required />
+                  <button class="btn-arena btn-arena--ghost" type="button" data-toggle-password="currentPassword"><i class="fa-solid fa-eye"></i></button>
+                </div>
+                <div class="form-error-arena d-none" data-error-for="currentPassword"></div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label-arena" for="newPassword">New Password</label>
+                <div class="input-group">
+                  <input type="password" id="newPassword" class="form-control-arena" required minlength="8" />
+                  <button class="btn-arena btn-arena--ghost" type="button" data-toggle-password="newPassword"><i class="fa-solid fa-eye"></i></button>
+                </div>
+                <div class="text-xs text-muted mt-1">At least 8 characters and one number.</div>
+                <div class="form-error-arena d-none" data-error-for="newPassword"></div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label-arena" for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" class="form-control-arena" required />
+                <div class="form-error-arena d-none" data-error-for="confirmPassword"></div>
+              </div>
+              <div class="alert alert-danger d-none" id="formError" role="alert"></div>
+              <button type="submit" class="btn-arena btn-arena--primary" id="changePasswordBtn">Update Password</button>
+            </form>
+          </div>
+
+          <div class="glass-card p-4">
+            <h5 class="mb-3"><i class="fa-solid fa-circle-info me-2"></i>Session</h5>
+            <p class="text-sm text-muted">If you suspect someone else is using your account, log out everywhere by changing your password above or signing out now.</p>
+            <button class="btn-arena btn-arena--danger" id="logoutNowBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/form-utils.js"></script>
+  <script>
+    (function () {
+      async function handleChangePassword(e) {
+        e.preventDefault();
+        const form = document.getElementById('changePasswordForm');
+        clearFormErrors(form);
+
+        const current = document.getElementById('currentPassword').value;
+        const newPass = document.getElementById('newPassword').value;
+        const confirm = document.getElementById('confirmPassword').value;
+
+        if (newPass !== confirm) {
+          showFieldError('confirmPassword', 'Passwords do not match');
+          return;
+        }
+
+        const btn = document.getElementById('changePasswordBtn');
+        ui.setButtonLoading(btn, true);
+        try {
+          await api.post('/auth/change-password', { currentPassword: current, newPassword: newPass });
+          ui.showToast('Password updated. Please log in again.', 'success');
+          form.reset();
+          setTimeout(() => auth.logout(), 1200);
+        } catch (err) {
+          if (err.errors && err.errors.length) {
+            ui.handleApiFormError(err, form);
+          } else {
+            document.getElementById('formError').textContent = err.message || 'Failed to update password';
+            document.getElementById('formError').classList.remove('d-none');
+          }
+        } finally {
+          ui.setButtonLoading(btn, false);
+        }
+      }
+
+      document.addEventListener('arena:includes-loaded', () => {
+        if (window.auth) { auth.requireAuth(); auth.updateAuthUI(); }
+        document.querySelectorAll('[data-nav]').forEach((link) => {
+          if (link.dataset.nav === 'settings') link.classList.add('active');
+        });
+
+        document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
+        document.getElementById('logoutNowBtn').addEventListener('click', () => auth.logout());
+      });
+    })();
+  </script>
+</body>
+</html>

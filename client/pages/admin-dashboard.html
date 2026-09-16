@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .proof-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: var(--radius-sm); cursor: pointer; }
+    .admin-tab { cursor: pointer; padding: 10px 16px; border-bottom: 2px solid transparent; color: var(--text-secondary); }
+    .admin-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+        <h1 class="mb-1">Admin Dashboard</h1>
+        <p class="text-secondary-arena mb-4">Approve payments and match results.</p>
+
+        <div class="d-flex gap-4 border-bottom mb-4" style="border-color:rgba(255,255,255,0.05)!important;">
+          <div class="admin-tab active" data-tab="payments"><i class="fa-solid fa-money-bill me-2"></i>Pending Payments</div>
+          <div class="admin-tab" data-tab="results"><i class="fa-solid fa-futbol me-2"></i>Pending Results</div>
+        </div>
+
+        <div id="paymentsPanel">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Pending Payments</h5>
+            <button class="btn-arena btn-arena--sm btn-arena--secondary" onclick="loadPayments()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+          </div>
+          <div id="paymentsList"></div>
+        </div>
+
+        <div id="resultsPanel" class="d-none">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Pending Results</h5>
+            <button class="btn-arena btn-arena--sm btn-arena--secondary" onclick="loadResults()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+          </div>
+          <div id="resultsList"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Image Modal -->
+  <div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content glass-card border-0">
+        <div class="modal-header border-0"><h5 class="modal-title">Proof Screenshot</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body text-center"><img id="modalImage" src="" class="img-fluid rounded" alt="Proof" /></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script>
+    (function () {
+      let activeTab = 'payments';
+
+      function requireAdmin() {
+        const user = auth.getUser();
+        if (!user || (user.role !== 'admin' && user.role !== 'moderator')) {
+          ui.showToast('Admin access required', 'error');
+          window.location.replace('/pages/dashboard.html');
+          return false;
+        }
+        return true;
+      }
+
+      function formatDate(iso) {
+        return iso ? new Date(iso).toLocaleString() : '—';
+      }
+
+      function money(p) {
+        return `${Number(p.amount).toLocaleString()} ${p.currency || 'TZS'}`;
+      }
+
+      function openImage(url) {
+        document.getElementById('modalImage').src = url;
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        modal.show();
+      }
+
+      function renderPayments(payments) {
+        const list = document.getElementById('paymentsList');
+        if (!payments || payments.length === 0) {
+          ui.renderEmpty(list, 'No pending payments.', '<span class="text-sm text-muted">Check back later or refresh.</span>');
+          return;
+        }
+        list.innerHTML = `
+          <div class="table-responsive">
+            <table class="table-arena">
+              <thead>
+                <tr><th>User</th><th>Tournament</th><th>Amount</th><th>Method</th><th>Date</th><th>Proof</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                ${payments.map((p) => `
+                  <tr>
+                    <td>${ui.escapeHtml(p.username || 'Unknown')}</td>
+                    <td>${ui.escapeHtml(p.tournament_name || '—')}</td>
+                    <td>${money(p)}</td>
+                    <td>${ui.escapeHtml(p.method || '—')}</td>
+                    <td class="text-nowrap">${formatDate(p.created_at || p.createdAt)}</td>
+                    <td>
+                      ${p.proof_screenshot_url || p.proofScreenshotUrl ? `<img src="${p.proof_screenshot_url || p.proofScreenshotUrl}" class="proof-thumb" onclick="window.adminOpenImage('${p.proof_screenshot_url || p.proofScreenshotUrl}')" alt="Proof" />` : '—'}
+                    </td>
+                    <td>
+                      <button class="btn-arena btn-arena--success btn-arena--sm me-1" data-action="approve-payment" data-uuid="${p.uuid}"><i class="fa-solid fa-check"></i></button>
+                      <button class="btn-arena btn-arena--danger btn-arena--sm" data-action="reject-payment" data-uuid="${p.uuid}"><i class="fa-solid fa-xmark"></i></button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        bindActions();
+      }
+
+      function renderResults(results) {
+        const list = document.getElementById('resultsList');
+        if (!results || results.length === 0) {
+          ui.renderEmpty(list, 'No pending results.', '<span class="text-sm text-muted">Check back later or refresh.</span>');
+          return;
+        }
+        list.innerHTML = `
+          <div class="table-responsive">
+            <table class="table-arena">
+              <thead>
+                <tr><th>Submitter</th><th>Match</th><th>Round</th><th>Score</th><th>OCR Confidence</th><th>Date</th><th>Screenshot</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                ${results.map((r) => `
+                  <tr>
+                    <td>${ui.escapeHtml(r.submitted_by_username || 'Unknown')}</td>
+                    <td>${ui.escapeHtml(r.match_uuid || '—').slice(0,8)}...</td>
+                    <td>${ui.escapeHtml(r.round || '—')}</td>
+                    <td class="fw-bold">${r.claimed_home_score ?? r.claimedHomeScore} - ${r.claimed_away_score ?? r.claimedAwayScore}</td>
+                    <td>${Math.round((r.ocr_confidence || r.ocrConfidence || 0) * 100)}%</td>
+                    <td class="text-nowrap">${formatDate(r.created_at || r.createdAt)}</td>
+                    <td>
+                      ${r.screenshot_url || r.screenshotUrl ? `<img src="${r.screenshot_url || r.screenshotUrl}" class="proof-thumb" onclick="window.adminOpenImage('${r.screenshot_url || r.screenshotUrl}')" alt="Screenshot" />` : '—'}
+                    </td>
+                    <td>
+                      <button class="btn-arena btn-arena--success btn-arena--sm me-1" data-action="approve-result" data-uuid="${r.uuid}"><i class="fa-solid fa-check"></i></button>
+                      <button class="btn-arena btn-arena--danger btn-arena--sm" data-action="reject-result" data-uuid="${r.uuid}"><i class="fa-solid fa-xmark"></i></button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        bindActions();
+      }
+
+      function bindActions() {
+        document.querySelectorAll('[data-action]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const action = btn.dataset.action;
+            const uuid = btn.dataset.uuid;
+            await doAction(action, uuid);
+          });
+        });
+      }
+
+      async function doAction(action, uuid) {
+        const [kind, verb] = action.split('-');
+        try {
+          if (kind === 'payment') {
+            await api.patch(`/payment/${uuid}/${verb}`);
+            ui.showToast(`Payment ${verb}d`, 'success');
+            await loadPayments();
+          } else if (kind === 'result') {
+            await api.patch(`/result/${uuid}/${verb}`);
+            ui.showToast(`Result ${verb}d`, 'success');
+            await loadResults();
+          }
+        } catch (err) {
+          ui.showToast(err.message || `Failed to ${verb}`, 'error');
+        }
+      }
+
+      async function loadPayments() {
+        const list = document.getElementById('paymentsList');
+        ui.renderSkeleton(list, 3, 'skeleton-arena');
+        try {
+          const data = await api.get('/payment?status=pending&limit=100');
+          renderPayments(data.data.payments || []);
+        } catch (err) {
+          ui.renderEmpty(list, err.message || 'Failed to load payments.', '<button class="btn-arena btn-arena--secondary btn-arena--sm" onclick="loadPayments()">Retry</button>');
+        }
+      }
+
+      async function loadResults() {
+        const list = document.getElementById('resultsList');
+        ui.renderSkeleton(list, 3, 'skeleton-arena');
+        try {
+          const data = await api.get('/result/pending?limit=100');
+          renderResults(data.data.results || []);
+        } catch (err) {
+          ui.renderEmpty(list, err.message || 'Failed to load results.', '<button class="btn-arena btn-arena--secondary btn-arena--sm" onclick="loadResults()">Retry</button>');
+        }
+      }
+
+      function setTab(tab) {
+        activeTab = tab;
+        document.querySelectorAll('.admin-tab').forEach((el) => el.classList.toggle('active', el.dataset.tab === tab));
+        document.getElementById('paymentsPanel').classList.toggle('d-none', tab !== 'payments');
+        document.getElementById('resultsPanel').classList.toggle('d-none', tab !== 'results');
+        if (tab === 'payments') loadPayments(); else loadResults();
+      }
+
+      document.addEventListener('arena:includes-loaded', () => {
+        if (window.auth) { auth.requireAuth(); auth.updateAuthUI(); }
+        document.querySelectorAll('[data-nav]').forEach((link) => {
+          if (link.dataset.nav === 'admin') link.classList.add('active');
+        });
+
+        if (!requireAdmin()) return;
+
+        window.adminOpenImage = openImage;
+
+        document.querySelectorAll('.admin-tab').forEach((tab) => {
+          tab.addEventListener('click', () => setTab(tab.dataset.tab));
+        });
+
+        loadPayments();
+      });
+    })();
+  </script>
+</body>
+</html>
