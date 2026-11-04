@@ -250,6 +250,144 @@ select.form-control-arena option {
   .public-nav-arena > .container-arena { padding-inline: 16px; }
 }
 
+/* --- Branded site footer --- */
+.arena-footer {
+  position: relative;
+  margin-top: 80px;
+  padding: 64px 0 24px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, .09);
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(var(--color-primary-rgb), .11), transparent 34%),
+    radial-gradient(ellipse at 88% 100%, rgba(var(--color-secondary-rgb), .08), transparent 32%),
+    linear-gradient(180deg, rgba(10, 11, 17, .92), rgba(4, 5, 9, .98));
+}
+.arena-footer::before {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: min(680px, 78%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--color-primary-rgb), .62), rgba(var(--color-secondary-rgb), .58), transparent);
+  content: '';
+  transform: translateX(-50%);
+}
+.arena-footer__main {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.35fr) minmax(110px, .62fr) minmax(140px, .78fr) minmax(260px, 1.2fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+  padding-bottom: 48px;
+}
+.arena-footer__brand { max-width: 300px; }
+.arena-footer__logo {
+  display: inline-flex;
+  margin: -12px 0 10px -8px;
+  border-radius: var(--radius-sm);
+}
+.arena-footer__logo img {
+  display: block;
+  width: 148px;
+  height: auto;
+  filter: drop-shadow(0 0 18px rgba(var(--color-primary-rgb), .16));
+}
+.arena-footer__brand p,
+.arena-footer__cta p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.8;
+}
+.arena-footer__links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.arena-footer__links h2 {
+  margin: 5px 0 5px;
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+.arena-footer__links a {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+.arena-footer__links a:hover {
+  color: var(--text-primary);
+  transform: translateX(3px);
+}
+.arena-footer__cta {
+  padding: 23px;
+  border: 1px solid transparent;
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(17, 18, 26, .96), rgba(9, 10, 16, .96)) padding-box,
+    linear-gradient(130deg, rgba(var(--color-primary-rgb), .52), rgba(255, 255, 255, .08) 48%, rgba(var(--color-secondary-rgb), .38)) border-box;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .22);
+}
+.arena-footer__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 13px;
+  color: #ff829b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.arena-footer__cta h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.05rem, 1.35vw, 1.3rem);
+  font-weight: 800;
+  letter-spacing: -.025em;
+}
+.arena-footer__cta .btn-arena { margin-top: 18px; }
+.arena-footer__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding-top: 19px;
+  border-top: 1px solid rgba(255, 255, 255, .09);
+}
+.arena-footer__bottom p,
+.arena-footer__bottom a {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+.arena-footer__bottom a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: color var(--transition-fast);
+}
+.arena-footer__bottom a:hover { color: var(--color-secondary); }
+
+@media (max-width: 991.98px) {
+  .arena-footer__main {
+    grid-template-columns: minmax(200px, 1.2fr) minmax(120px, .7fr) minmax(140px, .8fr);
+  }
+  .arena-footer__cta { grid-column: 1 / -1; }
+}
+@media (max-width: 575.98px) {
+  .arena-footer { margin-top: 56px; padding: 48px 0 20px; }
+  .arena-footer__main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 22px;
+    padding-bottom: 34px;
+  }
+  .arena-footer__brand,
+  .arena-footer__cta { grid-column: 1 / -1; }
+  .arena-footer__brand { max-width: 360px; }
+  .arena-footer__cta { padding: 20px; }
+  .arena-footer__bottom { align-items: flex-start; flex-direction: column; }
+}
+
 /* --- Top navigation --- */
 .topbar-arena {
   height: var(--topbar-height);
