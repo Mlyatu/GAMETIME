@@ -67,16 +67,23 @@
   </section>
 
   <!-- FEATURED TOURNAMENTS -->
-  <section class="container-arena py-5">
-    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
-      <div>
-        <h2 class="mb-1">Featured Tournaments</h2>
-        <p class="text-secondary-arena mb-0">Open competitions accepting players.</p>
+  <section class="featured-section">
+    <div class="container-arena">
+      <div class="featured-heading">
+        <div>
+          <span class="featured-eyebrow"><i class="fa-solid fa-trophy" aria-hidden="true"></i> Find your next challenge</span>
+          <h2>Featured <span class="featured-heading-accent">Tournaments</span></h2>
+          <p>Pick your competition, claim your spot, and make your mark.</p>
+        </div>
+        <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary btn-arena--sm">
+          Explore all tournaments <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </a>
       </div>
-      <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary btn-arena--sm">View All <i class="fa-solid fa-arrow-right"></i></a>
-    </div>
-    <div class="row g-4" id="featuredTournaments">
-      <div class="col-12 text-secondary-arena" id="featuredTournamentMessage">Loading tournaments...</div>
+      <div class="row g-4 featured-grid" id="featuredTournaments" aria-live="polite">
+        <div class="col-12" id="featuredTournamentMessage">
+          <div class="featured-state"><span class="spinner-arena" aria-hidden="true"></span><span>Finding open tournaments...</span></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -92,26 +99,103 @@
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const grid = document.getElementById('featuredTournaments');
-      const message = document.getElementById('featuredTournamentMessage');
+      const formatLabel = (format) => String(format || 'Tournament')
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
+      const formatMoney = (value) => {
+        const amount = Number(value || 0);
+        return amount > 0 ? `TZS ${amount.toLocaleString('en-US')}` : 'Free';
+      };
+      const formatDate = (value) => {
+        if (!value) return '';
+        const date = new Date(value);
+        return Number.isNaN(date.getTime())
+          ? ''
+          : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      };
+      const safeBannerUrl = (value) => {
+        if (!value) return '';
+        try {
+          const url = new URL(value, window.location.origin);
+          if (url.protocol !== 'https:' && url.origin !== window.location.origin) return '';
+          return url.href;
+        } catch {
+          return '';
+        }
+      };
+      const showState = (icon, title, description, action = '') => {
+        grid.innerHTML = `
+          <div class="col-12">
+            <div class="featured-state featured-state--empty">
+              <span class="featured-state__icon"><i class="fa-solid ${icon}" aria-hidden="true"></i></span>
+              <div><strong>${title}</strong><p>${description}</p></div>
+              ${action}
+            </div>
+          </div>`;
+      };
+
       try {
         const response = await api.get('/tournament?status=registration_open&limit=3');
         const tournaments = response.data.tournaments || [];
         if (!tournaments.length) {
-          message.textContent = 'No tournaments are open for registration right now.';
+          showState(
+            'fa-trophy',
+            'The next tournament is on its way',
+            'There are no open competitions right now. Check back soon or explore all tournaments.',
+            '<a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary btn-arena--sm">Explore tournaments <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>'
+          );
           return;
         }
-        message.remove();
-        grid.innerHTML = tournaments.map((tournament) => `
-          <div class="col-md-4">
-            <article class="glass-card p-4 h-100">
-              <span class="badge-arena badge-arena--primary mb-2">Registration Open</span>
-              <h5>${ui.escapeHtml(tournament.name)}</h5>
-              <p class="text-sm text-secondary-arena">${ui.escapeHtml(String(tournament.format || '').replace(/_/g, ' '))} · ${Number(tournament.approved_count || 0)} / ${ui.escapeHtml(tournament.max_participants || 'Open')} players</p>
-              <a href="/pages/tournament-detail.html?id=${encodeURIComponent(tournament.uuid)}" class="btn-arena btn-arena--secondary btn-arena--sm">View details</a>
+        grid.innerHTML = tournaments.map((tournament) => {
+          const approvedCount = Math.max(0, Number(tournament.approved_count) || 0);
+          const maxParticipants = Number(tournament.max_participants);
+          const hasCapacity = Number.isFinite(maxParticipants) && maxParticipants > 0;
+          const capacityLabel = hasCapacity ? maxParticipants : 'Unlimited';
+          const capacityPercent = hasCapacity
+            ? Math.min(100, Math.round((approvedCount / maxParticipants) * 100))
+            : 0;
+          const bannerUrl = safeBannerUrl(tournament.banner_url);
+          const startDate = formatDate(tournament.start_date);
+          const prizePool = Number(tournament.prize_pool || 0);
+          const registrationUrl = `/pages/tournament-detail.html?id=${encodeURIComponent(tournament.uuid)}`;
+          return `
+          <div class="col-12 col-md-6 col-lg-4">
+            <article class="featured-card">
+              <a class="featured-card__banner${bannerUrl ? ' has-image' : ''}" href="${registrationUrl}" aria-label="View ${ui.escapeHtml(tournament.name)} details"${bannerUrl ? ` style="--featured-banner-image:url(&quot;${ui.escapeHtml(bannerUrl)}&quot;)"` : ''}>
+                <span class="featured-card__banner-glow" aria-hidden="true"></span>
+                <span class="featured-card__sport-mark" aria-hidden="true"><i class="fa-solid fa-gamepad"></i></span>
+                <span class="featured-card__status"><i class="fa-solid fa-circle" aria-hidden="true"></i> Registration open</span>
+                <span class="featured-card__format">${ui.escapeHtml(formatLabel(tournament.format))}</span>
+              </a>
+              <div class="featured-card__body">
+                ${startDate ? `<span class="featured-card__date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Starts ${ui.escapeHtml(startDate)}</span>` : ''}
+                <h3><a href="${registrationUrl}">${ui.escapeHtml(tournament.name)}</a></h3>
+                <div class="featured-card__prize">
+                  <span><i class="fa-solid fa-trophy" aria-hidden="true"></i> Prize pool</span>
+                  <strong>${prizePool > 0 ? `TZS ${prizePool.toLocaleString('en-US')}` : 'Glory awaits'}</strong>
+                </div>
+                <div class="featured-card__capacity">
+                  <div class="featured-card__capacity-label">
+                    <span><i class="fa-solid fa-users" aria-hidden="true"></i> Players joined</span>
+                    <strong>${approvedCount} <span>/ ${ui.escapeHtml(capacityLabel)}</span></strong>
+                  </div>
+                  ${hasCapacity ? `<div class="featured-card__progress" role="progressbar" aria-label="Tournament capacity" aria-valuemin="0" aria-valuemax="${maxParticipants}" aria-valuenow="${Math.min(approvedCount, maxParticipants)}"><span style="width:${capacityPercent}%"></span></div>` : ''}
+                </div>
+                <div class="featured-card__footer">
+                  <span class="featured-card__entry">${Number(tournament.entry_fee || 0) > 0 ? `<i class="fa-solid fa-coins" aria-hidden="true"></i> ${ui.escapeHtml(formatMoney(tournament.entry_fee))} entry` : '<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Free entry'}</span>
+                  <a href="${registrationUrl}" class="featured-card__link">View tournament <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                </div>
+              </div>
             </article>
-          </div>`).join('');
+          </div>`;
+        }).join('');
       } catch {
-        message.textContent = 'Tournaments are temporarily unavailable.';
+        showState(
+          'fa-tower-broadcast',
+          'Tournaments are taking a short break',
+          'We could not load open tournaments right now. Please try again in a little while.',
+          '<a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary btn-arena--sm">Browse tournaments <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>'
+        );
       }
     });
   </script>
