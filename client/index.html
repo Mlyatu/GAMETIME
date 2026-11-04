@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EFootball Arena - Compete. Win. Repeat.</title>
+  <title>Fearless Me | EFootball Arena</title>
   <meta name="description" content="The competitive home for eFootball tournaments — fair fixtures, verified results, real prizes." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,26 +23,46 @@
   <div data-include="/components/public-navbar.html"></div>
 
   <!-- HERO -->
-  <section class="hero-arena">
+  <section class="hero-arena hero-arena--welcome">
     <div id="particles-bg"></div>
-    <div class="football-orbit" aria-hidden="true">
-      <span class="football-ball">&#9917;</span>
-    </div>
-    <div class="container-arena hero-content text-center">
-      <div class="animate-fade-in-up">
-        <span class="hero-eyebrow"><i class="fa-solid fa-circle animate-live-ping" style="font-size:6px;"></i> eFootball tournaments</span>
+    <div class="container-arena hero-content welcome-grid">
+      <div class="welcome-copy">
+        <div class="animate-fade-in-up">
+          <span class="hero-eyebrow"><i class="fa-solid fa-circle animate-live-ping" aria-hidden="true"></i> Fearless Me <span class="welcome-eyebrow-divider" aria-hidden="true"></span> eFootball tournaments</span>
+        </div>
+        <h1 class="welcome-title mt-4 animate-fade-in-up animate-stagger" style="--delay:1;">
+          Play <span class="welcome-gradient-text">Fearless.</span><br />
+          Compete. <span class="welcome-gradient-text">Win.</span>
+        </h1>
+        <p class="welcome-description animate-fade-in-up animate-stagger" style="--delay:2;">
+          Join the arena for fair tournaments, scheduled fixtures, and results verified by our team. Your next match starts here.
+        </p>
+        <div class="d-flex gap-3 flex-wrap mt-4 animate-fade-in-up animate-stagger" style="--delay:3;">
+          <a href="/pages/register.html" class="btn-arena btn-arena--primary"><i class="fa-solid fa-bolt"></i> Get Started Free</a>
+          <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary"><i class="fa-solid fa-trophy"></i> Browse Tournaments</a>
+        </div>
+        <div class="welcome-highlights animate-fade-in-up animate-stagger" style="--delay:4;" aria-label="Tournament features">
+          <span><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Scheduled fixtures</span>
+          <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Verified results</span>
+          <span><i class="fa-solid fa-ranking-star" aria-hidden="true"></i> Live standings</span>
+        </div>
       </div>
-      <h1 class="mt-4 animate-fade-in-up animate-stagger" style="--delay:1; font-size: clamp(2.5rem, 6vw, 4.5rem);">
-        Compete. <span class="glow-text-primary">Win.</span> <span class="glow-text-secondary">Repeat.</span>
-      </h1>
-      <p class="text-secondary-arena mx-auto animate-fade-in-up animate-stagger" style="--delay:2; max-width: 560px; font-size: var(--text-lg);">
-        Join tournaments with scheduled fixtures, screenshot-verified results, and standings reviewed by admins.
-      </p>
-      <div class="d-flex gap-3 justify-content-center flex-wrap mt-4 animate-fade-in-up animate-stagger" style="--delay:3;">
-        <a href="/pages/register.html" class="btn-arena btn-arena--primary"><i class="fa-solid fa-bolt"></i> Get Started Free</a>
-        <a href="/pages/tournaments.html" class="btn-arena btn-arena--secondary"><i class="fa-solid fa-trophy"></i> Browse Tournaments</a>
-      </div>
-
+      <figure class="welcome-brand-art animate-fade-in-up animate-stagger" style="--delay:2;">
+        <div class="welcome-logo-frame">
+          <img
+            src="/assets/images/fearless-me-logo.png"
+            class="welcome-company-logo"
+            alt="Fearless Me company logo"
+            width="666"
+            height="375"
+          />
+          <div class="welcome-logo-caption">
+            <span class="welcome-logo-caption__mark" aria-hidden="true"><i class="fa-solid fa-gamepad"></i></span>
+            <span><strong>Find your next challenge</strong><small>Step into the arena and make your mark.</small></span>
+            <i class="fa-solid fa-arrow-up-right-from-square welcome-logo-caption__arrow" aria-hidden="true"></i>
+          </div>
+        </div>
+      </figure>
     </div>
   </section>
 

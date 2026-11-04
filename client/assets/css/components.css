@@ -231,7 +231,24 @@ select.form-control-arena option {
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--glass-border);
 }
+.public-nav-brand {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+}
+.public-nav-logo {
+  display: block;
+  width: 116px;
+  height: auto;
+  filter: drop-shadow(0 0 14px rgba(var(--color-primary-rgb), 0.18));
+}
 .public-nav-arena a.text-secondary-arena:hover { color: var(--text-primary); }
+
+@media (max-width: 575.98px) {
+  .public-nav-logo { width: 100px; }
+  .public-nav-arena > .container-arena { padding-inline: 16px; }
+}
 
 /* --- Top navigation --- */
 .topbar-arena {
