@@ -8,8 +8,11 @@
 
 /* --- Glass panel: the base "floating card" used everywhere --- */
 .glass-card {
+  position: relative;
+  overflow: hidden;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  border-top-color: rgba(var(--color-primary-rgb), 0.32);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -17,9 +20,19 @@
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+  pointer-events: none;
+}
+
 .glass-card--interactive:hover {
-  transform: translateY(-4px);
-  border-color: rgba(var(--color-primary-rgb), 0.35);
+  transform: translateY(-5px);
+  border-color: rgba(var(--color-secondary-rgb), 0.38);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42), 0 0 32px rgba(var(--color-primary-rgb), 0.10);
 }
 
 /* Smaller radius variant for compact widgets (stat tiles, list items) */
@@ -69,7 +82,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.6), rgba(var(--color-secondary-rgb), 0.4));
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.72), rgba(var(--color-secondary-rgb), 0.48));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;

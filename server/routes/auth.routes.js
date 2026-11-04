@@ -24,6 +24,8 @@ const {
 
 // Public routes — authLimiter caps attempts to slow brute-force/spam
 router.post('/register', authLimiter, registerValidator, handleValidationErrors, asyncHandler(authController.register));
+router.get('/google', authController.startGoogleAuth);
+router.get('/google/callback', authController.googleCallback);
 router.get('/verify-email', asyncHandler(authController.verifyEmail));
 router.post('/login', authLimiter, loginValidator, handleValidationErrors, asyncHandler(authController.login));
 router.post('/refresh-token', refreshTokenValidator, handleValidationErrors, asyncHandler(authController.refreshToken));

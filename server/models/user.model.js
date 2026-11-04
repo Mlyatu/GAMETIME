@@ -32,16 +32,16 @@ async function findByUuid(uuid) {
  * transaction — if the profile insert fails, the user insert is rolled
  * back too, so we never end up with a "player" who has no profile.
  */
-async function createPlayer({ uuid, fullName, username, email, passwordHash, gamerTag }) {
+async function createPlayer({ uuid, fullName, username, email, passwordHash, gamerTag, isEmailVerified = false }) {
   const client = await getClient();
   try {
     await client.query('BEGIN');
 
     const userResult = await client.query(
-      `INSERT INTO users (uuid, full_name, username, email, password_hash, role)
-       VALUES ($1, $2, $3, $4, $5, 'player')
+      `INSERT INTO users (uuid, full_name, username, email, password_hash, role, is_email_verified)
+       VALUES ($1, $2, $3, $4, $5, 'player', $6)
        RETURNING id, uuid, full_name, username, email, role, is_email_verified, created_at`,
-      [uuid, fullName, username, email, passwordHash]
+      [uuid, fullName, username, email, passwordHash, isEmailVerified]
     );
     const user = userResult.rows[0];
 
@@ -70,6 +70,100 @@ async function updatePassword(userId, passwordHash) {
   await query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, userId]);
 }
 
+/**
+ * Create a user with an explicit role (admin/moderator/player) — used by
+ * the admin "add user" action. Admins are created pre-verified and active
+ * so they can log in immediately. Players/moderators get a player_profile
+ * row too (gamer_tag is required there).
+ */
+async function createUserByAdmin({ uuid, fullName, username, email, passwordHash, role, gamerTag, isEmailVerified = true }) {
+  const client = await getClient();
+  try {
+    await client.query('BEGIN');
+
+    const userResult = await client.query(
+      `INSERT INTO users (uuid, full_name, username, email, password_hash, role, is_email_verified, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'active')
+       RETURNING id, uuid, full_name, username, email, role, is_email_verified, status, created_at`,
+      [uuid, fullName, username, email, passwordHash, role, isEmailVerified]
+    );
+    const user = userResult.rows[0];
+
+    // Every role gets a player_profiles row (the schema expects a 1:1 and
+    // several player-facing queries JOIN it unconditionally). Fall back to
+    // the username when no gamer tag is supplied.
+    await client.query(
+      `INSERT INTO player_profiles (user_id, gamer_tag) VALUES ($1, $2)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [user.id, gamerTag || username]
+    );
+
+    await client.query('COMMIT');
+    return user;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Permanently remove a user and everything that must go with them, in a
+ * single transaction. Most child tables use ON DELETE CASCADE (profiles,
+ * tokens, notifications, payments, media, team memberships, participations,
+ * chat messages, verifications, captained teams) and are cleaned up
+ * automatically by the final DELETE. The handful of NOT NULL foreign keys
+ * WITHOUT cascade (tournaments.created_by, announcements.created_by,
+ * results.submitted_by) are reassigned to the acting admin first so the
+ * historical records survive; nullable reviewer FKs are nulled out.
+ *
+ * @param {number} userId           internal id of the user to delete
+ * @param {number} reassignToUserId internal id of the admin performing it
+ */
+async function hardDeleteUser(userId, reassignToUserId) {
+  const client = await getClient();
+  try {
+    await client.query('BEGIN');
+
+    // Reassign ownership of records that can't be nulled (NOT NULL FKs).
+    await client.query('UPDATE tournaments SET created_by = $1 WHERE created_by = $2', [reassignToUserId, userId]);
+    await client.query('UPDATE announcements SET created_by = $1 WHERE created_by = $2', [reassignToUserId, userId]);
+    await client.query('UPDATE results SET submitted_by = $1 WHERE submitted_by = $2', [reassignToUserId, userId]);
+
+    // Null out optional reviewer references so they don't block the delete.
+    await client.query('UPDATE results SET verified_by = NULL WHERE verified_by = $1', [userId]);
+    await client.query('UPDATE payments SET reviewed_by = NULL WHERE reviewed_by = $1', [userId]);
+    await client.query('UPDATE verifications SET reviewed_by = NULL WHERE reviewed_by = $1', [userId]);
+    await client.query('UPDATE audit_logs SET user_id = NULL WHERE user_id = $1', [userId]);
+
+    // The final delete cascades to profiles, tokens, notifications,
+    // payments, media, team_members, tournament_participants,
+    // chat_messages, verifications, and captained teams.
+    const result = await client.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
+
+    await client.query('COMMIT');
+    return result.rows[0] || null;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/** Look up a user's internal id + role by public uuid (for admin actions). */
+async function findByUuidWithRole(uuid) {
+  const result = await query('SELECT id, uuid, username, role FROM users WHERE uuid = $1 AND deleted_at IS NULL', [uuid]);
+  return result.rows[0] || null;
+}
+
+/** Count active (non-deleted) admins — used to protect the last admin. */
+async function countAdmins() {
+  const result = await query("SELECT COUNT(*)::int AS count FROM users WHERE role = 'admin' AND deleted_at IS NULL");
+  return result.rows[0].count;
+}
+
 /** Record the timestamp of a successful login. */
 async function recordLogin(userId) {
   await query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [userId]);
@@ -80,6 +174,10 @@ module.exports = {
   findByUsername,
   findByUuid,
   createPlayer,
+  createUserByAdmin,
+  hardDeleteUser,
+  findByUuidWithRole,
+  countAdmins,
   markEmailVerified,
   updatePassword,
   recordLogin,

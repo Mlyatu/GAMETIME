@@ -64,8 +64,8 @@
         <!-- WELCOME BANNER -->
         <div class="glass-card welcome-banner mb-4">
           <div>
-            <h3 class="mb-1">Welcome back, <span class="glow-text-primary" id="dashboardUsername">StrikerX</span> 👋</h3>
-            <p class="text-secondary-arena mb-0">You have <strong class="text-primary" style="color:var(--color-primary);">2 matches</strong> scheduled this week.</p>
+            <h3 class="mb-1">Welcome back, <span class="glow-text-primary" id="dashboardUsername">Player</span></h3>
+            <p class="text-secondary-arena mb-0" id="dashboardSummary">Your competition overview.</p>
           </div>
           <a href="/pages/tournaments.html" class="btn-arena btn-arena--primary"><i class="fa-solid fa-trophy"></i> Browse Tournaments</a>
         </div>
@@ -75,29 +75,29 @@
           <div class="col-6 col-md-3">
             <div class="glass-card glass-card--interactive stat-card">
               <div class="stat-card__icon" style="background:rgba(var(--color-primary-rgb),.15); color:var(--color-primary);"><i class="fa-solid fa-trophy"></i></div>
-              <div class="stat-card__value">3</div>
+              <div class="stat-card__value" id="dashboardActiveTournaments">—</div>
               <div class="stat-card__label">Active Tournaments</div>
             </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="glass-card glass-card--interactive stat-card">
               <div class="stat-card__icon" style="background:rgba(var(--color-success-rgb),.15); color:var(--color-success);"><i class="fa-solid fa-medal"></i></div>
-              <div class="stat-card__value">14</div>
+              <div class="stat-card__value" id="dashboardWins">—</div>
               <div class="stat-card__label">Wins</div>
             </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="glass-card glass-card--interactive stat-card">
               <div class="stat-card__icon" style="background:rgba(var(--color-warning-rgb),.15); color:var(--color-warning);"><i class="fa-solid fa-futbol"></i></div>
-              <div class="stat-card__value">42</div>
+              <div class="stat-card__value" id="dashboardGoals">—</div>
               <div class="stat-card__label">Goals Scored</div>
             </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="glass-card glass-card--interactive stat-card">
               <div class="stat-card__icon" style="background:rgba(var(--color-danger-rgb),.15); color:var(--color-danger);"><i class="fa-solid fa-ranking-star"></i></div>
-              <div class="stat-card__value">#7</div>
-              <div class="stat-card__label">Global Rank</div>
+              <div class="stat-card__value" id="dashboardMatchesPlayed">—</div>
+              <div class="stat-card__label">Matches Played</div>
             </div>
           </div>
         </div>
@@ -111,33 +111,13 @@
                 <a href="/pages/fixtures.html" class="text-sm">View All</a>
               </div>
 
-              <div class="match-row">
-                <div class="d-flex align-items-center gap-3">
-                  <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="36" height="36" alt="" />
-                  <div>
-                    <div class="text-sm fw-semibold">vs MidfieldMaestro</div>
-                    <div class="text-xs text-muted">Dodoma Winter Cup &middot; Round 2</div>
-                  </div>
-                </div>
-                <span class="badge-arena badge-arena--primary">Tomorrow, 6:00 PM</span>
-              </div>
-
-              <div class="match-row">
-                <div class="d-flex align-items-center gap-3">
-                  <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="36" height="36" alt="" />
-                  <div>
-                    <div class="text-sm fw-semibold">vs GoalMachine</div>
-                    <div class="text-xs text-muted">UDOM Campus League &middot; Round 4</div>
-                  </div>
-                </div>
-                <span class="badge-arena badge-arena--neutral">Sat, 3:00 PM</span>
-              </div>
+              <div id="dashboardMatches"><p class="text-secondary-arena mb-0">Loading fixtures...</p></div>
             </div>
 
             <!-- MY TOURNAMENTS -->
             <div class="glass-card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">My Tournaments</h5>
+                <h5 class="mb-0">Active Tournaments</h5>
                 <a href="/pages/tournaments.html" class="text-sm">View All</a>
               </div>
               <div class="table-responsive">
@@ -145,20 +125,7 @@
                   <thead>
                     <tr><th>Tournament</th><th>Format</th><th>Status</th><th>Rank</th></tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td>Dodoma Winter Cup</td><td>Knockout</td>
-                      <td><span class="badge-arena badge-arena--success">Ongoing</span></td><td>Quarter Final</td>
-                    </tr>
-                    <tr>
-                      <td>UDOM Campus League</td><td>Round Robin</td>
-                      <td><span class="badge-arena badge-arena--success">Ongoing</span></td><td>#2 of 12</td>
-                    </tr>
-                    <tr>
-                      <td>Arena Champions Series</td><td>Groups</td>
-                      <td><span class="badge-arena badge-arena--warning">Pending</span></td><td>—</td>
-                    </tr>
-                  </tbody>
+                  <tbody id="dashboardTournaments"><tr><td colspan="4" class="text-secondary-arena">Loading tournaments...</td></tr></tbody>
                 </table>
               </div>
             </div>
@@ -169,34 +136,7 @@
             <div class="glass-card p-4 mb-4">
               <h5 class="mb-3">Recent Activity</h5>
 
-              <div class="activity-item">
-                <div class="activity-icon" style="background:rgba(var(--color-success-rgb),.15); color:var(--color-success);"><i class="fa-solid fa-check"></i></div>
-                <div>
-                  <div class="text-sm">Payment approved for <strong>Dodoma Winter Cup</strong></div>
-                  <div class="text-xs text-muted">2 hours ago</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon" style="background:rgba(var(--color-primary-rgb),.15); color:var(--color-primary);"><i class="fa-solid fa-futbol"></i></div>
-                <div>
-                  <div class="text-sm">Match result recorded: <strong>3 - 1</strong> vs Player2</div>
-                  <div class="text-xs text-muted">Yesterday</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon" style="background:rgba(var(--color-warning-rgb),.15); color:var(--color-warning);"><i class="fa-solid fa-hourglass-half"></i></div>
-                <div>
-                  <div class="text-sm">Registration pending for <strong>Arena Champions Series</strong></div>
-                  <div class="text-xs text-muted">2 days ago</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon" style="background:rgba(var(--color-secondary-rgb),.15); color:var(--color-secondary);"><i class="fa-solid fa-user-plus"></i></div>
-                <div>
-                  <div class="text-sm">You joined team <strong>Arena Wolves</strong></div>
-                  <div class="text-xs text-muted">5 days ago</div>
-                </div>
-              </div>
+              <div class="text-secondary-arena text-sm">Activity updates will appear here when available.</div>
             </div>
 
             <div class="glass-card p-4">
@@ -226,6 +166,68 @@
       if (window.auth) auth.requireAuth();
     });
 
+    function titleCase(value) {
+      return String(value || '').replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+    }
+
+    function formatMatchDate(value) {
+      if (!value) return 'Time TBD';
+      return new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    async function loadDashboardData() {
+      const tournamentBody = document.getElementById('dashboardTournaments');
+      const matchesContainer = document.getElementById('dashboardMatches');
+      try {
+        const [profileResult, tournamentResult] = await Promise.all([
+          api.get('/player/me'),
+          api.get('/tournament?limit=100'),
+        ]);
+        const profile = profileResult.data.profile;
+        const tournaments = (tournamentResult.data.tournaments || []).filter((tournament) => ['registration_open', 'ongoing'].includes(tournament.status));
+        document.getElementById('dashboardActiveTournaments').textContent = tournaments.length;
+        document.getElementById('dashboardMatchesPlayed').textContent = Number(profile.total_matches || 0);
+        document.getElementById('dashboardWins').textContent = Number(profile.wins || 0);
+        document.getElementById('dashboardGoals').textContent = Number(profile.goals_scored || 0);
+        document.getElementById('dashboardSummary').textContent = `${tournaments.length} active tournament${tournaments.length === 1 ? '' : 's'} across the arena.`;
+
+        tournamentBody.innerHTML = tournaments.length ? tournaments.slice(0, 5).map((tournament) => `
+          <tr>
+            <td><a href="/pages/tournament-detail.html?id=${encodeURIComponent(tournament.uuid)}">${ui.escapeHtml(tournament.name)}</a></td>
+            <td>${ui.escapeHtml(titleCase(tournament.format))}</td>
+            <td><span class="badge-arena badge-arena--success">${ui.escapeHtml(titleCase(tournament.status))}</span></td>
+            <td>—</td>
+          </tr>
+        `).join('') : '<tr><td colspan="4" class="text-secondary-arena">No active tournaments right now.</td></tr>';
+
+        const fixtureResults = await Promise.all(tournaments.map(async (tournament) => {
+          try {
+            const result = await api.get(`/tournament/${encodeURIComponent(tournament.uuid)}/fixtures`);
+            return (result.data.matches || []).map((match) => ({ ...match, tournamentName: tournament.name }));
+          } catch {
+            return [];
+          }
+        }));
+        const now = Date.now();
+        const upcoming = fixtureResults.flat().filter((match) => match.status === 'scheduled' && (!match.scheduled_at || new Date(match.scheduled_at).getTime() >= now))
+          .sort((a, b) => (a.scheduled_at ? new Date(a.scheduled_at).getTime() : Infinity) - (b.scheduled_at ? new Date(b.scheduled_at).getTime() : Infinity))
+          .slice(0, 4);
+        matchesContainer.innerHTML = upcoming.length ? upcoming.map((match) => `
+          <div class="match-row">
+            <div>
+              <div class="text-sm fw-semibold">${ui.escapeHtml(match.home_team_name || match.home_username || 'TBD')} <span class="text-muted">vs</span> ${ui.escapeHtml(match.away_team_name || match.away_username || 'TBD')}</div>
+              <div class="text-xs text-muted">${ui.escapeHtml(match.tournamentName)} · ${ui.escapeHtml(match.round || 'Round TBD')}</div>
+            </div>
+            <span class="badge-arena badge-arena--primary">${ui.escapeHtml(formatMatchDate(match.scheduled_at))}</span>
+          </div>
+        `).join('') : '<p class="text-secondary-arena mb-0">No upcoming fixtures have been scheduled.</p>';
+      } catch (error) {
+        tournamentBody.innerHTML = '<tr><td colspan="4" class="text-secondary-arena">Tournament data is currently unavailable.</td></tr>';
+        matchesContainer.innerHTML = '<p class="text-secondary-arena mb-0">Match data is currently unavailable.</p>';
+        ui.showToast(error.message || 'Could not load dashboard data', 'error');
+      }
+    }
+
     document.addEventListener('arena:includes-loaded', async () => {
       document.querySelectorAll('[data-nav]').forEach((link) => {
         if (link.dataset.nav === 'dashboard') link.classList.add('active');
@@ -238,6 +240,7 @@
           const usernameEl = document.getElementById('dashboardUsername');
           if (usernameEl) usernameEl.textContent = user.username || user.fullName || 'Player';
         }
+        await loadDashboardData();
       } catch (err) {
         ui.showToast(err.message || 'Failed to load account', 'error');
       }

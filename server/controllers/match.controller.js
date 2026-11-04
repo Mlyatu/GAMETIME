@@ -10,10 +10,14 @@ const standingsService = require('../services/standings.service');
 const standingsModel = require('../models/standings.model');
 const { query } = require('../config/database');
 const { notifyUser } = require('../services/notification.service');
+const auditLogModel = require('../models/auditLog.model');
+const userModel = require('../models/user.model');
 
 /** POST /api/tournament/:uuid/fixtures/generate — admin/moderator only. */
 const generateFixtures = asyncHandler(async (req, res) => {
   const matches = await fixtureService.generateFixtures(req.params.uuid);
+  const actor = await userModel.findByUuid(req.user.uuid);
+  await auditLogModel.record({ userId: actor.id, action: 'fixtures.generated', entityType: 'tournament', metadata: { tournamentUuid: req.params.uuid, matchCount: matches.length }, ipAddress: req.ip });
   res.status(201).json({
     success: true,
     message: `${matches.length} fixture(s) generated`,
@@ -38,6 +42,21 @@ const getMatch = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Match not found' });
   }
   res.status(200).json({ success: true, data: { match } });
+});
+
+/** PATCH /api/match/:uuid/schedule — admin/moderator schedules a fixture. */
+const scheduleMatch = asyncHandler(async (req, res) => {
+  const match = await matchModel.getInternalId(req.params.uuid);
+  if (!match) {
+    return res.status(404).json({ success: false, message: 'Match not found' });
+  }
+  const updated = await matchModel.scheduleMatch(match.id, req.body.scheduledAt);
+  if (!updated) {
+    return res.status(400).json({ success: false, message: 'Only scheduled matches can be rescheduled' });
+  }
+  const actor = await userModel.findByUuid(req.user.uuid);
+  await auditLogModel.record({ userId: actor.id, action: 'match.scheduled', entityType: 'match', metadata: { matchUuid: match.uuid, scheduledAt: updated.scheduled_at }, ipAddress: req.ip });
+  return res.status(200).json({ success: true, message: 'Match scheduled', data: { match: updated } });
 });
 
 /**
@@ -99,6 +118,8 @@ const submitScore = asyncHandler(async (req, res) => {
   const participantIds = idsResult.rows.map((r) => r.id);
 
   const standings = await standingsService.recalculateStandings(match.tournament_id, participantIds);
+  const actor = await userModel.findByUuid(req.user.uuid);
+  await auditLogModel.record({ userId: actor.id, action: 'match.result_recorded', entityType: 'match', entityId: match.id, metadata: { homeScore, awayScore }, ipAddress: req.ip });
 
   res.status(200).json({
     success: true,
@@ -117,4 +138,4 @@ const getStandings = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: { standings } });
 });
 
-module.exports = { generateFixtures, listFixtures, getMatch, submitScore, getStandings };
+module.exports = { generateFixtures, listFixtures, getMatch, scheduleMatch, submitScore, getStandings };

@@ -12,40 +12,42 @@
 
 :root {
   /* --- Brand colors --- */
-  --color-primary: #3476F6;
-  --color-primary-rgb: 52, 118, 246;
-  --color-secondary: #00F2FE;
-  --color-secondary-rgb: 0, 242, 254;
+  --color-primary: #F21D4B;
+  --color-primary-rgb: 242, 29, 75;
+  --color-secondary: #20D9F5;
+  --color-secondary-rgb: 32, 217, 245;
   --color-success: #00E676;
   --color-success-rgb: 0, 230, 118;
   --color-danger: #FF4D6D;
   --color-danger-rgb: 255, 77, 109;
   --color-warning: #FFC857;
   --color-warning-rgb: 255, 200, 87;
+  --color-accent: #FF315D;
+  --color-accent-rgb: 255, 49, 93;
 
   /* --- Backgrounds (darkest to lightest — layer cards on top of these) --- */
-  --bg-deepest: #090D16;
-  --bg-base: #101827;
-  --bg-elevated: #111827;
+  --bg-deepest: #030305;
+  --bg-base: #090A0F;
+  --bg-elevated: #11131B;
 
   /* --- Glass surface --- */
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-bg-hover: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.10);
-  --glass-blur: 30px;
+  --glass-bg: rgba(15, 16, 23, 0.78);
+  --glass-bg-hover: rgba(28, 26, 37, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-blur: 18px;
 
   /* --- Text --- */
   --text-primary: #F3F4F6;
-  --text-secondary: #9CA3AF;
-  --text-muted: #6B7280;
+  --text-secondary: #AAB8C9;
+  --text-muted: #718198;
 
   /* --- Shape & elevation --- */
-  --radius-lg: 25px;
-  --radius-md: 16px;
-  --radius-sm: 10px;
-  --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.45);
-  --shadow-glow-primary: 0 0 24px rgba(var(--color-primary-rgb), 0.45);
-  --shadow-glow-secondary: 0 0 24px rgba(var(--color-secondary-rgb), 0.45);
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --radius-sm: 6px;
+  --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.34), 0 2px 0 rgba(255, 255, 255, 0.03) inset;
+  --shadow-glow-primary: 0 0 28px rgba(var(--color-primary-rgb), 0.50);
+  --shadow-glow-secondary: 0 0 24px rgba(var(--color-secondary-rgb), 0.42);
   --shadow-glow-success: 0 0 20px rgba(var(--color-success-rgb), 0.4);
   --shadow-glow-danger: 0 0 20px rgba(var(--color-danger-rgb), 0.4);
 

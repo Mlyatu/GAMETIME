@@ -33,6 +33,48 @@
       border-color: rgba(var(--color-primary-rgb), .4);
       color: var(--text-primary);
     }
+    .format-filter-wrap {
+      position: relative;
+      min-width: 170px;
+    }
+    .format-filter-wrap::after {
+      content: '\f078';
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      color: var(--color-secondary);
+      font-family: 'Font Awesome 6 Free';
+      font-size: 11px;
+      font-weight: 900;
+      pointer-events: none;
+    }
+    .format-filter {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 100% !important;
+      min-height: 42px;
+      padding: 9px 38px 9px 14px !important;
+      border: 1px solid rgba(var(--color-secondary-rgb), .22);
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(var(--color-secondary-rgb), .08), rgba(255,255,255,.035));
+      color: var(--text-primary);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .format-filter:hover {
+      border-color: rgba(var(--color-secondary-rgb), .52);
+      background: rgba(var(--color-secondary-rgb), .12);
+    }
+    .format-filter:focus {
+      border-color: var(--color-secondary);
+      box-shadow: 0 0 0 3px rgba(var(--color-secondary-rgb), .12);
+    }
+    .format-filter option {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
     .tournament-banner {
       height: 150px;
       position: relative;
@@ -66,8 +108,8 @@
           <button class="filter-pill" data-filter="status" data-value="registration_open">Registration Open</button>
           <button class="filter-pill" data-filter="status" data-value="ongoing">Ongoing</button>
           <button class="filter-pill" data-filter="status" data-value="completed">Completed</button>
-          <div class="ms-auto">
-            <select class="form-control-arena py-2" id="formatFilter" style="width:auto;">
+          <div class="ms-auto format-filter-wrap">
+            <select class="form-control-arena format-filter" id="formatFilter">
               <option value="">All Formats</option>
               <option value="league">League</option>
               <option value="knockout">Knockout</option>

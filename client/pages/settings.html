@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+      <main class="container-arena py-4">
+
+        <div class="mb-4">
+          <h1 class="mb-1">Settings</h1>
+          <p class="text-secondary-arena mb-0">Update your player profile and account details.</p>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-7">
+            <div class="glass-card p-4 animate-fade-in-up">
+              <h5 class="mb-3">Player Profile</h5>
+              <form id="settingsForm" novalidate>
+                <div class="row g-3">
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label-arena" for="fullName">Full Name</label>
+                    <input type="text" id="fullName" class="form-control-arena" maxlength="100" />
+                    <div class="form-error-arena d-none" data-error-for="fullName"></div>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label-arena" for="gamerTag">Gamer Tag</label>
+                    <input type="text" id="gamerTag" class="form-control-arena" maxlength="50" />
+                    <div class="form-error-arena d-none" data-error-for="gamerTag"></div>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label-arena" for="platform">Platform</label>
+                    <select id="platform" class="form-control-arena">
+                      <option value="mobile">Mobile</option>
+                      <option value="ps">PlayStation</option>
+                      <option value="xbox">Xbox</option>
+                      <option value="pc">PC</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label-arena" for="country">Country</label>
+                    <input type="text" id="country" class="form-control-arena" maxlength="60" placeholder="e.g. Tanzania" />
+                    <div class="form-error-arena d-none" data-error-for="country"></div>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label-arena" for="bio">Bio</label>
+                    <textarea id="bio" class="form-control-arena" rows="4" maxlength="1000" placeholder="Tell other players about yourself..."></textarea>
+                    <div class="form-error-arena d-none" data-error-for="bio"></div>
+                  </div>
+                </div>
+
+                <div class="d-none mt-3" id="formError" style="background:rgba(var(--color-danger-rgb),.12); border:1px solid rgba(var(--color-danger-rgb),.3); border-radius:var(--radius-sm); padding:12px 16px; color:var(--color-danger); font-size:var(--text-sm);"></div>
+
+                <div class="d-flex gap-2 mt-4">
+                  <button type="submit" class="btn-arena btn-arena--primary" id="saveBtn">
+                    <span>Save Changes</span>
+                    <span class="spinner-arena d-none" id="saveSpinner"></span>
+                  </button>
+                  <a href="/pages/profile.html" class="btn-arena btn-arena--ghost">View Public Profile</a>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-5">
+            <div class="glass-card p-4 animate-fade-in-up">
+              <h5 class="mb-3">Profile Picture</h5>
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <img id="settingsAvatar" src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="72" height="72" alt="Your avatar" />
+                <div class="text-sm text-secondary-arena">JPG, PNG, or WebP. Max 5&nbsp;MB.</div>
+              </div>
+              <form id="avatarForm">
+                <input type="file" id="avatarInput" accept="image/*" class="form-control-arena" />
+                <button type="submit" class="btn-arena btn-arena--secondary btn-arena--sm mt-3" id="avatarBtn">
+                  <span>Upload Avatar</span>
+                  <span class="spinner-arena d-none" id="avatarSpinner"></span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/form-utils.js"></script>
+  <script>
+    (function () {
+      function setLoading(btnId, spinnerId, isLoading) {
+        var btn = document.getElementById(btnId);
+        var spinner = document.getElementById(spinnerId);
+        if (!btn) return;
+        btn.disabled = isLoading;
+        var label = btn.querySelector('span:not(.spinner-arena)');
+        if (isLoading) {
+          if (label && !btn.dataset.originalText) btn.dataset.originalText = label.textContent;
+          if (label) label.textContent = 'Saving...';
+          if (spinner) spinner.classList.remove('d-none');
+        } else {
+          if (label) label.textContent = btn.dataset.originalText || '';
+          if (spinner) spinner.classList.add('d-none');
+        }
+      }
+
+      async function loadProfile() {
+        try {
+          var res = await api.get('/player/me');
+          var p = res.data.profile;
+          document.getElementById('fullName').value = p.full_name || '';
+          document.getElementById('gamerTag').value = p.gamer_tag || '';
+          document.getElementById('platform').value = p.platform || 'mobile';
+          document.getElementById('country').value = p.country || '';
+          document.getElementById('bio').value = p.bio || '';
+          var avatar = document.getElementById('settingsAvatar');
+          if (p.avatar_url) avatar.src = p.avatar_url;
+        } catch (err) {
+          ui.showToast(err.message || 'Could not load your profile', 'error');
+        }
+      }
+
+      document.getElementById('settingsForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        clearFormErrors(this);
+        var formError = document.getElementById('formError');
+        formError.classList.add('d-none');
+
+        var payload = {
+          fullName: document.getElementById('fullName').value.trim(),
+          gamerTag: document.getElementById('gamerTag').value.trim(),
+          platform: document.getElementById('platform').value,
+          country: document.getElementById('country').value.trim(),
+          bio: document.getElementById('bio').value.trim(),
+        };
+
+        setLoading('saveBtn', 'saveSpinner', true);
+        try {
+          await api.patch('/player/me', payload);
+          await auth.fetchCurrentUser();
+          ui.showToast('Profile updated', 'success');
+        } catch (err) {
+          ui.handleApiFormError(err, this);
+          formError.textContent = err.message || 'Could not save changes.';
+          formError.classList.remove('d-none');
+        } finally {
+          setLoading('saveBtn', 'saveSpinner', false);
+        }
+      });
+
+      document.getElementById('avatarForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var input = document.getElementById('avatarInput');
+        if (!input.files || !input.files[0]) {
+          ui.showToast('Choose an image first', 'warning');
+          return;
+        }
+        var fd = new FormData();
+        fd.append('avatar', input.files[0]);
+        setLoading('avatarBtn', 'avatarSpinner', true);
+        try {
+          var res = await api.upload('/player/me/avatar', fd);
+          document.getElementById('settingsAvatar').src = res.data.avatarUrl;
+          await auth.fetchCurrentUser();
+          ui.showToast('Avatar updated', 'success');
+          input.value = '';
+        } catch (err) {
+          ui.showToast(err.message || 'Could not upload avatar', 'error');
+        } finally {
+          setLoading('avatarBtn', 'avatarSpinner', false);
+        }
+      });
+
+      document.addEventListener('arena:includes-loaded', async function () {
+        if (!auth.requireAuth()) return;
+        try { await auth.updateAuthUI(); } catch (err) { /* non-fatal */ }
+        await loadProfile();
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -190,6 +190,7 @@
       }
 
       let tournament = null;
+      let isStaff = false;
 
       function titleCase(str) {
         return String(str || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -365,6 +366,7 @@
             return;
           }
           container.innerHTML = `
+            <div class="table-responsive-arena">
             <table class="table-arena standings-table">
               <thead>
                 <tr><th>#</th><th>Player / Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
@@ -384,6 +386,7 @@
                 `).join('')}
               </tbody>
             </table>
+            </div>
           `;
         } catch (err) {
           container.innerHTML = `<p class="text-danger p-3 mb-0">${ui.escapeHtml(err.message || 'Could not load standings')}</p>`;
@@ -400,9 +403,10 @@
             return;
           }
           container.innerHTML = `
+            <div class="table-responsive-arena">
             <table class="table-arena standings-table">
               <thead>
-                <tr><th>Player / Team</th><th>Joined</th><th>Status</th></tr>
+                <tr><th>Player / Team</th><th>Joined</th><th>Status</th>${isStaff ? '<th>Actions</th>' : ''}</tr>
               </thead>
               <tbody>
                 ${participants.map((p) => {
@@ -413,11 +417,13 @@
                       <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> ${ui.escapeHtml(name)}</td>
                       <td>${formatDate(p.joined_at)}</td>
                       <td><span class="badge-arena ${cfg.class}">${cfg.label}</span></td>
+                      ${isStaff ? `<td>${p.status === 'pending' ? `<button class="btn-arena btn-arena--success btn-arena--sm" data-participant-action="approved" data-id="${ui.escapeHtml(p.uuid)}">Approve</button> <button class="btn-arena btn-arena--danger btn-arena--sm" data-participant-action="rejected" data-id="${ui.escapeHtml(p.uuid)}">Reject</button>` : '—'}</td>` : ''}
                     </tr>
                   `;
                 }).join('')}
               </tbody>
             </table>
+            </div>
           `;
         } catch (err) {
           container.innerHTML = `<p class="text-danger p-3 mb-0">${ui.escapeHtml(err.message || 'Could not load participants')}</p>`;
@@ -429,8 +435,26 @@
         await Promise.all([loadFixtures(), loadStandings(), loadParticipants()]);
       }
 
-      document.addEventListener('arena:includes-loaded', () => {
+      document.getElementById('participantsContainer').addEventListener('click', async (event) => {
+        const button = event.target.closest('[data-participant-action]');
+        if (!button || !isStaff) return;
+        button.disabled = true;
+        try {
+          await api.patch(`/tournament/${encodeURIComponent(tournamentUuid)}/participants/${encodeURIComponent(button.dataset.id)}`, {
+            status: button.dataset.participantAction,
+          });
+          ui.showToast(`Participant ${button.dataset.participantAction}`, 'success');
+          await loadParticipants();
+        } catch (error) {
+          button.disabled = false;
+          ui.showToast(error.message || 'Could not update participant', 'error');
+        }
+      });
+
+      document.addEventListener('arena:includes-loaded', async () => {
         if (window.auth) auth.requireAuth();
+        const currentUser = auth.getUser() || await auth.fetchCurrentUser();
+        isStaff = Boolean(currentUser && ['admin', 'moderator'].includes(currentUser.role));
         document.querySelectorAll('[data-nav]').forEach((link) => {
           if (link.dataset.nav === 'tournaments') link.classList.add('active');
         });

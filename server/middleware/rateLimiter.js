@@ -10,11 +10,13 @@
 const rateLimit = require('express-rate-limit');
 
 const windowMinutes = Number(process.env.RATE_LIMIT_WINDOW_MINUTES) || 15;
-const maxRequests = Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100;
+const maxRequests = Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000;
 
 const generalLimiter = rateLimit({
   windowMs: windowMinutes * 60 * 1000,
   max: maxRequests,
+  // Only API requests should consume the API request budget.
+  skip: (req) => !req.path.startsWith('/api/'),
   standardHeaders: true,   // return rate limit info in RateLimit-* headers
   legacyHeaders: false,
   message: {

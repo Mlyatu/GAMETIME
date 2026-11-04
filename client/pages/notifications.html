@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+
+  <style>
+    .notification-row { display:flex; align-items:flex-start; gap:14px; padding:16px; border-radius:var(--radius-sm); background:rgba(255,255,255,.02); border:1px solid transparent; transition:background var(--transition-fast), border-color var(--transition-fast); }
+    .notification-row:hover { background:var(--glass-bg); }
+    .notification-row.is-unread { background:rgba(var(--color-primary-rgb),.06); border-color:rgba(var(--color-primary-rgb),.22); }
+    .notification-icon { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:var(--text-sm); background:rgba(255,255,255,.06); }
+    .notification-body { min-width:0; flex:1; }
+    .notification-body strong { display:block; color:var(--text-primary); }
+    .notification-body p { margin:2px 0 0; color:var(--text-secondary); font-size:var(--text-sm); }
+    @media (max-width:575.98px){ .notification-row{ flex-wrap:wrap; } }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+      <main class="container-arena py-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+          <div>
+            <h1 class="mb-1">Notifications</h1>
+            <p class="text-secondary-arena mb-0">Match reminders, payment updates, and tournament news.</p>
+          </div>
+          <button class="btn-arena btn-arena--secondary btn-arena--sm" id="markAllReadBtn">
+            <i class="fa-solid fa-check-double"></i> Mark all as read
+          </button>
+        </div>
+        <div class="glass-card p-3 p-sm-4">
+          <div id="notificationsList" class="d-flex flex-column gap-2"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script>
+    (function () {
+      var list = document.getElementById('notificationsList');
+      var typeConfig = {
+        payment: { icon: 'fa-money-bill-wave', color: 'var(--color-success)' },
+        result: { icon: 'fa-futbol', color: 'var(--color-secondary)' },
+        match: { icon: 'fa-calendar-days', color: 'var(--color-warning)' },
+        tournament: { icon: 'fa-trophy', color: 'var(--color-primary)' }
+      };
+      function timeAgo(dateStr) {
+        var then = new Date(dateStr).getTime();
+        if (isNaN(then)) return '';
+        var secs = Math.round((Date.now() - then) / 1000);
+        if (secs < 60) return 'Just now';
+        var mins = Math.round(secs / 60);
+        if (mins < 60) return mins + 'm ago';
+        var hrs = Math.round(mins / 60);
+        if (hrs < 24) return hrs + 'h ago';
+        var days = Math.round(hrs / 24);
+        if (days < 30) return days + 'd ago';
+        return new Date(then).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+      function render(items) {
+        if (!items.length) { ui.renderEmpty(list, "You're all caught up — no notifications yet."); return; }
+        list.innerHTML = items.map(function (n) {
+          var cfg = typeConfig[n.type] || { icon: 'fa-circle-info', color: 'var(--text-muted)' };
+          var click = n.link_url ? ' onclick="window.location.href=\'' + ui.escapeHtml(n.link_url) + '\'" style="cursor:pointer;"' : '';
+          return '<div class="notification-row ' + (n.is_read ? '' : 'is-unread') + '"' + click + '>' +
+            '<div class="notification-icon" style="color:' + cfg.color + ';"><i class="fa-solid ' + cfg.icon + '"></i></div>' +
+            '<div class="notification-body"><strong>' + ui.escapeHtml(n.title) + '</strong>' +
+            (n.body ? '<p>' + ui.escapeHtml(n.body) + '</p>' : '') +
+            '<span class="text-xs text-muted">' + timeAgo(n.created_at) + '</span></div>' +
+            (n.is_read ? '' : '<span class="badge-dot badge-dot--online mt-2" title="Unread"></span>') +
+            '</div>';
+        }).join('');
+      }
+      async function loadNotifications() {
+        ui.renderSkeleton(list, 4, 'skeleton-arena');
+        try {
+          var data = await api.get('/notification?page=1&limit=50');
+          render(data.data.notifications || []);
+        } catch (err) {
+          ui.renderEmpty(list, err.message || 'Could not load notifications.');
+        }
+      }
+      document.getElementById('markAllReadBtn').addEventListener('click', async function (e) {
+        var btn = e.currentTarget; btn.disabled = true;
+        try {
+          await api.patch('/notification/read-all', {});
+          ui.showToast('All notifications marked as read', 'success');
+          await loadNotifications();
+        } catch (err) {
+          ui.showToast(err.message || 'Could not update notifications', 'error');
+          btn.disabled = false;
+        }
+      });
+      document.addEventListener('arena:includes-loaded', async function () {
+        if (!auth.requireAuth()) return;
+        document.querySelectorAll('[data-nav]').forEach(function (link) {
+          if (link.dataset.nav === 'notifications') link.classList.add('active');
+        });
+        try { await auth.updateAuthUI(); await loadNotifications(); }
+        catch (err) { ui.showToast(err.message || 'Failed to load account', 'error'); }
+      });
+    })();
+  </script>
+</body>
+</html>

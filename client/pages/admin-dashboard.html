@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Command Center — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    .admin-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+      background:
+        linear-gradient(110deg, rgba(var(--color-primary-rgb), .20), rgba(var(--color-secondary-rgb), .06)),
+        var(--glass-bg);
+      border-color: rgba(var(--color-primary-rgb), .30);
+    }
+    .admin-hero::after {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -60px;
+      top: -110px;
+      border: 1px solid rgba(var(--color-secondary-rgb), .35);
+      border-radius: 50%;
+      box-shadow: 0 0 50px rgba(var(--color-primary-rgb), .18);
+      animation: adminOrbit 8s linear infinite;
+    }
+    .admin-kicker {
+      color: var(--color-primary);
+      font-size: var(--text-xs);
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .admin-stat {
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .admin-stat__value {
+      font-size: var(--text-3xl);
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .admin-stat__icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(var(--color-secondary-rgb), .24);
+      border-radius: var(--radius-sm);
+      color: var(--color-secondary);
+      background: rgba(var(--color-secondary-rgb), .08);
+    }
+    .admin-activity {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .admin-activity:last-child { border-bottom: 0; }
+    .admin-queue-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .admin-queue-row:last-child { border-bottom: 0; }
+    .admin-queue-copy { min-width: 0; }
+    .admin-queue-copy strong,
+    .admin-queue-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .admin-queue-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .admin-section-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .admin-count { color: var(--color-primary); font-weight: 800; }
+    .admin-activity__icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      border-radius: 50%;
+      color: var(--color-primary);
+      background: rgba(var(--color-primary-rgb), .12);
+    }
+    @keyframes adminOrbit {
+      to { transform: rotate(360deg); }
+    }
+    @media (max-width: 576px) {
+      .admin-hero { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+
+      <main class="container-arena py-4">
+        <section class="glass-card admin-hero animate-fade-in-up mb-4">
+          <div class="admin-kicker mb-2"><i class="fa-solid fa-shield-halved"></i> Control room</div>
+          <h1 class="mb-2">Admin Command Center</h1>
+          <p class="text-secondary-arena mb-0">Keep every tournament moving, verified, and ready for kickoff.</p>
+        </section>
+
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-xl-3">
+            <div class="glass-card admin-stat p-4 animate-fade-in-up animate-stagger" style="--delay:1;">
+              <div class="admin-stat__icon"><i class="fa-solid fa-trophy"></i></div>
+              <div><div class="admin-stat__value" id="activeTournamentCount">—</div><div class="text-secondary-arena text-sm">Active tournaments</div></div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="glass-card admin-stat p-4 animate-fade-in-up animate-stagger" style="--delay:2;">
+              <div class="admin-stat__icon"><i class="fa-solid fa-users"></i></div>
+              <div><div class="admin-stat__value" id="matchesPlayedCount">—</div><div class="text-secondary-arena text-sm">Matches played</div></div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="glass-card admin-stat p-4 animate-fade-in-up animate-stagger" style="--delay:3;">
+              <div class="admin-stat__icon"><i class="fa-solid fa-camera-retro"></i></div>
+              <div><div class="admin-stat__value" id="winsCount">—</div><div class="text-secondary-arena text-sm">Wins recorded</div></div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="glass-card admin-stat p-4 animate-fade-in-up animate-stagger" style="--delay:4;">
+              <div class="admin-stat__icon"><i class="fa-solid fa-money-bill-transfer"></i></div>
+              <div><div class="admin-stat__value" id="goalsScoredCount">—</div><div class="text-secondary-arena text-sm">Goals scored</div></div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="glass-card admin-stat p-4 animate-fade-in-up animate-stagger" style="--delay:5;">
+              <div class="admin-stat__icon"><i class="fa-solid fa-calendar-days"></i></div>
+              <div><div class="admin-stat__value" id="upcomingMatchesCount">—</div><div class="text-secondary-arena text-sm">Upcoming matches</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="glass-card p-4 h-100">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div><h5 class="mb-1">Command shortcuts</h5><p class="text-secondary-arena text-sm mb-0">Jump into the work that needs attention.</p></div>
+              </div>
+              <div class="row g-2">
+                <div class="col-sm-6"><a class="btn-arena btn-arena--secondary w-100 justify-content-start" href="/pages/tournaments.html"><i class="fa-solid fa-trophy"></i> Manage tournaments</a></div>
+                <div class="col-sm-6"><a class="btn-arena btn-arena--secondary w-100 justify-content-start" href="/pages/fixtures.html"><i class="fa-solid fa-calendar-days"></i> Manage fixtures &amp; scores</a></div>
+                <div class="col-sm-6"><a class="btn-arena btn-arena--secondary w-100 justify-content-start" href="/pages/leaderboard.html"><i class="fa-solid fa-ranking-star"></i> View standings</a></div>
+                <div class="col-sm-6"><a class="btn-arena btn-arena--secondary w-100 justify-content-start" href="/pages/teams.html"><i class="fa-solid fa-people-group"></i> Review teams</a></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="glass-card p-4 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2"><h5 class="mb-0">Tournament activity</h5></div>
+              <div id="adminTournamentActivity"><div class="text-secondary-arena text-sm py-3">Loading tournament activity...</div></div>
+            </div>
+          </div>
+        </div>
+
+        <section class="glass-card p-4 mt-4">
+          <div class="admin-section-title mb-3">
+            <div><h5 class="mb-1">Tournament management</h5><p class="text-secondary-arena text-sm mb-0">Create competitions and update their status or details.</p></div>
+            <button class="btn-arena btn-arena--primary btn-arena--sm" id="openTournamentModal"><i class="fa-solid fa-plus"></i> Create Tournament</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table-arena">
+              <thead><tr><th>Tournament</th><th>Format</th><th>Status</th><th>Entrants</th><th>Actions</th></tr></thead>
+              <tbody id="adminTournamentRows"><tr><td colspan="5" class="text-secondary-arena">Loading tournaments...</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="row g-4 mt-1" id="adminWorkspace">
+          <div class="col-xl-6">
+            <div class="glass-card p-4 h-100">
+              <div class="admin-section-title mb-2">
+                <div><h5 class="mb-1">User management <span class="text-secondary-arena text-sm" id="userCount"></span></h5><p class="text-secondary-arena text-sm mb-0">Add accounts or permanently remove them.</p></div>
+                <button class="btn-arena btn-arena--primary btn-arena--sm" id="openAddUserBtn"><i class="fa-solid fa-user-plus"></i> Add User</button>
+              </div>
+              <div class="d-flex gap-2 mb-3">
+                <input type="search" id="userSearch" class="form-control-arena" placeholder="Search by username or gamer tag..." aria-label="Search users" />
+              </div>
+              <div id="userQueue"><div class="skeleton-arena" style="height:64px;"></div></div>
+              <div class="d-flex justify-content-center mt-3" id="userPagination"></div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="glass-card p-4 h-100">
+              <div class="admin-section-title mb-2">
+                <div><h5 class="mb-1">Payment approvals</h5><p class="text-secondary-arena text-sm mb-0">Verify entry fees and payment proof.</p></div>
+                <span class="badge-arena badge-arena--warning"><span class="admin-count" id="paymentCount">—</span>&nbsp; pending</span>
+              </div>
+              <div id="paymentQueue"><div class="skeleton-arena" style="height:64px;"></div></div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="glass-card p-4 h-100">
+              <div class="admin-section-title mb-2">
+                <div><h5 class="mb-1">Result verification</h5><p class="text-secondary-arena text-sm mb-0">Review screenshot proof and approve scores before standings update.</p></div>
+                <span class="badge-arena badge-arena--danger"><span class="admin-count" id="resultCount">—</span>&nbsp; pending</span>
+              </div>
+              <div id="resultQueue"><div class="skeleton-arena" style="height:64px;"></div></div>
+              <a class="btn-arena btn-arena--secondary btn-arena--sm mt-3" href="/pages/fixtures.html"><i class="fa-solid fa-list-check"></i> Manage all fixtures &amp; enter scores</a>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="glass-card p-4 h-100">
+              <div class="admin-section-title mb-2">
+                <div><h5 class="mb-1">Operations checklist</h5><p class="text-secondary-arena text-sm mb-0">Keep the competition moving.</p></div>
+                <i class="fa-solid fa-list-check glow-text-secondary"></i>
+              </div>
+              <div class="admin-activity"><span class="admin-activity__icon"><i class="fa-solid fa-user-shield"></i></span><div><div class="text-sm">Review new player profiles</div><div class="text-xs text-muted">Confirm gamer tags and account details</div></div></div>
+              <div class="admin-activity"><span class="admin-activity__icon"><i class="fa-solid fa-receipt"></i></span><div><div class="text-sm">Clear payment queue</div><div class="text-xs text-muted">Approved payments unlock tournament entry</div></div></div>
+              <div class="admin-activity"><span class="admin-activity__icon"><i class="fa-solid fa-flag-checkered"></i></span><div><div class="text-sm">Verify match results</div><div class="text-xs text-muted">Approved scores update live standings</div></div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ADD USER MODAL -->
+        <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card border-0 p-2">
+              <div class="modal-header border-0">
+                <h5 class="modal-title"><i class="fa-solid fa-user-plus glow-text-primary"></i> Add New User</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="addUserForm" novalidate>
+                  <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                      <label class="form-label-arena" for="newFullName">Full Name</label>
+                      <input type="text" id="newFullName" class="form-control-arena" maxlength="100" required />
+                      <div class="form-error-arena d-none" data-error-for="newFullName"></div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                      <label class="form-label-arena" for="newUsername">Username</label>
+                      <input type="text" id="newUsername" class="form-control-arena" maxlength="50" required />
+                      <div class="form-error-arena d-none" data-error-for="newUsername"></div>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label-arena" for="newEmail">Email</label>
+                      <input type="email" id="newEmail" class="form-control-arena" required />
+                      <div class="form-error-arena d-none" data-error-for="newEmail"></div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                      <label class="form-label-arena" for="newGamerTag">Gamer Tag</label>
+                      <input type="text" id="newGamerTag" class="form-control-arena" maxlength="50" placeholder="Optional" />
+                    </div>
+                    <div class="col-12 col-sm-6">
+                      <label class="form-label-arena" for="newRole">Role</label>
+                      <select id="newRole" class="form-control-arena">
+                        <option value="player">Player</option>
+                        <option value="moderator">Moderator</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label-arena" for="newPassword">Temporary Password</label>
+                      <input type="password" id="newPassword" class="form-control-arena" placeholder="At least 8 characters, incl. a number" required minlength="8" />
+                      <div class="form-error-arena d-none" data-error-for="newPassword"></div>
+                    </div>
+                  </div>
+                  <div class="d-none mt-3" id="addUserError" style="background:rgba(var(--color-danger-rgb),.12); border:1px solid rgba(var(--color-danger-rgb),.3); border-radius:var(--radius-sm); padding:12px 16px; color:var(--color-danger); font-size:var(--text-sm);"></div>
+                  <button type="submit" class="btn-arena btn-arena--primary w-100 mt-3" id="addUserSubmit">
+                    <span>Create User</span>
+                    <span class="spinner-arena d-none" id="addUserSpinner"></span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="tournamentModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-card border-0 p-2">
+              <div class="modal-header border-0">
+                <h5 class="modal-title" id="tournamentModalTitle">Create Tournament</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="tournamentForm" novalidate>
+                  <input type="hidden" id="tournamentUuid" />
+                  <div class="row g-3">
+                    <div class="col-md-8"><label class="form-label-arena" for="tournamentName">Name</label><input class="form-control-arena" id="tournamentName" maxlength="150" required /></div>
+                    <div class="col-md-4"><label class="form-label-arena" for="tournamentFormat">Format</label><select class="form-control-arena" id="tournamentFormat"><option value="league">League</option><option value="round_robin">Round Robin</option><option value="knockout">Knockout</option><option value="swiss">Swiss</option><option value="groups">Groups</option></select></div>
+                    <div class="col-12"><label class="form-label-arena" for="tournamentDescription">Description</label><textarea class="form-control-arena" id="tournamentDescription" rows="3" maxlength="5000"></textarea></div>
+                    <div class="col-md-3"><label class="form-label-arena" for="tournamentCapacity">Max entrants</label><input class="form-control-arena" id="tournamentCapacity" type="number" min="2" required /></div>
+                    <div class="col-md-3"><label class="form-label-arena" for="tournamentEntryFee">Entry fee (TZS)</label><input class="form-control-arena" id="tournamentEntryFee" type="number" min="0" step="1" value="0" /></div>
+                    <div class="col-md-3"><label class="form-label-arena" for="tournamentPrizePool">Prize pool (TZS)</label><input class="form-control-arena" id="tournamentPrizePool" type="number" min="0" step="1" value="0" /></div>
+                    <div class="col-md-3"><label class="form-label-arena" for="tournamentStatus">Status</label><select class="form-control-arena" id="tournamentStatus"><option value="draft">Draft</option><option value="registration_open">Registration Open</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
+                    <div class="col-md-4"><label class="form-label-arena" for="tournamentDeadline">Registration deadline</label><input class="form-control-arena" id="tournamentDeadline" type="datetime-local" /></div>
+                    <div class="col-md-4"><label class="form-label-arena" for="tournamentStart">Start date</label><input class="form-control-arena" id="tournamentStart" type="datetime-local" /></div>
+                    <div class="col-md-4"><label class="form-label-arena" for="tournamentEnd">End date</label><input class="form-control-arena" id="tournamentEnd" type="datetime-local" /></div>
+                  </div>
+                  <div class="d-none mt-3" id="tournamentFormError" role="alert"></div>
+                  <button type="submit" class="btn-arena btn-arena--primary w-100 mt-3" id="saveTournamentButton">Save Tournament</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="resultScreenshotModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-card border-0 p-2">
+              <div class="modal-header border-0">
+                <h5 class="modal-title">Match screenshot</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body text-center">
+                <img id="resultScreenshotPreview" class="img-fluid rounded" alt="Player-submitted match result screenshot" style="max-height:70vh; object-fit:contain;" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/form-utils.js"></script>
+  <script>
+    function renderQueueEmpty(message) {
+      return `<div class="text-secondary-arena text-sm py-3">${message}</div>`;
+    }
+
+    function formatAdminDate(value) {
+      if (!value) return 'Date unavailable';
+      return new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function renderAdminOverview(overview) {
+      document.getElementById('activeTournamentCount').textContent = Number(overview.active_tournaments || 0).toLocaleString();
+      document.getElementById('matchesPlayedCount').textContent = Number(overview.matches_played || 0).toLocaleString();
+      document.getElementById('winsCount').textContent = Number(overview.wins || 0).toLocaleString();
+      document.getElementById('goalsScoredCount').textContent = Number(overview.goals_scored || 0).toLocaleString();
+      document.getElementById('upcomingMatchesCount').textContent = Number(overview.upcoming_matches || 0).toLocaleString();
+
+      const activity = document.getElementById('adminTournamentActivity');
+      const entries = overview.tournament_activity || [];
+      activity.innerHTML = entries.length ? entries.map((entry) => `
+        <div class="admin-activity">
+          <span class="admin-activity__icon"><i class="fa-solid ${entry.status === 'completed' ? 'fa-flag-checkered' : entry.status === 'ongoing' ? 'fa-futbol' : 'fa-door-open'}"></i></span>
+          <div><div class="text-sm">${ui.escapeHtml(entry.name)} · ${ui.escapeHtml(formatTournamentStatus(entry.status))}</div><div class="text-xs text-muted">Updated ${ui.escapeHtml(formatAdminDate(entry.updated_at))}</div></div>
+        </div>`).join('') : renderQueueEmpty('No open, ongoing, or completed tournaments yet.');
+    }
+
+    async function loadAdminOverview() {
+      const activity = document.getElementById('adminTournamentActivity');
+      try {
+        const response = await api.get('/admin/overview');
+        renderAdminOverview(response.data.overview);
+      } catch (error) {
+        activity.innerHTML = renderQueueEmpty('Admin overview is currently unavailable.');
+        ['activeTournamentCount', 'matchesPlayedCount', 'winsCount', 'goalsScoredCount', 'upcomingMatchesCount'].forEach((id) => {
+          document.getElementById(id).textContent = '—';
+        });
+        ui.showToast(error.message || 'Could not load admin overview', 'error');
+      }
+    }
+
+    function renderUsers(users) {
+      const queue = document.getElementById('userQueue');
+      document.getElementById('userCount').textContent = `(${users.length} shown)`;
+      queue.innerHTML = users.length ? users.map((user) => `
+        <div class="admin-queue-row" data-user="${ui.escapeHtml(user.uuid)}" data-username="${ui.escapeHtml(user.username || '')}">
+          <div class="admin-queue-copy"><strong>${ui.escapeHtml(user.full_name || user.username || 'Player')}</strong><span class="text-xs text-muted">@${ui.escapeHtml(user.username || 'unknown')} · ${ui.escapeHtml(user.role || 'player')}${user.is_email_verified === false ? ' · unverified' : ''}</span></div>
+          <div class="admin-queue-actions">
+            <a class="btn-arena btn-arena--ghost btn-arena--sm" href="/pages/profile.html?username=${encodeURIComponent(user.username || '')}" aria-label="View profile"><i class="fa-solid fa-eye"></i></a>
+            <button class="btn-arena btn-arena--danger btn-arena--sm" data-action="delete-user" data-id="${ui.escapeHtml(user.uuid)}" aria-label="Delete user"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>`).join('') : renderQueueEmpty('No users found.');
+    }
+
+    function renderUserPagination(page, hasMore) {
+      const nav = document.getElementById('userPagination');
+      const prevDisabled = page <= 1 ? 'disabled' : '';
+      const nextDisabled = !hasMore ? 'disabled' : '';
+      nav.innerHTML = `
+        <ul class="pagination" style="gap:8px;">
+          <li><button class="btn-arena btn-arena--secondary btn-arena--sm" data-upage="${page - 1}" ${prevDisabled}><i class="fa-solid fa-chevron-left"></i></button></li>
+          <li><span class="btn-arena btn-arena--ghost btn-arena--sm" style="cursor:default;">Page ${page}</span></li>
+          <li><button class="btn-arena btn-arena--secondary btn-arena--sm" data-upage="${page + 1}" ${nextDisabled}><i class="fa-solid fa-chevron-right"></i></button></li>
+        </ul>`;
+      nav.querySelectorAll('button[data-upage]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          userState.page = Number(btn.dataset.upage);
+          loadUsers();
+        });
+      });
+    }
+
+    function renderPayments(payments) {
+      const queue = document.getElementById('paymentQueue');
+      document.getElementById('paymentCount').textContent = payments.length;
+      queue.innerHTML = payments.length ? payments.slice(0, 6).map((payment) => `
+        <div class="admin-queue-row" data-payment="${ui.escapeHtml(payment.uuid)}">
+          <div class="admin-queue-copy"><strong>${ui.escapeHtml(payment.currency || 'TZS')} ${Number(payment.amount || 0).toLocaleString()}</strong><span class="text-xs text-muted">${ui.escapeHtml(payment.method || 'Payment')} · ${ui.escapeHtml(payment.transaction_reference || 'No reference')}</span></div>
+          <div class="admin-queue-actions"><button class="btn-arena btn-arena--success btn-arena--sm" data-action="approve-payment" data-id="${ui.escapeHtml(payment.uuid)}" aria-label="Approve payment"><i class="fa-solid fa-check"></i></button><button class="btn-arena btn-arena--danger btn-arena--sm" data-action="reject-payment" data-id="${ui.escapeHtml(payment.uuid)}" aria-label="Reject payment"><i class="fa-solid fa-xmark"></i></button></div>
+        </div>`).join('') : renderQueueEmpty('No pending payments.');
+    }
+
+    function renderResults(results) {
+      const queue = document.getElementById('resultQueue');
+      document.getElementById('resultCount').textContent = results.length;
+      queue.innerHTML = results.length ? results.slice(0, 6).map((result) => `
+        <div class="admin-queue-row"><div class="admin-queue-copy"><strong>${ui.escapeHtml(result.home_name)} ${Number(result.claimed_home_score)} - ${Number(result.claimed_away_score)} ${ui.escapeHtml(result.away_name)}</strong><span class="text-xs text-muted">${ui.escapeHtml(result.tournament_name)} · ${ui.escapeHtml(result.round || 'Match')} · submitted by @${ui.escapeHtml(result.submitted_by_username)}</span><span class="text-xs text-muted">OCR confidence: ${Math.round(Number(result.ocr_confidence || 0))}%</span><button type="button" class="btn-arena btn-arena--secondary btn-arena--sm mt-2" data-action="view-result-screenshot" data-screenshot="${ui.escapeHtml(result.screenshot_url)}"><i class="fa-solid fa-image"></i> Review screenshot</button></div><div class="admin-queue-actions"><button class="btn-arena btn-arena--success btn-arena--sm" data-action="approve-result" data-id="${ui.escapeHtml(result.uuid)}" aria-label="Approve result"><i class="fa-solid fa-check"></i></button><button class="btn-arena btn-arena--danger btn-arena--sm" data-action="reject-result" data-id="${ui.escapeHtml(result.uuid)}" aria-label="Reject result"><i class="fa-solid fa-xmark"></i></button></div></div>`).join('') : renderQueueEmpty('No submitted results waiting for review.');
+    }
+
+    const USER_LIMIT = 8;
+    const userState = { page: 1, search: '' };
+    let adminTournaments = [];
+
+    function formatTournamentStatus(status) {
+      const labels = { registration_open: 'Registration Open', ongoing: 'Ongoing', completed: 'Completed', cancelled: 'Cancelled', draft: 'Draft' };
+      return labels[status] || status;
+    }
+
+    function dateTimeInputValue(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 16);
+    }
+
+    function renderAdminTournaments(tournaments) {
+      const rows = document.getElementById('adminTournamentRows');
+      adminTournaments = tournaments;
+      rows.innerHTML = tournaments.length ? tournaments.map((tournament) => `
+        <tr>
+          <td><a href="/pages/tournament-detail.html?id=${encodeURIComponent(tournament.uuid)}">${ui.escapeHtml(tournament.name)}</a></td>
+          <td>${ui.escapeHtml(String(tournament.format || '').replace(/_/g, ' '))}</td>
+          <td>${ui.escapeHtml(formatTournamentStatus(tournament.status))}</td>
+          <td>${Number(tournament.approved_count || 0)} / ${ui.escapeHtml(tournament.max_participants || '∞')}</td>
+          <td><div class="admin-queue-actions"><button class="btn-arena btn-arena--secondary btn-arena--sm" data-action="edit-tournament" data-id="${ui.escapeHtml(tournament.uuid)}" aria-label="Edit tournament"><i class="fa-solid fa-pen"></i></button><button class="btn-arena btn-arena--danger btn-arena--sm" data-action="delete-tournament" data-id="${ui.escapeHtml(tournament.uuid)}" aria-label="Delete tournament"><i class="fa-solid fa-trash"></i></button></div></td>
+        </tr>`).join('') : '<tr><td colspan="5" class="text-secondary-arena">No tournaments have been created.</td></tr>';
+    }
+
+    async function loadAdminTournaments() {
+      const rows = document.getElementById('adminTournamentRows');
+      try {
+        const response = await api.get('/tournament?limit=100');
+        renderAdminTournaments(response.data.tournaments || []);
+      } catch (error) {
+        rows.innerHTML = `<tr><td colspan="5" class="text-secondary-arena">${ui.escapeHtml(error.message || 'Could not load tournaments.')}</td></tr>`;
+      }
+    }
+
+    function openTournamentEditor(tournament = null) {
+      const form = document.getElementById('tournamentForm');
+      form.reset();
+      document.getElementById('tournamentFormError').classList.add('d-none');
+      document.getElementById('tournamentModalTitle').textContent = tournament ? 'Update Tournament' : 'Create Tournament';
+      document.getElementById('tournamentUuid').value = tournament?.uuid || '';
+      document.getElementById('tournamentName').value = tournament?.name || '';
+      document.getElementById('tournamentDescription').value = tournament?.description || '';
+      document.getElementById('tournamentFormat').value = tournament?.format || 'league';
+      document.getElementById('tournamentCapacity').value = tournament?.max_participants || 16;
+      document.getElementById('tournamentEntryFee').value = Number(tournament?.entry_fee || 0);
+      document.getElementById('tournamentPrizePool').value = Number(tournament?.prize_pool || 0);
+      document.getElementById('tournamentStatus').value = tournament?.status || 'draft';
+      document.getElementById('tournamentDeadline').value = dateTimeInputValue(tournament?.registration_deadline);
+      document.getElementById('tournamentStart').value = dateTimeInputValue(tournament?.start_date);
+      document.getElementById('tournamentEnd').value = dateTimeInputValue(tournament?.end_date);
+      (bootstrap.Modal.getInstance(document.getElementById('tournamentModal')) || new bootstrap.Modal(document.getElementById('tournamentModal'))).show();
+    }
+
+    document.getElementById('tournamentForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = document.getElementById('saveTournamentButton');
+      const errorBox = document.getElementById('tournamentFormError');
+      const uuid = document.getElementById('tournamentUuid').value;
+      const value = (id) => document.getElementById(id).value;
+      const dateValue = (id) => value(id) ? new Date(value(id)).toISOString() : null;
+      const payload = {
+        name: value('tournamentName').trim(),
+        description: value('tournamentDescription').trim(),
+        format: value('tournamentFormat'),
+        maxParticipants: Number(value('tournamentCapacity')),
+        entryFee: Number(value('tournamentEntryFee') || 0),
+        prizePool: Number(value('tournamentPrizePool') || 0),
+        status: value('tournamentStatus'),
+        registrationDeadline: dateValue('tournamentDeadline'),
+        startDate: dateValue('tournamentStart'),
+        endDate: dateValue('tournamentEnd'),
+      };
+      if (!payload.name || payload.maxParticipants < 2) {
+        errorBox.textContent = 'Enter a tournament name and capacity of at least two.';
+        errorBox.classList.remove('d-none');
+        return;
+      }
+
+      button.disabled = true;
+      errorBox.classList.add('d-none');
+      try {
+        if (uuid) {
+          await api.patch(`/tournament/${encodeURIComponent(uuid)}`, payload);
+        } else {
+          await api.post('/tournament', payload);
+        }
+        bootstrap.Modal.getInstance(document.getElementById('tournamentModal')).hide();
+        await Promise.all([loadAdminTournaments(), loadAdminOverview()]);
+        ui.showToast(uuid ? 'Tournament updated' : 'Tournament created', 'success');
+      } catch (error) {
+        errorBox.textContent = error.message || 'Could not save tournament.';
+        errorBox.classList.remove('d-none');
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    async function loadUsers() {
+      const queue = document.getElementById('userQueue');
+      ui.renderSkeleton(queue, 4, 'skeleton-arena');
+      try {
+        const params = new URLSearchParams({ page: userState.page, limit: USER_LIMIT });
+        if (userState.search) params.set('search', userState.search);
+        const res = await api.get(`/admin/users?${params.toString()}`);
+        const users = res.data.players || [];
+        renderUsers(users);
+        renderUserPagination(userState.page, users.length === USER_LIMIT);
+      } catch (err) {
+        queue.innerHTML = renderQueueEmpty(err.message || 'Could not load users.');
+      }
+    }
+
+    async function loadAdminQueues() {
+      const [paymentsResponse, resultsResponse] = await Promise.all([
+        api.get('/payment?page=1&limit=20&status=pending'),
+        api.get('/result/pending?page=1&limit=20'),
+      ]);
+      renderPayments(paymentsResponse.data.payments || []);
+      renderResults(resultsResponse.data.results || []);
+      await loadUsers();
+    }
+
+    document.addEventListener('click', async (event) => {
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+
+      if (button.dataset.action === 'view-result-screenshot') {
+        const preview = document.getElementById('resultScreenshotPreview');
+        preview.src = button.dataset.screenshot;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('resultScreenshotModal')).show();
+        return;
+      }
+
+      if (button.dataset.action === 'edit-tournament') {
+        const tournament = adminTournaments.find((item) => item.uuid === button.dataset.id);
+        if (tournament) openTournamentEditor(tournament);
+        return;
+      }
+
+      if (button.dataset.action === 'delete-tournament') {
+        const tournament = adminTournaments.find((item) => item.uuid === button.dataset.id);
+        if (!tournament) return;
+        const confirmed = await ui.showModal({
+          title: 'Delete tournament?',
+          message: `Permanently delete <strong>${ui.escapeHtml(tournament.name)}</strong>, including its fixtures and registrations?`,
+          confirmText: 'Delete tournament',
+          cancelText: 'Cancel',
+        });
+        if (!confirmed) return;
+        button.disabled = true;
+        try {
+          await api.delete(`/tournament/${encodeURIComponent(tournament.uuid)}`);
+          await Promise.all([loadAdminTournaments(), loadAdminOverview()]);
+          ui.showToast('Tournament deleted', 'success');
+        } catch (error) {
+          button.disabled = false;
+          ui.showToast(error.message || 'Could not delete tournament', 'error');
+        }
+        return;
+      }
+
+      // Permanent user deletion — confirm first, then hard-delete.
+      if (button.dataset.action === 'delete-user') {
+        const row = button.closest('[data-user]');
+        const username = row ? row.dataset.username : 'this user';
+        const confirmed = await ui.showModal({
+          title: 'Delete user permanently?',
+          message: `This will permanently remove <strong>${ui.escapeHtml(username)}</strong> and all their data from the database. This cannot be undone.`,
+          confirmText: 'Delete permanently',
+          cancelText: 'Cancel',
+        });
+        if (!confirmed) return;
+        button.disabled = true;
+        try {
+          await api.delete(`/admin/users/${button.dataset.id}`);
+          ui.showToast('User deleted permanently', 'success');
+          // If we're on a page beyond the first and just emptied it, step back.
+          await loadUsers();
+        } catch (err) {
+          ui.showToast(err.message || 'Could not delete user', 'error');
+          button.disabled = false;
+        }
+        return;
+      }
+
+      button.disabled = true;
+      try {
+        const action = button.dataset.action;
+        const endpoint = action === 'approve-payment' ? `/payment/${button.dataset.id}/approve`
+          : action === 'reject-payment' ? `/payment/${button.dataset.id}/reject`
+          : action === 'approve-result' ? `/result/${button.dataset.id}/approve`
+          : `/result/${button.dataset.id}/reject`;
+        await api.patch(endpoint, {});
+        await loadAdminQueues();
+        ui.showToast('Review action completed', 'success');
+      } catch (err) {
+        button.disabled = false;
+        ui.showToast(err.message || 'Review action failed', 'error');
+      }
+    });
+
+    // --- Add User modal wiring ---
+    function setAddUserLoading(isLoading) {
+      const btn = document.getElementById('addUserSubmit');
+      const spinner = document.getElementById('addUserSpinner');
+      const label = btn.querySelector('span:not(.spinner-arena)');
+      btn.disabled = isLoading;
+      if (isLoading) {
+        if (!btn.dataset.originalText) btn.dataset.originalText = label.textContent;
+        label.textContent = 'Creating...';
+        spinner.classList.remove('d-none');
+      } else {
+        label.textContent = btn.dataset.originalText || 'Create User';
+        spinner.classList.add('d-none');
+      }
+    }
+
+    document.getElementById('addUserForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      clearFormErrors(this);
+      const formError = document.getElementById('addUserError');
+      formError.classList.add('d-none');
+
+      const fullName = document.getElementById('newFullName').value.trim();
+      const username = document.getElementById('newUsername').value.trim();
+      const email = document.getElementById('newEmail').value.trim();
+      const gamerTag = document.getElementById('newGamerTag').value.trim();
+      const role = document.getElementById('newRole').value;
+      const password = document.getElementById('newPassword').value;
+
+      let hasError = false;
+      if (!fullName) { showFieldError('newFullName', 'Full name is required'); hasError = true; }
+      if (!/^[a-zA-Z0-9_]{3,50}$/.test(username)) { showFieldError('newUsername', 'Letters, numbers, underscores (3-50 chars)'); hasError = true; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError('newEmail', 'Enter a valid email'); hasError = true; }
+      if (password.length < 8 || !/\d/.test(password)) { showFieldError('newPassword', 'Min 8 characters, must include a number'); hasError = true; }
+      if (hasError) return;
+
+      setAddUserLoading(true);
+      try {
+        await api.post('/admin/users', { fullName, username, email, gamerTag, role, password });
+        ui.showToast('User created successfully', 'success');
+        this.reset();
+        const modalEl = document.getElementById('addUserModal');
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.hide();
+        userState.page = 1;
+        await loadUsers();
+      } catch (err) {
+        ui.handleApiFormError(err, this);
+        formError.textContent = err.message || 'Could not create user.';
+        formError.classList.remove('d-none');
+      } finally {
+        setAddUserLoading(false);
+      }
+    });
+
+    // Debounced search
+    let searchTimer = null;
+    document.getElementById('userSearch').addEventListener('input', (e) => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        userState.search = e.target.value.trim();
+        userState.page = 1;
+        loadUsers();
+      }, 350);
+    });
+
+    document.addEventListener('arena:includes-loaded', async () => {
+      if (!auth.requireAuth('/pages/admin-dashboard.html')) return;
+      const user = auth.getUser() || await auth.fetchCurrentUser();
+      if (!user || user.role !== 'admin') {
+        window.location.replace('/pages/dashboard.html');
+        return;
+      }
+      document.querySelectorAll('[data-nav]').forEach((link) => {
+        if (link.dataset.nav === 'admin') link.classList.add('active');
+      });
+      document.getElementById('openAddUserBtn').addEventListener('click', () => {
+        const modalEl = document.getElementById('addUserModal');
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+      });
+      document.getElementById('openTournamentModal').addEventListener('click', () => openTournamentEditor());
+      await auth.updateAuthUI();
+      try {
+        await loadAdminQueues();
+        await Promise.all([loadAdminOverview(), loadAdminTournaments()]);
+      } catch (err) {
+        ui.showToast(err.message || 'Could not load admin queues', 'error');
+      }
+    });
+  </script>
+</body>
+</html>

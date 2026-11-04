@@ -17,7 +17,17 @@
   let refreshPromise = null;
 
   function getTokenStorage() {
-    return localStorage.getItem(config.TOKEN_STORAGE_KEY) === 'session' ? sessionStorage : localStorage;
+    // The storage marker can live in EITHER store depending on the
+    // "remember me" choice, so we must check both. Previously we only
+    // looked in localStorage, which meant a session-stored token (remember
+    // me OFF, the default) was invisible right after login — the dashboard
+    // couldn't find the token and bounced the user back to the login page.
+    if (sessionStorage.getItem(config.TOKEN_STORAGE_KEY) === 'session') return sessionStorage;
+    if (localStorage.getItem(config.TOKEN_STORAGE_KEY) === 'local') return localStorage;
+    // Fallback: prefer whichever store actually holds an access token.
+    if (localStorage.getItem(config.ACCESS_TOKEN_KEY)) return localStorage;
+    if (sessionStorage.getItem(config.ACCESS_TOKEN_KEY)) return sessionStorage;
+    return localStorage;
   }
 
   function getAccessToken() {
@@ -187,6 +197,7 @@
     get: (endpoint, options) => request('GET', endpoint, null, options),
     post: (endpoint, body, options) => request('POST', endpoint, body, options),
     put: (endpoint, body, options) => request('PUT', endpoint, body, options),
+    patch: (endpoint, body, options) => request('PATCH', endpoint, body, options),
     delete: (endpoint, options) => request('DELETE', endpoint, null, options),
     upload: (endpoint, formData, options) => request('POST', endpoint, formData, options),
     setTokens,

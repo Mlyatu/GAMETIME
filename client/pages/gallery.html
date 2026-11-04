@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — EFootball Arena</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <link rel="stylesheet" href="/assets/css/marketing.css" />
+
+  <style>
+    .gallery-item { overflow: hidden; }
+    .gallery-thumb {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+      background: var(--bg-elevated);
+      transition: transform var(--transition-base);
+    }
+    .gallery-item:hover .gallery-thumb { transform: scale(1.04); }
+    .gallery-caption { color: var(--text-secondary); font-size: var(--text-sm); }
+  </style>
+</head>
+<body>
+
+  <div data-include="/components/public-navbar.html"></div>
+
+  <section class="hero-arena hero-arena--compact text-center">
+    <div class="container-arena hero-content">
+      <span class="hero-eyebrow"><i class="fa-solid fa-images"></i> Media Gallery</span>
+      <h1 class="mt-4">Moments from the <span class="glow-text-primary">Arena</span></h1>
+      <p class="text-secondary-arena mx-auto" style="max-width:560px;">Posters, banners, and highlights from tournaments across the platform.</p>
+    </div>
+  </section>
+
+  <section class="container-arena py-5">
+    <div class="row g-4" id="galleryGrid"></div>
+    <nav class="d-flex justify-content-center mt-5" id="galleryPagination"></nav>
+  </section>
+
+  <div data-include="/components/footer.html"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/particles-config.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script>
+    (function () {
+      var grid = document.getElementById('galleryGrid');
+      var pagination = document.getElementById('galleryPagination');
+      var LIMIT = 12;
+      var state = { page: 1 };
+
+      function isVideo(url) {
+        return /\.(mp4|webm|ogg|mov)$/i.test(url || '');
+      }
+
+      function render(media) {
+        if (!media.length) {
+          ui.renderEmpty(grid, 'No media has been uploaded yet. Check back soon!');
+          pagination.innerHTML = '';
+          return;
+        }
+        grid.innerHTML = media.map(function (m) {
+          var visual = isVideo(m.file_url)
+            ? '<video class="gallery-thumb" controls preload="metadata" src="' + ui.escapeHtml(m.file_url) + '"></video>'
+            : '<img class="gallery-thumb" loading="lazy" src="' + ui.escapeHtml(m.file_url) + '" alt="' + ui.escapeHtml(m.caption || 'Arena media') + '" />';
+          var type = '<span class="badge-arena badge-arena--neutral text-capitalize">' + ui.escapeHtml(m.type || 'media') + '</span>';
+          var caption = m.caption ? '<p class="gallery-caption mb-1">' + ui.escapeHtml(m.caption) + '</p>' : '';
+          var meta = m.tournament_name
+            ? '<span class="text-xs text-muted"><i class="fa-solid fa-trophy"></i> ' + ui.escapeHtml(m.tournament_name) + '</span>'
+            : '<span class="text-xs text-muted">by ' + ui.escapeHtml(m.uploaded_by_username || 'Arena') + '</span>';
+          return '<div class="col-6 col-md-4 col-lg-3">' +
+            '<div class="glass-card glass-card--interactive gallery-item h-100">' + visual +
+            '<div class="p-3 d-flex flex-column gap-2">' + type + caption +
+            '<div class="d-flex justify-content-between align-items-center gap-2">' + meta + '</div>' +
+            '</div></div></div>';
+        }).join('');
+      }
+
+      function renderPagination(page, hasMore) {
+        var prevDisabled = page <= 1 ? 'disabled' : '';
+        var nextDisabled = !hasMore ? 'disabled' : '';
+        pagination.innerHTML =
+          '<ul class="pagination" style="gap:8px;">' +
+            '<li><button class="btn-arena btn-arena--secondary btn-arena--sm" data-page="' + (page - 1) + '" ' + prevDisabled + '><i class="fa-solid fa-chevron-left"></i></button></li>' +
+            '<li><span class="btn-arena btn-arena--ghost btn-arena--sm" style="cursor:default;">Page ' + page + '</span></li>' +
+            '<li><button class="btn-arena btn-arena--secondary btn-arena--sm" data-page="' + (page + 1) + '" ' + nextDisabled + '><i class="fa-solid fa-chevron-right"></i></button></li>' +
+          '</ul>';
+        pagination.querySelectorAll('button[data-page]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            if (btn.disabled) return;
+            state.page = Number(btn.dataset.page);
+            loadMedia();
+          });
+        });
+      }
+
+      async function loadMedia() {
+        ui.renderSkeleton(grid, 6, 'skeleton-arena');
+        try {
+          var params = new URLSearchParams({ page: state.page, limit: LIMIT });
+          var data = await api.get('/media?' + params.toString());
+          var media = data.data.media || [];
+          render(media);
+          renderPagination(state.page, media.length === LIMIT);
+        } catch (err) {
+          ui.renderEmpty(grid, err.message || 'Could not load the gallery.', '<button class="btn-arena btn-arena--secondary btn-arena--sm" onclick="location.reload()">Retry</button>');
+        }
+      }
+
+      loadMedia();
+    })();
+  </script>
+</body>
+</html>

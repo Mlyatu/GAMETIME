@@ -13,9 +13,32 @@ const PROFILE_SELECT = `
   SELECT
     u.uuid, u.full_name, u.username, u.email, u.avatar_url, u.status, u.created_at,
     p.gamer_tag, p.platform, p.country, p.bio,
-    p.total_matches, p.wins, p.draws, p.losses, p.goals_scored, p.goals_conceded
+    COALESCE(stats.total_matches, 0)::int AS total_matches,
+    COALESCE(stats.wins, 0)::int AS wins,
+    COALESCE(stats.draws, 0)::int AS draws,
+    COALESCE(stats.losses, 0)::int AS losses,
+    COALESCE(stats.goals_scored, 0)::int AS goals_scored,
+    COALESCE(stats.goals_conceded, 0)::int AS goals_conceded
   FROM users u
   JOIN player_profiles p ON p.user_id = u.id
+  LEFT JOIN LATERAL (
+    SELECT COUNT(*) AS total_matches,
+           COUNT(*) FILTER (WHERE (m.home_participant_id = tp.id AND m.home_score > m.away_score)
+                          OR (m.away_participant_id = tp.id AND m.away_score > m.home_score)) AS wins,
+           COUNT(*) FILTER (WHERE m.home_score = m.away_score) AS draws,
+           COUNT(*) FILTER (WHERE (m.home_participant_id = tp.id AND m.home_score < m.away_score)
+                          OR (m.away_participant_id = tp.id AND m.away_score < m.home_score)) AS losses,
+           COALESCE(SUM(CASE WHEN m.home_participant_id = tp.id THEN m.home_score ELSE m.away_score END), 0) AS goals_scored,
+           COALESCE(SUM(CASE WHEN m.home_participant_id = tp.id THEN m.away_score ELSE m.home_score END), 0) AS goals_conceded
+    FROM tournament_participants tp
+    JOIN matches m ON (m.home_participant_id = tp.id OR m.away_participant_id = tp.id)
+    WHERE (tp.user_id = u.id OR tp.team_id IN (
+      SELECT tm.team_id FROM team_members tm WHERE tm.user_id = u.id
+      UNION
+      SELECT t.id FROM teams t WHERE t.captain_id = u.id
+    )) AND m.status = 'completed'
+      AND m.home_participant_id IS NOT NULL AND m.away_participant_id IS NOT NULL
+  ) stats ON TRUE
 `;
 
 /** Full profile (including email) — only for the player viewing their own data. */

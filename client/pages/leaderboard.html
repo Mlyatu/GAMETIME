@@ -44,79 +44,27 @@
 
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
           <div>
-            <h1 class="mb-1">Leaderboard</h1>
-            <p class="text-secondary-arena mb-0">Top-ranked players across all tournaments this season.</p>
+            <h1 class="mb-1">Tournament Leaderboard</h1>
+            <p class="text-secondary-arena mb-0">Rankings from confirmed match results.</p>
           </div>
-          <select class="form-control-arena py-2" style="width:auto;">
-            <option>Season 4 (Current)</option>
-            <option>Season 3</option>
-            <option>All Time</option>
+          <select class="form-control-arena py-2" id="leaderboardTournament" style="width:auto;" aria-label="Choose a tournament">
+            <option value="">Loading tournaments...</option>
           </select>
         </div>
 
-        <!-- TODO (Step 13): replace with real aggregated ranking data (e.g. from a dedicated leaderboard endpoint or aggregated standings) -->
-
         <!-- PODIUM -->
-        <div class="podium">
-          <div class="glass-card podium-card podium-card--second">
-            <div class="podium-rank" style="background:rgba(200,200,200,.2); color:#c8c8c8;">2</div>
-            <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena mb-2" width="56" height="56" alt="" />
-            <h6 class="mb-0">MidfieldMaestro</h6>
-            <p class="text-xs text-muted mb-0">312 pts</p>
-          </div>
-          <div class="glass-card podium-card podium-card--first glow-primary">
-            <div class="podium-rank" style="background:rgba(255,200,87,.25); color:var(--color-warning);"><i class="fa-solid fa-crown"></i></div>
-            <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena mb-2" width="72" height="72" alt="" />
-            <h5 class="mb-0">StrikerX</h5>
-            <p class="text-xs text-muted mb-0">348 pts</p>
-          </div>
-          <div class="glass-card podium-card podium-card--third">
-            <div class="podium-rank" style="background:rgba(205,127,50,.2); color:#cd7f32;">3</div>
-            <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena mb-2" width="56" height="56" alt="" />
-            <h6 class="mb-0">GoalMachine</h6>
-            <p class="text-xs text-muted mb-0">289 pts</p>
-          </div>
-        </div>
+        <div class="podium" id="leaderboardPodium"></div>
 
         <!-- FULL TABLE -->
         <div class="glass-card p-2">
+          <div class="table-responsive-arena">
           <table class="table-arena">
             <thead>
-              <tr><th>Rank</th><th>Player</th><th>Tournaments</th><th>W</th><th>D</th><th>L</th><th>Win Rate</th><th>Points</th></tr>
+              <tr><th>Rank</th><th>Player / Team</th><th>Played</th><th>W</th><th>D</th><th>L</th><th>Win Rate</th><th>Points</th></tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="rank-cell top3">1</td>
-                <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> StrikerX</td>
-                <td>6</td><td>28</td><td>4</td><td>3</td><td>80%</td><td><strong>348</strong></td>
-              </tr>
-              <tr>
-                <td class="rank-cell top3">2</td>
-                <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> MidfieldMaestro</td>
-                <td>5</td><td>24</td><td>6</td><td>4</td><td>71%</td><td><strong>312</strong></td>
-              </tr>
-              <tr>
-                <td class="rank-cell top3">3</td>
-                <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> GoalMachine</td>
-                <td>5</td><td>21</td><td>5</td><td>6</td><td>66%</td><td><strong>289</strong></td>
-              </tr>
-              <tr>
-                <td class="rank-cell">4</td>
-                <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> DefenderD</td>
-                <td>4</td><td>17</td><td>3</td><td>6</td><td>65%</td><td><strong>254</strong></td>
-              </tr>
-              <tr>
-                <td class="rank-cell">5</td>
-                <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> WingerW</td>
-                <td>4</td><td>15</td><td>4</td><td>7</td><td>58%</td><td><strong>229</strong></td>
-              </tr>
-              <tr style="background:rgba(var(--color-primary-rgb),.06);">
-                <td class="rank-cell">7</td>
-                <td class="d-flex align-items-center gap-2"><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="28" height="28" alt="" /> You</td>
-                <td>3</td><td>11</td><td>2</td><td>5</td><td>61%</td><td><strong>187</strong></td>
-              </tr>
-            </tbody>
+            <tbody id="leaderboardRows"><tr><td colspan="8" class="text-secondary-arena">Choose a tournament to view standings.</td></tr></tbody>
           </table>
+          </div>
         </div>
 
       </main>
@@ -125,10 +73,79 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
   <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/ui.js"></script>
   <script>
+    const tournamentSelect = document.getElementById('leaderboardTournament');
+    const leaderboardRows = document.getElementById('leaderboardRows');
+    const leaderboardPodium = document.getElementById('leaderboardPodium');
+
+    async function loadStandings(tournamentUuid) {
+      if (!tournamentUuid) {
+        leaderboardRows.innerHTML = '<tr><td colspan="8" class="text-secondary-arena">No tournament selected.</td></tr>';
+        leaderboardPodium.innerHTML = '';
+        return;
+      }
+      leaderboardRows.innerHTML = '<tr><td colspan="8" class="text-secondary-arena">Loading standings...</td></tr>';
+      try {
+        const response = await api.get(`/tournament/${encodeURIComponent(tournamentUuid)}/standings`);
+        const standings = response.data.standings || [];
+        if (!standings.length) {
+          leaderboardRows.innerHTML = '<tr><td colspan="8" class="text-secondary-arena">Standings will appear after match results are recorded.</td></tr>';
+          leaderboardPodium.innerHTML = '';
+          return;
+        }
+
+        leaderboardRows.innerHTML = standings.map((row) => {
+          const played = Number(row.played || 0);
+          const winRate = played ? `${Math.round((Number(row.won || 0) / played) * 100)}%` : '0%';
+          const name = row.player_username || row.team_name || 'Unknown entrant';
+          return `<tr>
+            <td class="rank-cell${Number(row.rank) <= 3 ? ' top3' : ''}">${Number(row.rank)}</td>
+            <td>${ui.escapeHtml(name)}</td>
+            <td>${played}</td><td>${Number(row.won || 0)}</td><td>${Number(row.drawn || 0)}</td><td>${Number(row.lost || 0)}</td>
+            <td>${winRate}</td><td><strong>${Number(row.points || 0)}</strong></td>
+          </tr>`;
+        }).join('');
+
+        const podium = standings.slice(0, 3);
+        leaderboardPodium.innerHTML = podium.map((row, index) => {
+          const rank = Number(row.rank);
+          const place = rank === 1 ? 'first' : rank === 2 ? 'second' : 'third';
+          const rankContent = rank === 1 ? '<i class="fa-solid fa-crown"></i>' : rank;
+          return `<div class="glass-card podium-card podium-card--${place}${rank === 1 ? ' glow-primary' : ''}">
+            <div class="podium-rank">${rankContent}</div>
+            <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena mb-2" width="${rank === 1 ? 72 : 56}" height="${rank === 1 ? 72 : 56}" alt="" />
+            <h6 class="mb-0">${ui.escapeHtml(row.player_username || row.team_name || 'Unknown entrant')}</h6>
+            <p class="text-xs text-muted mb-0">${Number(row.points || 0)} pts</p>
+          </div>`;
+        }).join('');
+      } catch (error) {
+        leaderboardRows.innerHTML = `<tr><td colspan="8" class="text-secondary-arena">${ui.escapeHtml(error.message || 'Standings could not be loaded.')}</td></tr>`;
+        leaderboardPodium.innerHTML = '';
+      }
+    }
+
+    tournamentSelect.addEventListener('change', () => loadStandings(tournamentSelect.value));
+
     document.addEventListener('arena:includes-loaded', () => {
       document.querySelectorAll('[data-nav]').forEach((link) => {
         if (link.dataset.nav === 'leaderboard') link.classList.add('active');
+      });
+      api.get('/tournament?limit=100').then((response) => {
+        const tournaments = response.data.tournaments || [];
+        if (!tournaments.length) {
+          tournamentSelect.innerHTML = '<option value="">No tournaments available</option>';
+          leaderboardRows.innerHTML = '<tr><td colspan="8" class="text-secondary-arena">No tournament standings are available yet.</td></tr>';
+          return;
+        }
+        tournamentSelect.innerHTML = tournaments.map((tournament) => `<option value="${ui.escapeHtml(tournament.uuid)}">${ui.escapeHtml(tournament.name)} · ${ui.escapeHtml(tournament.status)}</option>`).join('');
+        loadStandings(tournamentSelect.value);
+      }).catch((error) => {
+        tournamentSelect.innerHTML = '<option value="">Unable to load tournaments</option>';
+        leaderboardRows.innerHTML = `<tr><td colspan="8" class="text-secondary-arena">${ui.escapeHtml(error.message || 'Tournament list could not be loaded.')}</td></tr>`;
       });
     });
   </script>

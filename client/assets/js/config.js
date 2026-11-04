@@ -18,6 +18,7 @@
     REFRESH_TOKEN_KEY: 'arena_refresh_token',
     USER_KEY: 'arena_user',
     TOKEN_STORAGE_KEY: 'arena_token_storage',
+    HOME_REDIRECT: '/index.html',
     AUTH_REDIRECT: '/pages/login.html',
     DEFAULT_PROTECTED_REDIRECT: '/pages/dashboard.html',
     PUBLIC_PAGES: [

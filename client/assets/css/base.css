@@ -21,9 +21,13 @@ body {
   line-height: 1.6;
   color: var(--text-primary);
   background:
-    radial-gradient(circle at 15% 0%, rgba(var(--color-primary-rgb), 0.16), transparent 45%),
-    radial-gradient(circle at 85% 20%, rgba(var(--color-secondary-rgb), 0.12), transparent 40%),
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
+    radial-gradient(circle at 8% -10%, rgba(var(--color-primary-rgb), 0.20), transparent 36%),
+    radial-gradient(circle at 92% 12%, rgba(var(--color-secondary-rgb), 0.10), transparent 32%),
+    radial-gradient(circle at 52% 105%, rgba(var(--color-primary-rgb), 0.08), transparent 30%),
     var(--bg-deepest);
+  background-size: 44px 44px, 44px 44px, auto, auto, auto;
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
 }
@@ -40,7 +44,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 1.2;
   margin: 0 0 0.5em;
   color: var(--text-primary);
@@ -89,4 +93,9 @@ small, .text-sm { font-size: var(--text-sm); }
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: 0 24px;
+}
+
+::selection {
+  color: #06111f;
+  background: var(--color-secondary);
 }

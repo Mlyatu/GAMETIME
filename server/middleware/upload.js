@@ -11,6 +11,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const { getUploadDirectory } = require('../config/storage');
 
 const MAX_SIZE_BYTES = (Number(process.env.UPLOAD_MAX_SIZE_MB) || 10) * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -24,7 +25,7 @@ function ensureDir(dir) {
 }
 
 function makeUploader(subfolder, allowedTypes, maxSizeBytes) {
-  const destination = path.join(__dirname, '..', 'uploads', subfolder);
+  const destination = path.join(getUploadDirectory(), subfolder);
   ensureDir(destination);
 
   const storage = multer.diskStorage({

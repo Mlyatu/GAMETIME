@@ -9,16 +9,19 @@
 
 const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const userModel = require('../models/user.model');
 const authTokenModel = require('../models/authToken.model');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { generateRawToken, hashToken } = require('../utils/token');
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require('../utils/jwt');
-const { sendVerificationEmail, sendPasswordResetEmail } = require('../services/email.service');
+const { sendVerificationEmail, sendPasswordResetEmail, emailEnabled } = require('../services/email.service');
 
 const EMAIL_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;      // 1 hour
+const googleStates = new Map();
+const isDev = (process.env.NODE_ENV || 'development') !== 'production';
 
 /** Shape returned to the client for a logged-in/registered user — never includes password_hash. */
 function toPublicUser(user) {
@@ -30,6 +33,117 @@ function toPublicUser(user) {
     role: user.role,
     isEmailVerified: user.is_email_verified,
   };
+}
+
+function getAppUrl() {
+  return process.env.APP_URL || (process.env.CLIENT_URL || '').split(',')[0].trim() || 'http://localhost:5000';
+}
+
+function googleConfigured() {
+  return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+}
+
+function googleRedirectUri() {
+  return process.env.GOOGLE_REDIRECT_URI || `${getAppUrl()}/api/auth/google/callback`;
+}
+
+function createGoogleUsername(email) {
+  return email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '_').slice(0, 44) || 'player';
+}
+
+async function startGoogleAuth(req, res) {
+  if (!googleConfigured()) {
+    return res.redirect('/pages/login.html?oauth=not-configured');
+  }
+
+  const state = crypto.randomBytes(24).toString('hex');
+  googleStates.set(state, Date.now() + 10 * 60 * 1000);
+  const params = new URLSearchParams({
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    redirect_uri: googleRedirectUri(),
+    response_type: 'code',
+    scope: 'openid email profile',
+    state,
+    access_type: 'offline',
+    prompt: 'select_account',
+  });
+  return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
+}
+
+async function googleCallback(req, res, next) {
+  try {
+    const { code, state, error } = req.query;
+    if (error || !code || !state || !googleStates.has(state) || googleStates.get(state) < Date.now()) {
+      googleStates.delete(state);
+      return res.redirect('/pages/login.html?oauth=failed');
+    }
+    googleStates.delete(state);
+
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        redirect_uri: googleRedirectUri(),
+        grant_type: 'authorization_code',
+      }),
+    });
+    const tokenData = await tokenResponse.json();
+    if (!tokenResponse.ok || !tokenData.access_token) throw new Error('Google token exchange failed');
+
+    const profileResponse = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    const profile = await profileResponse.json();
+    if (!profileResponse.ok || !profile.email || profile.email_verified !== true) {
+      throw new Error('Google did not provide a verified email address');
+    }
+
+    let user = await userModel.findByEmail(profile.email.toLowerCase());
+    if (!user) {
+      const baseUsername = createGoogleUsername(profile.email);
+      let username = baseUsername;
+      for (let suffix = 1; await userModel.findByUsername(username); suffix += 1) {
+        username = `${baseUsername.slice(0, 49 - String(suffix).length)}${suffix}`;
+      }
+      user = await userModel.createPlayer({
+        uuid: uuidv4(),
+        fullName: profile.name || username,
+        username,
+        email: profile.email.toLowerCase(),
+        passwordHash: await hashPassword(crypto.randomBytes(32).toString('hex')),
+        gamerTag: username.slice(0, 50),
+        isEmailVerified: true,
+      });
+    } else if (!user.is_email_verified) {
+      await userModel.markEmailVerified(user.id);
+      user.is_email_verified = true;
+    }
+
+    if (user.status !== 'active') throw new Error(`Account is ${user.status}`);
+    const accessToken = signAccessToken(user);
+    const refreshToken = signRefreshToken(user);
+    const decodedRefresh = jwt.decode(refreshToken);
+    await authTokenModel.createToken(
+      user.id,
+      hashToken(refreshToken),
+      'refresh',
+      new Date(decodedRefresh.exp * 1000)
+    );
+    await userModel.recordLogin(user.id);
+    const next = encodeURIComponent('/pages/dashboard.html');
+    return res.redirect(`${getAppUrl()}/pages/login.html#google_access_token=${encodeURIComponent(accessToken)}&google_refresh_token=${encodeURIComponent(refreshToken)}&google_next=${next}`);
+  } catch (err) {
+    // Never leak a raw 500 to the browser from an OAuth redirect flow.
+    // Network errors reaching Google, rejected tokens, or misconfigured
+    // credentials all funnel here — send the user back to the login page
+    // with a friendly status the UI already knows how to render.
+    // eslint-disable-next-line no-console
+    console.error('Google OAuth callback failed:', err.message);
+    return res.redirect('/pages/login.html?oauth=failed');
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -53,25 +167,44 @@ async function register(req, res, next) {
     const passwordHash = await hashPassword(password);
     const uuid = uuidv4();
 
-    const user = await userModel.createPlayer({ uuid, fullName, username, email, passwordHash, gamerTag });
-
-    // Issue an email verification token and send it — registration
-    // succeeds either way; a failed email send shouldn't block signup.
-    const rawToken = generateRawToken();
-    await authTokenModel.createToken(
-      user.id,
-      hashToken(rawToken),
-      'email_verification',
-      new Date(Date.now() + EMAIL_TOKEN_TTL_MS)
-    );
-    sendVerificationEmail(user.email, rawToken).catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to send verification email:', err.message);
+    // When email delivery isn't configured (local/dev without SMTP), we
+    // can't send a verification link — so we auto-verify the account and
+    // let the user straight in. Once real SMTP creds are set, this flips
+    // back to the proper "verify your email first" flow automatically.
+    const autoVerify = !emailEnabled;
+    const user = await userModel.createPlayer({
+      uuid,
+      fullName,
+      username,
+      email,
+      passwordHash,
+      gamerTag,
+      isEmailVerified: autoVerify,
     });
+
+    let message;
+    if (autoVerify) {
+      message = 'Account created. You can log in now.';
+    } else {
+      // Issue an email verification token and send it. Registration
+      // succeeds either way; a failed email send shouldn't block signup.
+      const rawToken = generateRawToken();
+      await authTokenModel.createToken(
+        user.id,
+        hashToken(rawToken),
+        'email_verification',
+        new Date(Date.now() + EMAIL_TOKEN_TTL_MS)
+      );
+      sendVerificationEmail(user.email, rawToken).catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to send verification email:', err.message);
+      });
+      message = 'Account created. Please check your email to verify your account.';
+    }
 
     return res.status(201).json({
       success: true,
-      message: 'Account created. Please check your email to verify your account.',
+      message,
       data: { user: toPublicUser(user) },
     });
   } catch (err) {
@@ -233,7 +366,14 @@ async function forgotPassword(req, res, next) {
       'password_reset',
       new Date(Date.now() + RESET_TOKEN_TTL_MS)
     );
-    await sendPasswordResetEmail(user.email, rawToken);
+    const emailResult = await sendPasswordResetEmail(user.email, rawToken);
+
+    // In development (Ethereal test inbox), hand the preview URL back so
+    // the user can actually open the "sent" email in their browser. In
+    // production this is omitted — the real email is already in their inbox.
+    if (emailResult && emailResult.previewUrl && isDev) {
+      return res.status(200).json({ ...genericResponse, previewUrl: emailResult.previewUrl });
+    }
 
     return res.status(200).json(genericResponse);
   } catch (err) {
@@ -300,6 +440,8 @@ async function logout(req, res, next) {
 
 module.exports = {
   register,
+  startGoogleAuth,
+  googleCallback,
   verifyEmail,
   login,
   refreshToken,

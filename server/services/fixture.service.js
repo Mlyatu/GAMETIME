@@ -10,6 +10,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const tournamentModel = require('../models/tournament.model');
 const matchModel = require('../models/match.model');
+const standingsService = require('./standings.service');
 const { query } = require('../config/database');
 const {
   generateRoundRobin,
@@ -111,6 +112,7 @@ async function generateFixtures(tournamentUuid) {
   }
 
   const created = await matchModel.bulkCreateMatches(tournament.id, fixturesToInsert);
+  await standingsService.recalculateStandings(tournament.id, participantIds);
   return created;
 }
 

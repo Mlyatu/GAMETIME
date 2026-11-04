@@ -11,6 +11,11 @@
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes sidebarSlideIn {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
 .animate-fade-in-up {
   animation: fadeInUp var(--transition-slow) both;
 }
@@ -28,6 +33,59 @@
   50%      { box-shadow: 0 0 32px rgba(var(--color-primary-rgb), 0.6); }
 }
 .animate-glow-pulse { animation: glowPulse 2.4s ease-in-out infinite; }
+
+@keyframes footballOrbit {
+  0% { transform: translate3d(-42vw, 34vh, 0) rotate(0deg); opacity: 0; }
+  12% { opacity: .9; }
+  50% { transform: translate3d(4vw, -6vh, 0) rotate(360deg); opacity: 1; }
+  88% { opacity: .72; }
+  100% { transform: translate3d(46vw, 30vh, 0) rotate(720deg); opacity: 0; }
+}
+.football-orbit {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.football-orbit::before {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  left: 50%;
+  top: 45%;
+  border: 1px solid rgba(var(--color-primary-rgb), .18);
+  border-radius: 50%;
+  box-shadow: 0 0 60px rgba(var(--color-primary-rgb), .10), inset 0 0 40px rgba(var(--color-secondary-rgb), .08);
+  transform: translate(-50%, -50%) rotate(22deg) scaleX(1.8);
+}
+.football-ball {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 25px;
+  filter: drop-shadow(0 0 14px rgba(var(--color-primary-rgb), .8));
+  animation: footballOrbit 9s cubic-bezier(.45, .05, .55, .95) infinite;
+}
+
+@keyframes livePing {
+  0% { box-shadow: 0 0 0 0 rgba(var(--color-success-rgb), .55); }
+  70% { box-shadow: 0 0 0 9px rgba(var(--color-success-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--color-success-rgb), 0); }
+}
+.animate-live-ping { animation: livePing 1.8s ease-out infinite; }
+
+@keyframes scoreFlash {
+  0%, 100% { border-color: var(--glass-border); }
+  50% { border-color: rgba(var(--color-secondary-rgb), .72); box-shadow: 0 0 24px rgba(var(--color-secondary-rgb), .12); }
+}
+.animate-score-flash { animation: scoreFlash 3.2s ease-in-out infinite; }
 
 @keyframes shimmer {
   0%   { background-position: -400px 0; }

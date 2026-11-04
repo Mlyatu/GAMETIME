@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Player Profile — EFootball Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="/assets/css/tokens.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/glass.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    .profile-hero {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 28px;
+      background: linear-gradient(115deg, rgba(var(--color-primary-rgb), .18), rgba(var(--color-secondary-rgb), .06));
+      border-color: rgba(var(--color-primary-rgb), .3);
+    }
+    .profile-avatar {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      border: 3px solid var(--color-primary);
+      box-shadow: 0 0 28px rgba(var(--color-primary-rgb), .35);
+      object-fit: cover;
+      background: var(--bg-elevated);
+    }
+    .profile-stat { padding: 22px; }
+    .profile-stat strong { display: block; font-size: var(--text-2xl); color: var(--text-primary); }
+    .profile-stat span { color: var(--text-secondary); font-size: var(--text-sm); }
+    @media (max-width: 576px) {
+      .profile-hero { align-items: flex-start; flex-direction: column; padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <div data-include="/components/sidebar.html"></div>
+    <div class="flex-grow-1" style="min-width:0;">
+      <div data-include="/components/topbar.html"></div>
+      <main class="container-arena py-4">
+        <div id="profileState" class="glass-card p-4 text-center animate-fade-in-up">Loading player profile...</div>
+        <div id="profileContent" hidden>
+          <section class="glass-card profile-hero animate-fade-in-up mb-4">
+            <img id="profileAvatar" class="profile-avatar" src="/assets/images/avatar-placeholder.svg" alt="Player avatar" />
+            <div>
+              <span class="badge-arena badge-arena--success mb-2"><span class="badge-dot badge-dot--online animate-live-ping"></span> Player profile</span>
+              <h1 class="mb-1" id="profileName"></h1>
+              <p class="text-secondary-arena mb-1" id="profileHandle"></p>
+              <p class="text-secondary-arena text-sm mb-0" id="profileLocation"></p>
+            </div>
+          </section>
+          <div class="row g-3 mb-4" id="profileStats"></div>
+          <section class="glass-card p-4 animate-fade-in-up">
+            <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="mb-0">Player details</h5><span class="badge-arena badge-arena--primary" id="profilePlatform"></span></div>
+            <p class="text-secondary-arena mb-0" id="profileBio"></p>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/include.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script>
+    document.addEventListener('arena:includes-loaded', async () => {
+      const username = new URLSearchParams(window.location.search).get('username');
+      const state = document.getElementById('profileState');
+      if (!username) {
+        state.textContent = 'No player was selected.';
+        return;
+      }
+      try {
+        const response = await api.get(`/player/${encodeURIComponent(username)}`);
+        const profile = response.data.profile;
+        document.title = `${profile.full_name || profile.username} — EFootball Arena`;
+        document.getElementById('profileAvatar').src = profile.avatar_url || '/assets/images/avatar-placeholder.svg';
+        document.getElementById('profileName').textContent = profile.full_name || profile.username;
+        document.getElementById('profileHandle').textContent = `@${profile.username} · ${profile.gamer_tag || 'Arena player'}`;
+        document.getElementById('profileLocation').textContent = [profile.country, profile.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}` : ''].filter(Boolean).join(' · ');
+        document.getElementById('profilePlatform').textContent = (profile.platform || 'mobile').toUpperCase();
+        document.getElementById('profileBio').textContent = profile.bio || 'No player bio has been added yet.';
+        const stats = [
+          ['total_matches', 'Matches played'],
+          ['wins', 'Wins'],
+          ['draws', 'Draws'],
+          ['losses', 'Losses'],
+        ];
+        document.getElementById('profileStats').innerHTML = stats.map(([key, label]) => `<div class="col-6 col-lg-3"><div class="glass-card profile-stat"><strong>${Number(profile[key] || 0)}</strong><span>${label}</span></div></div>`).join('');
+        state.hidden = true;
+        document.getElementById('profileContent').hidden = false;
+      } catch (error) {
+        state.textContent = error.message || 'Player profile could not be loaded.';
+      }
+    });
+  </script>
+</body>
+</html>

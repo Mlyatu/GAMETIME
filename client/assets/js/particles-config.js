@@ -21,14 +21,14 @@
     particlesJS('particles-bg', {
       particles: {
         number: { value: 45, density: { enable: true, value_area: 900 } },
-        color: { value: ['#3476F6', '#00F2FE'] },
+        color: { value: ['#F21D4B', '#20D9F5', '#FFFFFF'] },
         shape: { type: 'circle' },
         opacity: { value: 0.35, random: true },
         size: { value: 3, random: true },
         line_linked: {
           enable: true,
           distance: 140,
-          color: '#3476F6',
+          color: '#F21D4B',
           opacity: 0.15,
           width: 1,
         },

@@ -20,6 +20,10 @@ const Tesseract = require('tesseract.js');
 const tesseractOptions = process.env.OCR_LANG_PATH
   ? { langPath: process.env.OCR_LANG_PATH, gzip: process.env.OCR_LANG_GZIP !== 'false' }
   : {};
+tesseractOptions.errorHandler = () => {
+  // Let the recognize promise reject so the result controller can fall back
+  // to the scores entered by the player instead of crashing the server.
+};
 
 // Matches two 1-2 digit numbers separated by a dash, colon, or similar,
 // optionally with whitespace — covers the common on-screen scoreboard

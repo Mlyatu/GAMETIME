@@ -6,17 +6,17 @@ const { query } = require('../config/database');
 
 async function createTournament({
   uuid, name, description, bannerUrl, format, maxParticipants,
-  entryFee, registrationDeadline, startDate, endDate, createdByUserId,
+  entryFee, prizePool, status, registrationDeadline, startDate, endDate, createdByUserId,
 }) {
   const result = await query(
     `INSERT INTO tournaments
        (uuid, name, description, banner_url, format, max_participants,
-        entry_fee, registration_deadline, start_date, end_date, created_by, status)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'draft')
+        entry_fee, prize_pool, registration_deadline, start_date, end_date, created_by, status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
      RETURNING uuid, name, description, banner_url, format, max_participants,
-               entry_fee, status, registration_deadline, start_date, end_date, created_at`,
+               entry_fee, prize_pool, status, registration_deadline, start_date, end_date, created_at`,
     [uuid, name, description, bannerUrl, format, maxParticipants,
-      entryFee, registrationDeadline, startDate, endDate, createdByUserId]
+      entryFee, prizePool || 0, registrationDeadline, startDate, endDate, createdByUserId, status || 'draft']
   );
   return result.rows[0];
 }
@@ -59,7 +59,7 @@ async function listTournaments({ page = 1, limit = 20, status = null, format = n
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const result = await query(
-    `SELECT t.uuid, t.name, t.banner_url, t.format, t.status, t.max_participants,
+    `SELECT t.uuid, t.name, t.description, t.banner_url, t.format, t.status, t.max_participants,
             t.entry_fee, t.prize_pool, t.registration_deadline, t.start_date, t.end_date,
             (SELECT COUNT(*) FROM tournament_participants tp
                WHERE tp.tournament_id = t.id AND tp.status = 'approved') AS approved_count
@@ -73,27 +73,37 @@ async function listTournaments({ page = 1, limit = 20, status = null, format = n
 }
 
 async function updateTournament(tournamentId, fields) {
-  const {
-    name, description, bannerUrl, maxParticipants, entryFee, prizePool,
-    status, registrationDeadline, startDate, endDate,
-  } = fields;
+  const columnByField = {
+    name: 'name',
+    description: 'description',
+    bannerUrl: 'banner_url',
+    format: 'format',
+    maxParticipants: 'max_participants',
+    entryFee: 'entry_fee',
+    prizePool: 'prize_pool',
+    status: 'status',
+    registrationDeadline: 'registration_deadline',
+    startDate: 'start_date',
+    endDate: 'end_date',
+  };
+  const values = [tournamentId];
+  const assignments = Object.entries(columnByField)
+    .filter(([field]) => Object.prototype.hasOwnProperty.call(fields, field))
+    .map(([field, column]) => {
+      values.push(fields[field]);
+      return `${column} = $${values.length}`;
+    });
+
+  if (!assignments.length) {
+    const current = await query('SELECT uuid, name, status FROM tournaments WHERE id = $1', [tournamentId]);
+    return current.rows[0] || null;
+  }
 
   const result = await query(
-    `UPDATE tournaments SET
-       name = COALESCE($2, name),
-       description = COALESCE($3, description),
-       banner_url = COALESCE($4, banner_url),
-       max_participants = COALESCE($5, max_participants),
-       entry_fee = COALESCE($6, entry_fee),
-       prize_pool = COALESCE($7, prize_pool),
-       status = COALESCE($8, status),
-       registration_deadline = COALESCE($9, registration_deadline),
-       start_date = COALESCE($10, start_date),
-       end_date = COALESCE($11, end_date)
+    `UPDATE tournaments SET ${assignments.join(', ')}
      WHERE id = $1
      RETURNING uuid, name, status`,
-    [tournamentId, name, description, bannerUrl, maxParticipants, entryFee,
-      prizePool, status, registrationDeadline, startDate, endDate]
+    values
   );
   return result.rows[0] || null;
 }

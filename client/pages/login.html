@@ -15,8 +15,30 @@
   <link rel="stylesheet" href="/assets/css/glass.css" />
   <link rel="stylesheet" href="/assets/css/components.css" />
   <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    .login-page .auth-shell {
+      display: grid;
+      min-height: 100vh;
+      min-height: 100dvh;
+      place-items: center;
+      padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    }
+
+    .login-page #particles-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .login-page .auth-card {
+      width: min(100%, 440px);
+      padding: clamp(24px, 5vw, 40px);
+    }
+  </style>
 </head>
-<body>
+<body class="login-page">
 
   <div class="auth-shell">
     <div id="particles-bg"></div>
@@ -59,6 +81,10 @@
         </button>
       </form>
 
+      <a href="/api/auth/google" class="btn-arena btn-arena--secondary w-100 mt-3">
+        <i class="fa-brands fa-google"></i> Continue with Google
+      </a>
+
       <div class="auth-divider">OR</div>
 
       <p class="text-center text-sm mb-0">
@@ -76,7 +102,26 @@
   <script src="/assets/js/ui.js"></script>
   <script src="/assets/js/auth.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      const oauthStatus = new URLSearchParams(window.location.search).get('oauth');
+      if (oauthStatus === 'not-configured') {
+        const formError = document.getElementById('formError');
+        formError.textContent = 'Google sign-in is not configured yet. Add Google OAuth credentials to the server .env file.';
+        formError.classList.remove('d-none');
+      } else if (oauthStatus === 'failed') {
+        const formError = document.getElementById('formError');
+        formError.textContent = 'Google sign-in could not be completed. Please try again.';
+        formError.classList.remove('d-none');
+      }
+      if (window.auth && auth.handleGoogleCallback) {
+        try {
+          if (await auth.handleGoogleCallback()) return;
+        } catch {
+        const formError = document.getElementById('formError');
+        formError.textContent = 'Google sign-in could not be completed. Please try again.';
+        formError.classList.remove('d-none');
+        }
+      }
       if (window.auth && auth.redirectIfAuthenticated) auth.redirectIfAuthenticated();
     });
 

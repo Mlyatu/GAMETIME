@@ -20,6 +20,7 @@ const { generalLimiter } = require('./middleware/rateLimiter');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 const { testConnection } = require('./config/database');
+const { getUploadDirectory } = require('./config/storage');
 
 const app = express();
 
@@ -33,6 +34,16 @@ const app = express();
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: ["'self'", 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
+      },
+    },
   })
 );
 
@@ -80,7 +91,7 @@ app.use(compression());                                // gzip responses
 // ---------------------------------------------------------------------
 // Static file serving (uploaded avatars, screenshots, media)
 // ---------------------------------------------------------------------
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(getUploadDirectory()));
 
 // ---------------------------------------------------------------------
 // Rate limiting (applied globally; stricter limiter is added per-route
@@ -106,6 +117,7 @@ app.get('/health', async (req, res) => {
 // API routes
 // ---------------------------------------------------------------------
 app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/admin', require('./routes/admin.routes'));
 app.use('/api/player', require('./routes/player.routes'));
 app.use('/api/team', require('./routes/team.routes'));
 app.use('/api/tournament', require('./routes/tournament.routes'));
@@ -124,6 +136,20 @@ app.use('/api/report', require('./routes/report.routes'));
 // ---------------------------------------------------------------------
 // 404 + centralized error handling — must be registered last, in order
 // ---------------------------------------------------------------------
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../client')));
+
+// Kwa SPA / direct page access
+app.get('*', (req, res, next) => {
+  // Usizuie API routes
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads') || req.path.startsWith('/socket')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, '../client/index.html'));
+});
+
+
 app.use(notFound);
 app.use(errorHandler);
 

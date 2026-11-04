@@ -44,7 +44,7 @@ async function findByUuid(uuid) {
 async function getInternalId(uuid) {
   const result = await query(
     `SELECT r.id, r.match_id, r.claimed_home_score, r.claimed_away_score, r.verification_status, r.submitted_by,
-            m.tournament_id
+            m.tournament_id, m.uuid AS match_uuid
      FROM results r
      JOIN matches m ON m.id = r.match_id
      WHERE r.uuid = $1`,
@@ -72,10 +72,20 @@ async function listPending({ page = 1, limit = 20 } = {}) {
   const result = await query(
     `SELECT r.uuid, r.claimed_home_score, r.claimed_away_score, r.screenshot_url,
             r.ocr_confidence, r.created_at,
-            m.uuid AS match_uuid, m.round,
-            u.username AS submitted_by_username
+                 m.uuid AS match_uuid, m.round,
+                 t.name AS tournament_name,
+                 COALESCE(ht.name, hu.username, 'TBD') AS home_name,
+                 COALESCE(at.name, au.username, 'TBD') AS away_name,
+                 u.username AS submitted_by_username
      FROM results r
      JOIN matches m ON m.id = r.match_id
+               JOIN tournaments t ON t.id = m.tournament_id
+               LEFT JOIN tournament_participants hp ON hp.id = m.home_participant_id
+               LEFT JOIN users hu ON hu.id = hp.user_id
+               LEFT JOIN teams ht ON ht.id = hp.team_id
+               LEFT JOIN tournament_participants ap ON ap.id = m.away_participant_id
+               LEFT JOIN users au ON au.id = ap.user_id
+               LEFT JOIN teams at ON at.id = ap.team_id
      JOIN users u ON u.id = r.submitted_by
      WHERE r.verification_status = 'pending'
      ORDER BY r.created_at ASC
@@ -83,6 +93,14 @@ async function listPending({ page = 1, limit = 20 } = {}) {
     [limit, offset]
   );
   return result.rows;
+}
+
+async function hasPendingForMatch(matchId) {
+  const result = await query(
+    "SELECT 1 FROM results WHERE match_id = $1 AND verification_status = 'pending' LIMIT 1",
+    [matchId]
+  );
+  return result.rowCount > 0;
 }
 
 async function updateVerification(resultId, status, reviewerUserId) {
@@ -95,4 +113,4 @@ async function updateVerification(resultId, status, reviewerUserId) {
   return result.rows[0] || null;
 }
 
-module.exports = { createResult, findByUuid, getInternalId, listByMatch, listPending, updateVerification };
+module.exports = { createResult, findByUuid, getInternalId, listByMatch, listPending, hasPendingForMatch, updateVerification };

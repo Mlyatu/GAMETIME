@@ -32,6 +32,26 @@ const submitResult = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: 'This match has already been completed' });
   }
 
+  const submitter = await userModel.findByUuid(req.user.uuid);
+  const participantCheck = await query(
+    `SELECT EXISTS (
+       SELECT 1
+       FROM tournament_participants tp
+       WHERE tp.id IN ($1, $2)
+         AND tp.status = 'approved'
+         AND (tp.user_id = $3 OR EXISTS (
+           SELECT 1 FROM team_members tm WHERE tm.team_id = tp.team_id AND tm.user_id = $3
+         ))
+     ) AS is_participant`,
+    [match.home_participant_id, match.away_participant_id, submitter.id]
+  );
+  if (!participantCheck.rows[0].is_participant) {
+    return res.status(403).json({ success: false, message: 'Only a player on one of the approved match sides can submit a result' });
+  }
+  if (await resultModel.hasPendingForMatch(match.id)) {
+    return res.status(409).json({ success: false, message: 'A result is already waiting for review' });
+  }
+
   const screenshotPath = req.file.path;
   const screenshotUrl = `/uploads/results/${req.file.filename}`;
 
@@ -56,7 +76,6 @@ const submitResult = asyncHandler(async (req, res) => {
     });
   }
 
-  const submitter = await userModel.findByUuid(req.user.uuid);
   const savedResult = await resultModel.createResult({
     matchId: match.id,
     submittedBy: submitter.id,
@@ -104,6 +123,11 @@ const approveResult = asyncHandler(async (req, res) => {
   }
   if (submission.verification_status !== 'pending') {
     return res.status(400).json({ success: false, message: `This submission was already ${submission.verification_status}` });
+  }
+
+  const currentMatch = await matchModel.getInternalId(submission.match_uuid);
+  if (!currentMatch || currentMatch.status === 'completed') {
+    return res.status(409).json({ success: false, message: 'This match already has a confirmed result' });
   }
 
   const reviewer = await userModel.findByUuid(req.user.uuid);

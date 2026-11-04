@@ -15,8 +15,30 @@
   <link rel="stylesheet" href="/assets/css/glass.css" />
   <link rel="stylesheet" href="/assets/css/components.css" />
   <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    .register-page .auth-shell {
+      display: grid;
+      min-height: 100vh;
+      min-height: 100dvh;
+      place-items: center;
+      padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    }
+
+    .register-page #particles-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .register-page .auth-card {
+      width: min(100%, 440px);
+      padding: clamp(24px, 5vw, 40px);
+    }
+  </style>
 </head>
-<body>
+<body class="register-page">
 
   <div class="auth-shell">
     <div id="particles-bg"></div>
@@ -129,10 +151,10 @@
       ui.setButtonLoading(btn, true);
 
       try {
-        await auth.register({ fullName, username, gamerTag, email, password });
+        const result = await auth.register({ fullName, username, gamerTag, email, password });
         ui.showModal({
           title: 'Account created',
-          message: 'Check your email and click the verification link to activate your account.',
+          message: (result && result.message) || 'Your account is ready. You can log in now.',
           showCancel: false,
           confirmText: 'Go to Login',
           onConfirm: () => { window.location.href = '/pages/login.html'; },

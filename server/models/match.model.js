@@ -121,6 +121,16 @@ async function setResult(matchId, { homeScore, awayScore }) {
   return result.rows[0] || null;
 }
 
+async function scheduleMatch(matchId, scheduledAt) {
+  const result = await query(
+    `UPDATE matches SET scheduled_at = $2
+     WHERE id = $1 AND status = 'scheduled'
+     RETURNING uuid, scheduled_at, status`,
+    [matchId, scheduledAt]
+  );
+  return result.rows[0] || null;
+}
+
 /** All completed matches for a tournament — the raw data standings are computed from. */
 async function listCompletedByTournament(tournamentId) {
   const result = await query(
@@ -140,5 +150,6 @@ module.exports = {
   listByTournament,
   tournamentHasMatches,
   setResult,
+  scheduleMatch,
   listCompletedByTournament,
 };

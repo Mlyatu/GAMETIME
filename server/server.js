@@ -9,29 +9,48 @@
 
 require('dotenv').config();
 
+const { validateProductionConfig } = require('./config/productionConfig');
+validateProductionConfig();
+
 const http = require('http');
 const app = require('./app');
 const { testConnection } = require('./config/database');
 const { initSocket } = require('./socket');
 
-const PORT = process.env.PORT || 5000;
-
-const server = http.createServer(app);
+const DEFAULT_PORT = Number(process.env.PORT) || 5000;
+let server;
+let activePort = DEFAULT_PORT;
 
 // Socket.io shares the same HTTP server/port as Express — it
 // intercepts the WebSocket upgrade handshake, REST traffic is
 // untouched. See socket/index.js for auth, chat, and presence logic.
-initSocket(server);
 
-async function start() {
+async function start(port = DEFAULT_PORT) {
   try {
     const { now } = await testConnection();
     // eslint-disable-next-line no-console
     console.log(`Connected to PostgreSQL — server time: ${now}`);
 
-    server.listen(PORT, () => {
+    server = http.createServer(app);
+    initSocket(server);
+
+    server.once('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        const nextPort = port + 1;
+        // eslint-disable-next-line no-console
+        console.warn(`Port ${port} is already in use. Retrying on ${nextPort}...`);
+        return start(nextPort);
+      }
+
       // eslint-disable-next-line no-console
-      console.log(`EFootball Arena API running on http://localhost:${PORT}`);
+      console.error('Failed to start server:', err.message);
+      process.exit(1);
+    });
+
+    server.listen(port, () => {
+      activePort = port;
+      // eslint-disable-next-line no-console
+      console.log(`EFootball Arena API running on http://localhost:${activePort}`);
       // eslint-disable-next-line no-console
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
@@ -47,6 +66,12 @@ async function start() {
 // so a deploy/restart doesn't cut off active users mid-request.
 // ---------------------------------------------------------------------
 function shutdown(signal) {
+  if (!server) {
+    // eslint-disable-next-line no-console
+    console.log(`\n${signal} received. No server is listening yet; exiting.`);
+    process.exit(0);
+  }
+
   // eslint-disable-next-line no-console
   console.log(`\n${signal} received. Shutting down gracefully...`);
   server.close(() => {

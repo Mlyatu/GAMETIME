@@ -53,9 +53,12 @@
             <h1 class="mb-1">Fixtures</h1>
             <p class="text-secondary-arena mb-0">Browse fixtures and results by tournament.</p>
           </div>
-          <select class="form-control-arena py-2" id="tournamentSelect" style="width:auto; min-width:220px;">
-            <option value="">Select a tournament</option>
-          </select>
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <select class="form-control-arena py-2" id="tournamentSelect" style="width:auto; min-width:220px;">
+              <option value="">Select a tournament</option>
+            </select>
+            <button class="btn-arena btn-arena--primary btn-arena--sm d-none" id="generateFixturesButton"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate fixtures</button>
+          </div>
         </div>
 
         <div id="fixturesContainer" class="glass-card p-4">
@@ -77,6 +80,7 @@
       const tournamentSelect = document.getElementById('tournamentSelect');
       const container = document.getElementById('fixturesContainer');
       let tournaments = [];
+      let isStaff = false;
 
       function titleCase(str) {
         return String(str || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -88,13 +92,24 @@
         return isNaN(d) ? iso : d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
       }
 
+      function dateTimeInputValue(iso) {
+        if (!iso) return '';
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return '';
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      }
+
       async function loadTournaments() {
         try {
-          const data = await api.get('/tournament?limit=200');
+          const data = await api.get('/tournament?limit=100');
           tournaments = data.data.tournaments || [];
           tournamentSelect.innerHTML = '<option value="">Select a tournament</option>' + tournaments.map((t) =>
             `<option value="${t.uuid}">${ui.escapeHtml(t.name)}</option>`
           ).join('');
+
+          const currentUser = auth.getUser() || await auth.fetchCurrentUser();
+          isStaff = Boolean(currentUser && ['admin', 'moderator'].includes(currentUser.role));
+          document.getElementById('generateFixturesButton').classList.toggle('d-none', !isStaff);
 
           const urlParams = new URLSearchParams(window.location.search);
           const preselected = urlParams.get('tournament');
@@ -134,6 +149,20 @@
               const homeClass = isCompleted && m.home_score > m.away_score ? ' style="color:var(--color-success);"' : '';
               const awayClass = isCompleted && m.away_score > m.home_score ? ' style="color:var(--color-success);"' : '';
               const badge = isBye ? '<span class="badge-arena badge-arena--neutral">Bye</span>' : `<span class="badge-arena badge-arena--primary">${titleCase(m.status)}</span>`;
+              const adminControls = isStaff && !isBye ? `
+                <div class="d-flex flex-wrap justify-content-end gap-2 mt-2">
+                  ${m.status === 'scheduled' ? `<label class="text-xs text-muted">Schedule <input class="form-control-arena py-1" type="datetime-local" data-schedule-input="${ui.escapeHtml(m.uuid)}" value="${dateTimeInputValue(m.scheduled_at)}" /></label><button class="btn-arena btn-arena--secondary btn-arena--sm" data-action="schedule-match" data-id="${ui.escapeHtml(m.uuid)}">Save time</button>` : ''}
+                  <input class="form-control-arena py-1" type="number" min="0" aria-label="Home score" placeholder="Home" data-home-score="${ui.escapeHtml(m.uuid)}" value="${isCompleted ? Number(m.home_score) : ''}" style="width:78px;" />
+                  <input class="form-control-arena py-1" type="number" min="0" aria-label="Away score" placeholder="Away" data-away-score="${ui.escapeHtml(m.uuid)}" value="${isCompleted ? Number(m.away_score) : ''}" style="width:78px;" />
+                  <button class="btn-arena btn-arena--primary btn-arena--sm" data-action="save-score" data-id="${ui.escapeHtml(m.uuid)}">${isCompleted ? 'Update score' : 'Record score'}</button>
+                </div>` : '';
+              const playerSubmission = !isStaff && !isBye && m.status === 'scheduled' ? `
+                <form class="d-flex flex-wrap align-items-end gap-2 mt-2" data-result-form="${ui.escapeHtml(m.uuid)}">
+                  <label class="text-xs text-muted">Home score<input class="form-control-arena py-1" type="number" name="claimedHomeScore" min="0" required style="width:90px;" /></label>
+                  <label class="text-xs text-muted">Away score<input class="form-control-arena py-1" type="number" name="claimedAwayScore" min="0" required style="width:90px;" /></label>
+                  <label class="text-xs text-muted">Final-score screenshot<input class="form-control-arena py-1" type="file" name="screenshot" accept="image/jpeg,image/png,image/webp" required /></label>
+                  <button class="btn-arena btn-arena--secondary btn-arena--sm" type="submit"><i class="fa-solid fa-camera"></i> Send score &amp; screenshot</button>
+                </form>` : '';
               return `
                 <div class="fixture-row">
                   <div class="text-xs text-muted">${formatDateTime(m.scheduled_at)}</div>
@@ -142,6 +171,8 @@
                   <div class="player away"${awayClass}><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> ${ui.escapeHtml(awayName)}</div>
                   <div class="text-end">${badge}</div>
                 </div>
+                ${adminControls}
+                ${playerSubmission}
               `;
             }).join('')}
           `).join('');
@@ -162,8 +193,68 @@
         await loadFixtures(uuid);
       });
 
+      container.addEventListener('submit', async (event) => {
+        const form = event.target.closest('[data-result-form]');
+        if (!form) return;
+        event.preventDefault();
+        const button = form.querySelector('button[type="submit"]');
+        const formData = new FormData(form);
+        formData.set('matchUuid', form.dataset.resultForm);
+        button.disabled = true;
+        try {
+          await api.upload('/result', formData);
+          ui.showToast('Screenshot submitted for admin review', 'success');
+          form.innerHTML = '<span class="text-secondary-arena text-sm">Result submitted and waiting for review.</span>';
+        } catch (error) {
+          ui.showToast(error.message || 'Could not submit result', 'error');
+          button.disabled = false;
+        }
+      });
+
+      document.getElementById('generateFixturesButton').addEventListener('click', async () => {
+        const uuid = tournamentSelect.value;
+        if (!uuid) return;
+        const button = document.getElementById('generateFixturesButton');
+        button.disabled = true;
+        try {
+          await api.post(`/tournament/${encodeURIComponent(uuid)}/fixtures/generate`, {});
+          ui.showToast('Fixtures generated', 'success');
+          await loadFixtures(uuid);
+        } catch (error) {
+          ui.showToast(error.message || 'Could not generate fixtures', 'error');
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      container.addEventListener('click', async (event) => {
+        const button = event.target.closest('[data-action]');
+        if (!button || !isStaff) return;
+        const matchUuid = button.dataset.id;
+        button.disabled = true;
+        try {
+          if (button.dataset.action === 'schedule-match') {
+            const input = container.querySelector(`[data-schedule-input="${CSS.escape(matchUuid)}"]`);
+            if (!input || !input.value) throw new Error('Choose a date and time first.');
+            await api.patch(`/match/${encodeURIComponent(matchUuid)}/schedule`, { scheduledAt: new Date(input.value).toISOString() });
+            ui.showToast('Fixture scheduled', 'success');
+          } else if (button.dataset.action === 'save-score') {
+            const homeScore = container.querySelector(`[data-home-score="${CSS.escape(matchUuid)}"]`).value;
+            const awayScore = container.querySelector(`[data-away-score="${CSS.escape(matchUuid)}"]`).value;
+            if (homeScore === '' || awayScore === '') throw new Error('Enter both scores.');
+            await api.patch(`/match/${encodeURIComponent(matchUuid)}/score`, { homeScore: Number(homeScore), awayScore: Number(awayScore) });
+            ui.showToast('Score saved and standings updated', 'success');
+          }
+          await loadFixtures(tournamentSelect.value);
+        } catch (error) {
+          ui.showToast(error.message || 'Could not update fixture', 'error');
+        } finally {
+          button.disabled = false;
+        }
+      });
+
       document.addEventListener('arena:includes-loaded', () => {
-        if (window.auth) auth.requireAuth();
+        if (window.auth && !auth.requireAuth()) return;
         document.querySelectorAll('[data-nav]').forEach((link) => {
           if (link.dataset.nav === 'fixtures') link.classList.add('active');
         });

@@ -5,4 +5,8 @@ const submitScoreValidator = [
   body('awayScore').isInt({ min: 0 }).withMessage('Away score must be a non-negative integer'),
 ];
 
-module.exports = { submitScoreValidator };
+const scheduleMatchValidator = [
+  body('scheduledAt').isISO8601().withMessage('A valid scheduled date and time is required'),
+];
+
+module.exports = { submitScoreValidator, scheduleMatchValidator };

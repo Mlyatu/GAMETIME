@@ -14,9 +14,17 @@ const matchController = require('../controllers/match.controller');
 const requireAuth = require('../middleware/auth');
 const requireRole = require('../middleware/roleCheck');
 const { handleValidationErrors } = require('../validators/auth.validator');
-const { submitScoreValidator } = require('../validators/match.validator');
+const { submitScoreValidator, scheduleMatchValidator } = require('../validators/match.validator');
 
 router.get('/:uuid', matchController.getMatch);
+router.patch(
+  '/:uuid/schedule',
+  requireAuth,
+  requireRole('admin', 'moderator'),
+  scheduleMatchValidator,
+  handleValidationErrors,
+  matchController.scheduleMatch
+);
 router.patch(
   '/:uuid/score',
   requireAuth,

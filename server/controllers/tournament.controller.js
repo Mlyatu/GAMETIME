@@ -7,6 +7,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const tournamentModel = require('../models/tournament.model');
 const teamModel = require('../models/team.model');
 const userModel = require('../models/user.model');
+const auditLogModel = require('../models/auditLog.model');
 const { notifyUser } = require('../services/notification.service');
 
 /** POST /api/tournament — create a tournament (admin/moderator only, enforced by route middleware). */
@@ -20,11 +21,14 @@ const createTournament = asyncHandler(async (req, res) => {
     format: req.body.format,
     maxParticipants: req.body.maxParticipants,
     entryFee: req.body.entryFee || 0,
+    prizePool: req.body.prizePool || 0,
+    status: req.body.status,
     registrationDeadline: req.body.registrationDeadline,
     startDate: req.body.startDate,
     endDate: req.body.endDate,
     createdByUserId: creator.id,
   });
+  await auditLogModel.record({ userId: creator.id, action: 'tournament.created', entityType: 'tournament', metadata: { name: tournament.name, status: tournament.status }, ipAddress: req.ip });
   res.status(201).json({ success: true, message: 'Tournament created', data: { tournament } });
 });
 
@@ -51,6 +55,8 @@ const updateTournament = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Tournament not found' });
   }
   const updated = await tournamentModel.updateTournament(internal.id, req.body);
+  const actor = await userModel.findByUuid(req.user.uuid);
+  await auditLogModel.record({ userId: actor.id, action: 'tournament.updated', entityType: 'tournament', entityId: internal.id, metadata: { name: updated.name, status: updated.status }, ipAddress: req.ip });
   res.status(200).json({ success: true, message: 'Tournament updated', data: { tournament: updated } });
 });
 
@@ -60,6 +66,9 @@ const deleteTournament = asyncHandler(async (req, res) => {
   if (!internal) {
     return res.status(404).json({ success: false, message: 'Tournament not found' });
   }
+  const tournament = await tournamentModel.findByUuid(req.params.uuid);
+  const actor = await userModel.findByUuid(req.user.uuid);
+  await auditLogModel.record({ userId: actor.id, action: 'tournament.deleted', entityType: 'tournament', entityId: internal.id, metadata: { name: tournament?.name }, ipAddress: req.ip });
   await tournamentModel.deleteTournament(internal.id);
   res.status(200).json({ success: true, message: 'Tournament deleted' });
 });
