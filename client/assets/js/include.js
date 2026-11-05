@@ -18,6 +18,34 @@
  * running on plain DOMContentLoaded.
  */
 (function () {
+  function initPublicNav() {
+    const toggle = document.getElementById('publicNavToggle');
+    const mobile = document.getElementById('publicNavMobile');
+    if (!toggle || !mobile || toggle.dataset.bound === 'true') return;
+
+    const icon = toggle.querySelector('i');
+    const setOpen = (isOpen) => {
+      mobile.hidden = !isOpen;
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      toggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+      if (icon) {
+        icon.classList.toggle('fa-bars', !isOpen);
+        icon.classList.toggle('fa-xmark', isOpen);
+      }
+    };
+
+    toggle.dataset.bound = 'true';
+    toggle.setAttribute('aria-controls', mobile.id);
+    setOpen(false);
+    toggle.addEventListener('click', () => setOpen(mobile.hidden));
+    mobile.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => setOpen(false));
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+  }
+
   function initMobileSidebar() {
     const toggle = document.getElementById('mobileSidebarToggle');
     const sidebar = document.querySelector('.sidebar-arena');
@@ -68,6 +96,7 @@
         }
       })
     );
+    initPublicNav();
     initMobileSidebar();
     document.dispatchEvent(new CustomEvent('arena:includes-loaded'));
   }
