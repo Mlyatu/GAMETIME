@@ -25,9 +25,10 @@ function clearFormErrors(formEl) {
 // Password show/hide toggle — wires up any button with
 // data-toggle-password="<inputId>" on the page.
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('[data-toggle-password]').forEach((btn) => {
+  document.querySelectorAll('.password-toggle-arena').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const input = document.getElementById(btn.getAttribute('data-toggle-password'));
+      const field = btn.closest('.position-relative');
+      const input = field ? field.querySelector('input') : null;
       if (!input) return;
       const icon = btn.querySelector('i');
       if (input.type === 'password') {

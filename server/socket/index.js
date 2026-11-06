@@ -9,6 +9,7 @@
 // =====================================================================
 
 const { Server } = require('socket.io');
+const { isAllowedOrigin } = require('../config/cors');
 
 const { verifyAccessToken } = require('../utils/jwt');
 const userModel = require('../models/user.model');
@@ -59,11 +60,9 @@ async function resolveChannelId(channelKey) {
 }
 
 function initSocket(httpServer) {
-  const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000').split(',');
-
   const io = new Server(httpServer, {
     cors: {
-      origin: allowedOrigins,
+      origin: isAllowedOrigin,
       credentials: true,
     },
   });

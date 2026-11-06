@@ -36,6 +36,26 @@
       width: min(100%, 440px);
       padding: clamp(24px, 5vw, 40px);
     }
+
+    .login-notice {
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: var(--text-sm);
+      margin-bottom: 16px;
+    }
+
+    .login-notice--warning {
+      color: #f3d58c;
+      background: rgba(var(--color-warning-rgb), 0.08);
+      border-color: rgba(var(--color-warning-rgb), 0.2);
+    }
+
+    .login-notice--error {
+      color: #f2b5c0;
+      background: rgba(var(--color-danger-rgb), 0.08);
+      border-color: rgba(var(--color-danger-rgb), 0.2);
+    }
   </style>
 </head>
 <body class="login-page">
@@ -60,7 +80,7 @@
         <div class="mb-2 position-relative">
           <label class="form-label-arena" for="password">Password</label>
           <input type="password" id="password" name="password" class="form-control-arena" placeholder="Your password" required />
-          <button type="button" class="password-toggle-arena" data-toggle-password="password" style="top: 38px; transform:none;" aria-label="Show password">
+          <button type="button" class="password-toggle-arena" data-toggle-trigger="password" style="top: 38px; transform:none;" aria-label="Show password">
             <i class="fa-solid fa-eye"></i>
           </button>
           <div class="form-error-arena d-none" data-error-for="password"></div>
@@ -73,7 +93,7 @@
           <a href="/pages/forgot-password.html" class="text-sm">Forgot password?</a>
         </div>
 
-        <div class="d-none" id="formError" style="background:rgba(var(--color-danger-rgb),.12); border:1px solid rgba(var(--color-danger-rgb),.3); border-radius:var(--radius-sm); padding:12px 16px; color:var(--color-danger); font-size:var(--text-sm); margin-bottom:16px;"></div>
+        <div class="login-notice login-notice--error d-none" id="formError" role="status" aria-live="polite"></div>
 
         <button type="submit" class="btn-arena btn-arena--primary w-100" id="loginSubmitBtn">
           <span id="loginBtnText">Log In</span>
@@ -104,12 +124,12 @@
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const oauthStatus = new URLSearchParams(window.location.search).get('oauth');
+      const formError = document.getElementById('formError');
       if (oauthStatus === 'not-configured') {
-        const formError = document.getElementById('formError');
-        formError.textContent = 'Google sign-in is not configured yet. Add Google OAuth credentials to the server .env file.';
+        formError.classList.replace('login-notice--error', 'login-notice--warning');
+        formError.textContent = 'Google sign-in is not set up yet. You can still log in with your email and password.';
         formError.classList.remove('d-none');
       } else if (oauthStatus === 'failed') {
-        const formError = document.getElementById('formError');
         formError.textContent = 'Google sign-in could not be completed. Please try again.';
         formError.classList.remove('d-none');
       }
@@ -117,9 +137,8 @@
         try {
           if (await auth.handleGoogleCallback()) return;
         } catch {
-        const formError = document.getElementById('formError');
-        formError.textContent = 'Google sign-in could not be completed. Please try again.';
-        formError.classList.remove('d-none');
+          formError.textContent = 'Google sign-in could not be completed. Please try again.';
+          formError.classList.remove('d-none');
         }
       }
       if (window.auth && auth.redirectIfAuthenticated) auth.redirectIfAuthenticated();

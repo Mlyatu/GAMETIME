@@ -21,6 +21,7 @@ const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 const { testConnection } = require('./config/database');
 const { getUploadDirectory } = require('./config/storage');
+const { isAllowedOrigin } = require('./config/cors');
 
 const app = express();
 
@@ -53,16 +54,9 @@ app.use(
 // Only the configured CLIENT_URL is allowed to call this API with
 // credentials (cookies/auth headers). Wildcard origins are avoided
 // deliberately since this API handles authenticated requests.
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000').split(',');
 app.use(
   cors({
-    origin(origin, callback) {
-      // Allow tools like Postman/curl (no Origin header) in development.
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error('Not allowed by CORS'));
-    },
+    origin: isAllowedOrigin,
     credentials: true,
   })
 );

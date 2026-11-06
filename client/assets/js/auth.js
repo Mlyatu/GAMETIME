@@ -144,11 +144,12 @@
     const topbarAvatar = document.getElementById('topbarAvatar');
     if (topbarAvatar && user.avatarUrl) topbarAvatar.src = user.avatarUrl;
 
-    if (user.role === 'admin' || user.role === 'moderator') {
-      document.querySelectorAll('.sidebar-admin-only').forEach((el) => {
-        el.style.display = 'block';
-      });
-    }
+    document.querySelectorAll('.sidebar-admin-only').forEach((el) => {
+      const shouldShow = user && (user.role === 'admin' || user.role === 'moderator');
+      el.hidden = !shouldShow;
+      el.style.display = shouldShow ? '' : 'none';
+      el.classList.toggle('d-none', !shouldShow);
+    });
 
   }
 
