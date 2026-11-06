@@ -96,6 +96,7 @@ npm run db:clean-users    # DESTRUCTIVE: permanently delete all non-admin users
 Log in as an admin and open **Admin Command Center** (`/pages/admin-dashboard.html`):
 
 - **Add User** — create a player, moderator, or admin with a temporary password.
+- **Change role** — select an existing user's role and save; admins cannot change their own role or demote the last admin.
 - **Delete** — permanently removes a user and all their data from the database
   (hard delete, not a soft flag). Safety guards prevent deleting your own
   account or the last remaining admin.

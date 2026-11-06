@@ -11,7 +11,6 @@
 const { v4: uuidv4 } = require('uuid');
 
 const userModel = require('../models/user.model');
-const playerModel = require('../models/player.model');
 const adminModel = require('../models/admin.model');
 const { hashPassword } = require('../utils/password');
 
@@ -29,14 +28,13 @@ const getOverview = async (req, res, next) => {
 
 /**
  * GET /api/admin/users
- * Paginated, searchable list of every (non-deleted) user with their
- * profile stats — powers the admin "Users" table.
+ * Paginated, searchable list of every non-deleted user and role.
  */
 const listUsers = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, search } = req.query;
-    const players = await playerModel.listPlayers({ page, limit, search });
-    return res.status(200).json({ success: true, data: { players, page: Number(page), limit: Number(limit) } });
+    const users = await userModel.listAdminUsers({ page, limit, search });
+    return res.status(200).json({ success: true, data: { users, page: Number(page), limit: Number(limit) } });
   } catch (err) {
     return next(err);
   }
@@ -90,6 +88,41 @@ const createUser = async (req, res, next) => {
 };
 
 /**
+ * PATCH /api/admin/users/:uuid/role
+ * Change an existing user's role. Admins cannot change their own role,
+ * and the last admin cannot be demoted.
+ */
+const updateUserRole = async (req, res, next) => {
+  try {
+    const { uuid } = req.params;
+    const { role } = req.body;
+
+    if (uuid === req.user.uuid) {
+      return res.status(400).json({ success: false, message: 'You cannot change your own role' });
+    }
+
+    const result = await userModel.updateRoleByUuid(uuid, role);
+    if (result.status === 'not_found') {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    if (result.status === 'last_admin') {
+      return res.status(400).json({ success: false, message: 'You cannot demote the last admin account' });
+    }
+    if (result.status === 'unchanged') {
+      return res.status(200).json({ success: true, message: 'User already has that role', data: { user: result.user } });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `User '${result.user.username}' is now ${result.user.role}.`,
+      data: { user: result.user },
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+/**
  * DELETE /api/admin/users/:uuid
  * Permanently delete a user. Guards:
  *   - can't delete yourself (avoid locking the last admin out),
@@ -123,4 +156,4 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-module.exports = { getOverview, listUsers, createUser, deleteUser };
+module.exports = { getOverview, listUsers, createUser, updateUserRole, deleteUser };

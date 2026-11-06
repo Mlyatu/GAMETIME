@@ -17,6 +17,7 @@ const { handleValidationErrors } = require('../validators/auth.validator');
 const {
   listUsersValidator,
   createUserValidator,
+  updateUserRoleValidator,
   deleteUserValidator,
 } = require('../validators/admin.validator');
 
@@ -29,6 +30,9 @@ router.get('/users', listUsersValidator, handleValidationErrors, asyncHandler(ad
 
 // POST /api/admin/users — create a new account with a chosen role
 router.post('/users', createUserValidator, handleValidationErrors, asyncHandler(adminController.createUser));
+
+// PATCH /api/admin/users/:uuid/role — change an existing user's role
+router.patch('/users/:uuid/role', updateUserRoleValidator, handleValidationErrors, asyncHandler(adminController.updateUserRole));
 
 // DELETE /api/admin/users/:uuid — permanently remove a user
 router.delete('/users/:uuid', deleteUserValidator, handleValidationErrors, asyncHandler(adminController.deleteUser));

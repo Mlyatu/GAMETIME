@@ -191,7 +191,7 @@
           <div class="col-xl-6">
             <div class="glass-card p-4 h-100">
               <div class="admin-section-title mb-2">
-                <div><h5 class="mb-1">User management <span class="text-secondary-arena text-sm" id="userCount"></span></h5><p class="text-secondary-arena text-sm mb-0">Add accounts or permanently remove them.</p></div>
+                <div><h5 class="mb-1">User management <span class="text-secondary-arena text-sm" id="userCount"></span></h5><p class="text-secondary-arena text-sm mb-0">Add accounts, change roles, or permanently remove users.</p></div>
                 <button class="btn-arena btn-arena--primary btn-arena--sm" id="openAddUserBtn"><i class="fa-solid fa-user-plus"></i> Add User</button>
               </div>
               <div class="d-flex gap-2 mb-3">
@@ -386,10 +386,16 @@
       const queue = document.getElementById('userQueue');
       document.getElementById('userCount').textContent = `(${users.length} shown)`;
       queue.innerHTML = users.length ? users.map((user) => `
-        <div class="admin-queue-row" data-user="${ui.escapeHtml(user.uuid)}" data-username="${ui.escapeHtml(user.username || '')}">
+        <div class="admin-queue-row" data-user="${ui.escapeHtml(user.uuid)}" data-username="${ui.escapeHtml(user.username || '')}" data-role="${ui.escapeHtml(user.role || 'player')}">
           <div class="admin-queue-copy"><strong>${ui.escapeHtml(user.full_name || user.username || 'Player')}</strong><span class="text-xs text-muted">@${ui.escapeHtml(user.username || 'unknown')} · ${ui.escapeHtml(user.role || 'player')}${user.is_email_verified === false ? ' · unverified' : ''}</span></div>
           <div class="admin-queue-actions">
             <a class="btn-arena btn-arena--ghost btn-arena--sm" href="/pages/profile.html?username=${encodeURIComponent(user.username || '')}" aria-label="View profile"><i class="fa-solid fa-eye"></i></a>
+            <select class="form-control-arena" data-role-select aria-label="Role for ${ui.escapeHtml(user.username || 'user')}" style="width:auto; min-width:105px; padding:6px 28px 6px 10px;" ${user.uuid === currentAdminUuid ? 'disabled' : ''}>
+              <option value="player" ${user.role === 'player' ? 'selected' : ''}>Player</option>
+              <option value="moderator" ${user.role === 'moderator' ? 'selected' : ''}>Moderator</option>
+              <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+            <button class="btn-arena btn-arena--secondary btn-arena--sm" data-action="save-user-role" data-id="${ui.escapeHtml(user.uuid)}" aria-label="Save role for ${ui.escapeHtml(user.username || 'user')}" ${user.uuid === currentAdminUuid ? 'disabled' : ''}><i class="fa-solid fa-floppy-disk"></i></button>
             <button class="btn-arena btn-arena--danger btn-arena--sm" data-action="delete-user" data-id="${ui.escapeHtml(user.uuid)}" aria-label="Delete user"><i class="fa-solid fa-trash"></i></button>
           </div>
         </div>`).join('') : renderQueueEmpty('No users found.');
@@ -433,6 +439,7 @@
 
     const USER_LIMIT = 8;
     const userState = { page: 1, search: '' };
+    let currentAdminUuid = '';
     let adminTournaments = [];
 
     function formatTournamentStatus(status) {
@@ -541,7 +548,7 @@
         const params = new URLSearchParams({ page: userState.page, limit: USER_LIMIT });
         if (userState.search) params.set('search', userState.search);
         const res = await api.get(`/admin/users?${params.toString()}`);
-        const users = res.data.players || [];
+        const users = res.data.users || [];
         renderUsers(users);
         renderUserPagination(userState.page, users.length === USER_LIMIT);
       } catch (err) {
@@ -617,6 +624,38 @@
           await loadUsers();
         } catch (err) {
           ui.showToast(err.message || 'Could not delete user', 'error');
+          button.disabled = false;
+        }
+        return;
+      }
+
+      if (button.dataset.action === 'save-user-role') {
+        const row = button.closest('[data-user]');
+        const roleSelect = row?.querySelector('[data-role-select]');
+        if (!row || !roleSelect || roleSelect.value === row.dataset.role) return;
+
+        const roleLabel = roleSelect.options[roleSelect.selectedIndex].text;
+        const confirmed = await ui.showModal({
+          title: 'Change user role?',
+          message: `Change <strong>${ui.escapeHtml(row.dataset.username)}</strong> to <strong>${ui.escapeHtml(roleLabel)}</strong>? This changes their access permissions.`,
+          confirmText: 'Change role',
+          cancelText: 'Cancel',
+        });
+        if (!confirmed) {
+          roleSelect.value = row.dataset.role;
+          return;
+        }
+
+        button.disabled = true;
+        roleSelect.disabled = true;
+        try {
+          await api.patch(`/admin/users/${encodeURIComponent(button.dataset.id)}/role`, { role: roleSelect.value });
+          ui.showToast(`User role changed to ${roleLabel}`, 'success');
+          await loadUsers();
+        } catch (err) {
+          ui.showToast(err.message || 'Could not change user role', 'error');
+          roleSelect.value = row.dataset.role;
+          roleSelect.disabled = false;
           button.disabled = false;
         }
         return;
@@ -711,6 +750,7 @@
         window.location.replace('/pages/dashboard.html');
         return;
       }
+      currentAdminUuid = user.uuid;
       document.querySelectorAll('[data-nav]').forEach((link) => {
         if (link.dataset.nav === 'admin') link.classList.add('active');
       });

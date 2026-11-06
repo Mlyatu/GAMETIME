@@ -164,6 +164,87 @@ async function countAdmins() {
   return result.rows[0].count;
 }
 
+/** List all account roles for the admin user-management screen. */
+async function listAdminUsers({ page = 1, limit = 20, search = null }) {
+  const params = [limit, (page - 1) * limit];
+  let where = 'WHERE u.deleted_at IS NULL';
+
+  if (search) {
+    params.push(`%${search}%`);
+    where += ` AND (u.full_name ILIKE $${params.length}
+      OR u.username ILIKE $${params.length}
+      OR u.email ILIKE $${params.length}
+      OR p.gamer_tag ILIKE $${params.length})`;
+  }
+
+  const result = await query(
+    `SELECT u.uuid, u.full_name, u.username, u.email, u.role,
+            u.is_email_verified, u.created_at, p.gamer_tag
+     FROM users u
+     LEFT JOIN player_profiles p ON p.user_id = u.id
+     ${where}
+     ORDER BY u.created_at DESC
+     LIMIT $1 OFFSET $2`,
+    params
+  );
+  return result.rows;
+}
+
+/**
+ * Change an account role while serializing role updates and protecting
+ * the last administrator from being demoted.
+ */
+async function updateRoleByUuid(uuid, role) {
+  const client = await getClient();
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      `SELECT id FROM users
+       WHERE role = 'admin' AND deleted_at IS NULL
+       ORDER BY id FOR UPDATE`
+    );
+
+    const targetResult = await client.query(
+      'SELECT id, uuid, username, role FROM users WHERE uuid = $1 AND deleted_at IS NULL FOR UPDATE',
+      [uuid]
+    );
+    const target = targetResult.rows[0];
+    if (!target) {
+      await client.query('ROLLBACK');
+      return { status: 'not_found' };
+    }
+
+    if (target.role === role) {
+      await client.query('COMMIT');
+      return { status: 'unchanged', user: target };
+    }
+
+    if (target.role === 'admin' && role !== 'admin') {
+      const admins = await client.query(
+        "SELECT id FROM users WHERE role = 'admin' AND deleted_at IS NULL"
+      );
+      if (admins.rowCount <= 1) {
+        await client.query('ROLLBACK');
+        return { status: 'last_admin' };
+      }
+    }
+
+    const result = await client.query(
+      `UPDATE users SET role = $1
+       WHERE id = $2
+       RETURNING uuid, full_name, username, email, role, is_email_verified`,
+      [role, target.id]
+    );
+    await client.query('COMMIT');
+    return { status: 'updated', user: result.rows[0] };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 /** Record the timestamp of a successful login. */
 async function recordLogin(userId) {
   await query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [userId]);
@@ -178,6 +259,8 @@ module.exports = {
   hardDeleteUser,
   findByUuidWithRole,
   countAdmins,
+  listAdminUsers,
+  updateRoleByUuid,
   markEmailVerified,
   updatePassword,
   recordLogin,

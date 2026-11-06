@@ -31,4 +31,9 @@ const deleteUserValidator = [
   param('uuid').isUUID().withMessage('A valid user id is required'),
 ];
 
-module.exports = { listUsersValidator, createUserValidator, deleteUserValidator };
+const updateUserRoleValidator = [
+  param('uuid').isUUID().withMessage('A valid user id is required'),
+  body('role').isIn(['player', 'moderator', 'admin']).withMessage('Role must be player, moderator, or admin'),
+];
+
+module.exports = { listUsersValidator, createUserValidator, updateUserRoleValidator, deleteUserValidator };
