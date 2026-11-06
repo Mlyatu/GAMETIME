@@ -4,26 +4,28 @@
 // Wraps nodemailer so controllers just call sendVerificationEmail(...)
 // / sendPasswordResetEmail(...) without knowing SMTP details.
 //
-// Delivery works in three tiers, tried in order:
-//   1. REAL SMTP   — when SMTP_HOST + real credentials are set in .env
-//                    (production). Emails go to the user's actual inbox.
-//   2. ETHEREAL    — when SMTP isn't configured (local/dev). We spin up
+// Delivery supports:
+//   1. RESEND API  — when RESEND_API_KEY is set; uses HTTPS.
+//   2. REAL SMTP   — when SMTP_HOST + real credentials are set.
+//   3. ETHEREAL    — when production email isn't configured (local/dev). We spin up
 //                    a free Ethereal test inbox and send the real email
 //                    there. It's a genuine, readable email you open in a
 //                    browser via a preview URL. No account needed.
-//   3. CONSOLE     — if Ethereal can't be reached (e.g. no internet), we
+//   4. CONSOLE     — if Ethereal can't be reached (e.g. no internet), we
 //                    log the direct link so the flow still completes.
-// Configure real SMTP_* values to switch back to true email delivery.
+// RESEND_API_KEY takes precedence over SMTP when both are configured.
 // =====================================================================
 
 const nodemailer = require('nodemailer');
 
 const appUrl = process.env.APP_URL || (process.env.CLIENT_URL || '').split(',')[0].trim() || 'http://localhost:5000';
+const resendApiKey = process.env.RESEND_API_KEY?.trim() || null;
 const smtpValues = [process.env.SMTP_USER, process.env.SMTP_PASS];
 const hasPlaceholderCredentials = smtpValues.some((value) => !value || /your_|change_this|app_password/i.test(value));
 
-// True only when a real SMTP host + credentials are provided.
-const emailEnabled = Boolean(process.env.SMTP_HOST && !hasPlaceholderCredentials);
+const emailEnabled = Boolean(
+  resendApiKey || (process.env.SMTP_HOST && !hasPlaceholderCredentials)
+);
 
 // Real SMTP transporter (production). Null in local dev.
 const smtpTransporter = emailEnabled
@@ -42,6 +44,17 @@ const smtpTransporter = emailEnabled
   : null;
 
 async function verifyEmailTransport() {
+  if (resendApiKey) {
+    const response = await fetch('https://api.resend.com/domains', {
+      headers: { Authorization: `Bearer ${resendApiKey}` },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) {
+      throw new Error(`Resend API verification failed (HTTP ${response.status})`);
+    }
+    return true;
+  }
+
   if (!smtpTransporter) return false;
   await smtpTransporter.verify();
   return true;
@@ -81,6 +94,22 @@ async function getEtherealTransporter() {
  */
 async function sendMail({ to, subject, html }) {
   const from = process.env.EMAIL_FROM || '"EFootball Arena" <no-reply@efootballarena.com>';
+
+  if (resendApiKey) {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ from, to: [to], subject, html }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!response.ok) {
+      throw new Error(`Resend email request failed (HTTP ${response.status})`);
+    }
+    return { previewUrl: null, delivered: true };
+  }
 
   // 1) Real SMTP (production).
   if (smtpTransporter) {
@@ -171,7 +200,9 @@ module.exports = { sendVerificationEmail, sendPasswordResetEmail, verifyEmailTra
 // One-time startup notice so it's obvious which delivery mode is active.
 if (emailEnabled) {
   // eslint-disable-next-line no-console
-  console.log('[email] Real SMTP configured — verification/reset emails are delivered to real inboxes.');
+  console.log(resendApiKey
+    ? '[email] Resend API configured — verification/reset emails use HTTPS.'
+    : '[email] SMTP configured — verification/reset emails use SMTP.');
 } else {
   // eslint-disable-next-line no-console
   console.log('[email] SMTP not configured — dev mode: signups auto-verify and reset emails open in a test inbox. Set real SMTP_* values in .env to email real users.');

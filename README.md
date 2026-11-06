@@ -110,7 +110,14 @@ The app runs in one of two modes, shown in the server startup log:
   you can log in immediately. Password-reset emails are delivered to a free
   **Ethereal test inbox** — the forgot-password page shows an
   *"Open the reset email"* button that opens the real email in your browser.
-- **Real email**: set real SMTP credentials in `server/.env` and restart, e.g.
+- **Real email**: use the Resend HTTPS API (recommended for hosted services):
+  ```
+  RESEND_API_KEY=re_your_api_key
+  EMAIL_FROM="EFootball Arena <verified-sender@your-domain.com>"
+  ```
+  Verify the sender domain with Resend first. The server verifies the API key
+  at startup and reports connectivity failures in its logs.
+- Alternatively, use real SMTP credentials in `server/.env`, e.g.
   ```
   SMTP_HOST=smtp.gmail.com
   SMTP_PORT=587

@@ -25,7 +25,7 @@ function validateProductionConfig(env = process.env) {
   const errors = [];
   const requiredKeys = [
     'CLIENT_URL', 'APP_URL', 'DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME',
-    'JWT_SECRET', 'JWT_REFRESH_SECRET', 'UPLOAD_DIR', 'SMTP_HOST', 'SMTP_USER', 'SMTP_PASS',
+    'JWT_SECRET', 'JWT_REFRESH_SECRET', 'UPLOAD_DIR',
   ];
   requiredKeys.forEach((key) => {
     if (!env[key] || !env[key].trim()) errors.push(`${key} must be set`);
@@ -50,11 +50,28 @@ function validateProductionConfig(env = process.env) {
     errors.push('UPLOAD_DIR must be an absolute path to persistent storage');
   }
 
-  ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'].forEach((key) => {
-    if (/your_|change_this|app_password/i.test(env[key] || '')) {
-      errors.push(`${key} must use real production email credentials`);
-    }
-  });
+  const hasResend = Boolean(env.RESEND_API_KEY && env.RESEND_API_KEY.trim());
+  const smtpKeys = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'];
+  const hasSmtp = smtpKeys.every((key) => env[key] && env[key].trim());
+  if (!hasResend && !hasSmtp) {
+    errors.push('Configure RESEND_API_KEY or all of SMTP_HOST, SMTP_USER, and SMTP_PASS');
+  }
+
+  if (hasResend && (!env.EMAIL_FROM || !env.EMAIL_FROM.trim())) {
+    errors.push('EMAIL_FROM must be a sender address verified with Resend');
+  }
+
+  if (!hasResend) {
+    smtpKeys.forEach((key) => {
+      if (/your_|change_this|app_password/i.test(env[key] || '')) {
+        errors.push(`${key} must use real production email credentials`);
+      }
+    });
+  }
+
+  if (hasResend && /your_|change_this|example/i.test(env.RESEND_API_KEY)) {
+    errors.push('RESEND_API_KEY must use a real API key');
+  }
 
   ['JWT_SECRET', 'JWT_REFRESH_SECRET'].forEach((key) => {
     const secret = env[key] || '';

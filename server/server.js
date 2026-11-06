@@ -36,10 +36,10 @@ async function start(port = DEFAULT_PORT) {
       try {
         await verifyEmailTransport();
         // eslint-disable-next-line no-console
-        console.log('[email] SMTP connection verified.');
+        console.log('[email] Email provider connection verified.');
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error(`[email] SMTP verification failed: ${err.message}`);
+        console.error(`[email] Email provider verification failed: ${err.message}`);
       }
     }
 
