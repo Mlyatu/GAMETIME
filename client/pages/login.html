@@ -94,6 +94,10 @@
         </div>
 
         <div class="login-notice login-notice--error d-none" id="formError" role="status" aria-live="polite"></div>
+        <button type="button" class="btn-arena btn-arena--secondary btn-arena--sm w-100 mb-3 d-none" id="resendVerificationBtn">
+          <span>Resend verification email</span>
+          <span class="spinner-arena d-none"></span>
+        </button>
 
         <button type="submit" class="btn-arena btn-arena--primary w-100" id="loginSubmitBtn">
           <span id="loginBtnText">Log In</span>
@@ -157,6 +161,10 @@
       if (hasError) return;
 
       const btn = document.getElementById('loginSubmitBtn');
+      const formError = document.getElementById('formError');
+      const resendBtn = document.getElementById('resendVerificationBtn');
+      formError.classList.add('d-none');
+      resendBtn.classList.add('d-none');
       ui.setButtonLoading(btn, true);
 
       try {
@@ -164,9 +172,35 @@
         const next = new URLSearchParams(window.location.search).get('next') || '/pages/dashboard.html';
         window.location.href = next;
       } catch (err) {
-        ui.handleApiFormError(err, this);
+        if (err.code === 'EMAIL_NOT_VERIFIED') {
+          formError.textContent = err.message;
+          formError.classList.remove('d-none');
+          resendBtn.classList.remove('d-none');
+        } else {
+          resendBtn.classList.add('d-none');
+          ui.handleApiFormError(err, this);
+        }
       } finally {
         ui.setButtonLoading(btn, false);
+      }
+    });
+
+    document.getElementById('resendVerificationBtn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value.trim();
+      const button = document.getElementById('resendVerificationBtn');
+      const formError = document.getElementById('formError');
+      ui.setButtonLoading(button, true, 'Sending...');
+      try {
+        const result = await api.post('/auth/resend-verification', { email });
+        formError.textContent = result.message;
+        formError.classList.remove('d-none');
+        formError.classList.replace('login-notice--error', 'login-notice--warning');
+      } catch (err) {
+        formError.textContent = err.message || 'The verification email could not be sent. Please try again later.';
+        formError.classList.remove('d-none');
+        formError.classList.replace('login-notice--warning', 'login-notice--error');
+      } finally {
+        ui.setButtonLoading(button, false);
       }
     });
   </script>

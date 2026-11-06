@@ -31,12 +31,21 @@ const smtpTransporter = emailEnabled
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT) || 587,
       secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for 587/others
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 30000,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
     })
   : null;
+
+async function verifyEmailTransport() {
+  if (!smtpTransporter) return false;
+  await smtpTransporter.verify();
+  return true;
+}
 
 // Lazily-created Ethereal test transporter for local dev. Created once,
 // then reused. `etherealState` is 'idle' | 'ready' | 'unavailable'.
@@ -157,7 +166,7 @@ async function sendPasswordResetEmail(toEmail, rawToken) {
   return result;
 }
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail, emailEnabled };
+module.exports = { sendVerificationEmail, sendPasswordResetEmail, verifyEmailTransport, emailEnabled };
 
 // One-time startup notice so it's obvious which delivery mode is active.
 if (emailEnabled) {

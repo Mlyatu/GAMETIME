@@ -30,6 +30,10 @@ const forgotPasswordValidator = [
   body('email').trim().isEmail().withMessage('A valid email is required').normalizeEmail(),
 ];
 
+const resendVerificationValidator = [
+  body('email').trim().isEmail().withMessage('A valid email is required').normalizeEmail(),
+];
+
 const resetPasswordValidator = [
   body('token').notEmpty().withMessage('Reset token is required'),
   body('newPassword').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
@@ -57,6 +61,7 @@ module.exports = {
   registerValidator,
   loginValidator,
   forgotPasswordValidator,
+  resendVerificationValidator,
   resetPasswordValidator,
   refreshTokenValidator,
   handleValidationErrors,

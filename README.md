@@ -116,6 +116,10 @@ The app runs in one of two modes, shown in the server startup log:
   SMTP_PORT=587
   SMTP_USER=your.real.email@gmail.com
   SMTP_PASS=your_16_char_app_password
+  EMAIL_FROM="EFootball Arena <your.real.email@gmail.com>"
   ```
   Signups then require email verification and reset links go to real inboxes.
+  The server verifies the SMTP connection at startup and reports failures in its logs.
+  If a verification email fails, the user can request another from the login page.
+  Configure `EMAIL_FROM` with a sender address accepted by your provider.
   (For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833), not your normal password.)

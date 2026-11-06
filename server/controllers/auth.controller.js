@@ -183,30 +183,72 @@ async function register(req, res, next) {
     });
 
     let message;
+    let verificationEmailSent = autoVerify;
     if (autoVerify) {
       message = 'Account created. You can log in now.';
     } else {
-      // Issue an email verification token and send it. Registration
-      // succeeds either way; a failed email send shouldn't block signup.
       const rawToken = generateRawToken();
-      await authTokenModel.createToken(
+      const verificationTokenId = await authTokenModel.createToken(
         user.id,
         hashToken(rawToken),
         'email_verification',
         new Date(Date.now() + EMAIL_TOKEN_TTL_MS)
       );
-      sendVerificationEmail(user.email, rawToken).catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to send verification email:', err.message);
-      });
-      message = 'Account created. Please check your email to verify your account.';
+      const emailResult = await sendVerificationEmail(user.email, rawToken);
+      verificationEmailSent = emailResult.delivered;
+      if (!verificationEmailSent) {
+        await authTokenModel.markTokenUsed(verificationTokenId);
+      }
+      message = emailResult.delivered
+        ? 'Account created. Please check your email to verify your account.'
+        : 'Your account was created, but the verification email could not be sent. Log in and use the resend verification option to try again.';
     }
 
     return res.status(201).json({
       success: true,
       message,
-      data: { user: toPublicUser(user) },
+      data: { user: toPublicUser(user), verificationEmailSent },
     });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+// ---------------------------------------------------------------------
+// POST /api/auth/resend-verification
+// ---------------------------------------------------------------------
+async function resendVerification(req, res, next) {
+  try {
+    const user = await userModel.findByEmail(req.body.email);
+    const genericResponse = {
+      success: true,
+      message: 'If this account needs email verification, a new link will be sent.',
+    };
+
+    if (!user || user.is_email_verified) {
+      return res.status(200).json(genericResponse);
+    }
+
+    const rawToken = generateRawToken();
+    const verificationTokenId = await authTokenModel.createToken(
+      user.id,
+      hashToken(rawToken),
+      'email_verification',
+      new Date(Date.now() + EMAIL_TOKEN_TTL_MS)
+    );
+    const emailResult = await sendVerificationEmail(user.email, rawToken);
+
+    if (!emailResult.delivered) {
+      await authTokenModel.markTokenUsed(verificationTokenId);
+      return res.status(503).json({
+        success: false,
+        code: 'VERIFICATION_EMAIL_FAILED',
+        message: 'The verification email could not be sent. Please try again later or contact support.',
+      });
+    }
+
+    await authTokenModel.invalidateUserTokens(user.id, 'email_verification', verificationTokenId);
+    return res.status(200).json(genericResponse);
   } catch (err) {
     return next(err);
   }
@@ -442,6 +484,7 @@ module.exports = {
   register,
   startGoogleAuth,
   googleCallback,
+  resendVerification,
   verifyEmail,
   login,
   refreshToken,

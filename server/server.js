@@ -16,6 +16,7 @@ const http = require('http');
 const app = require('./app');
 const { testConnection } = require('./config/database');
 const { initSocket } = require('./socket');
+const { verifyEmailTransport, emailEnabled } = require('./services/email.service');
 
 const DEFAULT_PORT = Number(process.env.PORT) || 5000;
 let server;
@@ -30,6 +31,17 @@ async function start(port = DEFAULT_PORT) {
     const { now } = await testConnection();
     // eslint-disable-next-line no-console
     console.log(`Connected to PostgreSQL — server time: ${now}`);
+
+    if (emailEnabled) {
+      try {
+        await verifyEmailTransport();
+        // eslint-disable-next-line no-console
+        console.log('[email] SMTP connection verified.');
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(`[email] SMTP verification failed: ${err.message}`);
+      }
+    }
 
     server = http.createServer(app);
     initSocket(server);

@@ -44,10 +44,12 @@ async function markTokenUsed(tokenId) {
 }
 
 /** Invalidate all outstanding tokens of a given type for a user (e.g. on password change). */
-async function invalidateUserTokens(userId, type) {
+async function invalidateUserTokens(userId, type, exceptTokenId = null) {
   await query(
-    'UPDATE auth_tokens SET used_at = NOW() WHERE user_id = $1 AND type = $2 AND used_at IS NULL',
-    [userId, type]
+    `UPDATE auth_tokens SET used_at = NOW()
+     WHERE user_id = $1 AND type = $2 AND used_at IS NULL
+       AND ($3::bigint IS NULL OR id <> $3::bigint)`,
+    [userId, type, exceptTokenId]
   );
 }
 
