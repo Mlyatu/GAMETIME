@@ -255,17 +255,25 @@ async function resendVerification(req, res, next) {
 }
 
 // ---------------------------------------------------------------------
-// GET /api/auth/verify-email?token=...
+// POST /api/auth/verify-email
 // ---------------------------------------------------------------------
 async function verifyEmail(req, res, next) {
   try {
-    const { token } = req.query;
+    const { token } = req.body;
     if (!token) {
       return res.status(400).json({ success: false, message: 'Verification token is required' });
     }
 
-    const tokenRecord = await authTokenModel.findValidToken(hashToken(token), 'email_verification');
+    const tokenRecord = await authTokenModel.findEmailVerificationToken(hashToken(token));
     if (!tokenRecord) {
+      return res.status(400).json({ success: false, message: 'This verification link is invalid or has expired' });
+    }
+
+    if (tokenRecord.is_email_verified) {
+      return res.status(200).json({ success: true, message: 'Email is already verified. You can log in.' });
+    }
+
+    if (tokenRecord.used_at || new Date(tokenRecord.expires_at).getTime() <= Date.now()) {
       return res.status(400).json({ success: false, message: 'This verification link is invalid or has expired' });
     }
 

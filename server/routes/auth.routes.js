@@ -18,6 +18,7 @@ const {
   loginValidator,
   forgotPasswordValidator,
   resendVerificationValidator,
+  verifyEmailValidator,
   resetPasswordValidator,
   refreshTokenValidator,
   handleValidationErrors,
@@ -27,7 +28,7 @@ const {
 router.post('/register', authLimiter, registerValidator, handleValidationErrors, asyncHandler(authController.register));
 router.get('/google', authController.startGoogleAuth);
 router.get('/google/callback', authController.googleCallback);
-router.get('/verify-email', asyncHandler(authController.verifyEmail));
+router.post('/verify-email', verifyEmailValidator, handleValidationErrors, asyncHandler(authController.verifyEmail));
 router.post('/resend-verification', authLimiter, resendVerificationValidator, handleValidationErrors, asyncHandler(authController.resendVerification));
 router.post('/login', authLimiter, loginValidator, handleValidationErrors, asyncHandler(authController.login));
 router.post('/refresh-token', refreshTokenValidator, handleValidationErrors, asyncHandler(authController.refreshToken));

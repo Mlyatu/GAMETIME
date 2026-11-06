@@ -27,8 +27,11 @@
 
       <!-- Loading -->
       <div id="loadingState" class="py-4">
-        <span class="spinner-arena" style="width:32px; height:32px; border-width:3px;"></span>
-        <p class="text-secondary-arena text-sm mt-3 mb-0">Verifying your email...</p>
+        <i class="fa-solid fa-envelope-circle-check fa-2x glow-text-primary mb-3" aria-hidden="true"></i>
+        <p class="text-secondary-arena text-sm mb-0">Confirm your email address to activate your account.</p>
+        <button type="button" class="btn-arena btn-arena--primary w-100 mt-3" id="verifyButton">
+          Verify Email
+        </button>
       </div>
 
       <!-- Success -->
@@ -59,6 +62,7 @@
       const loading = document.getElementById('loadingState');
       const success = document.getElementById('successState');
       const error = document.getElementById('errorState');
+      const verifyButton = document.getElementById('verifyButton');
 
       if (!token) {
         loading.classList.add('d-none');
@@ -66,15 +70,21 @@
         return;
       }
 
-      try {
-        await api.get(`/auth/verify-email?token=${encodeURIComponent(token)}`);
-        loading.classList.add('d-none');
-        success.classList.remove('d-none');
-      } catch (err) {
-        loading.classList.add('d-none');
-        error.classList.remove('d-none');
-        ui.showToast(err.message || 'Verification failed', 'error');
-      }
+      window.history.replaceState(null, '', window.location.pathname);
+      verifyButton.addEventListener('click', async () => {
+        verifyButton.disabled = true;
+        try {
+          await api.post('/auth/verify-email', { token });
+          loading.classList.add('d-none');
+          success.classList.remove('d-none');
+        } catch (err) {
+          loading.classList.add('d-none');
+          error.classList.remove('d-none');
+          ui.showToast(err.message || 'Verification failed', 'error');
+        } finally {
+          verifyButton.disabled = false;
+        }
+      });
     });
   </script>
 </body>

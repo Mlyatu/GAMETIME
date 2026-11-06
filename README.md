@@ -60,12 +60,12 @@ two different JWT secrets of at least 32 characters. Mount persistent storage
 for uploads and set `UPLOAD_DIR` to its absolute mount path; the default local
 `server/uploads` directory is not safe for ephemeral hosting. Production startup
 rejects localhost database hosts, non-HTTPS URLs, example JWT secrets, and
-relative upload paths. Production also requires real SMTP credentials for
-verification and password-reset emails. Run `npm run db:migrate` against the
-production database before serving traffic. Configure automated database
-backups and persistent-volume backups in the hosting provider; the application
-does not create offsite backups itself. Keep `.env` and user-uploaded files out
-of source control.
+relative upload paths. Production requires either `RESEND_API_KEY` or real SMTP
+credentials to deliver verification and password-reset emails. Run
+`npm run db:migrate` against the production database before serving traffic.
+Configure automated database and persistent-volume backups in the hosting
+provider; the application does not create offsite backups itself. Keep `.env`
+and user-uploaded files out of source control.
 
 ## Quick user manual
 

@@ -38,6 +38,17 @@ async function findValidToken(tokenHash, type) {
   return result.rows[0] || null;
 }
 
+async function findEmailVerificationToken(tokenHash) {
+  const result = await query(
+    `SELECT t.*, u.is_email_verified
+     FROM auth_tokens t
+     JOIN users u ON u.id = t.user_id
+     WHERE t.token_hash = $1 AND t.type = 'email_verification'`,
+    [tokenHash]
+  );
+  return result.rows[0] || null;
+}
+
 /** Mark a token as used so it can't be replayed. */
 async function markTokenUsed(tokenId) {
   await query('UPDATE auth_tokens SET used_at = NOW() WHERE id = $1', [tokenId]);
@@ -53,4 +64,10 @@ async function invalidateUserTokens(userId, type, exceptTokenId = null) {
   );
 }
 
-module.exports = { createToken, findValidToken, markTokenUsed, invalidateUserTokens };
+module.exports = {
+  createToken,
+  findValidToken,
+  findEmailVerificationToken,
+  markTokenUsed,
+  invalidateUserTokens,
+};

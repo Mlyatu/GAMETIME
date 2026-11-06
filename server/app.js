@@ -72,8 +72,15 @@ if (!fs.existsSync(logsDir)) {
 }
 const accessLogStream = fs.createWriteStream(path.join(logsDir, 'access.log'), { flags: 'a' });
 
-app.use(morgan('dev'));                 // concise colored output in the terminal
-app.use(morgan('combined', { stream: accessLogStream })); // full Apache-style log to disk
+morgan.token('safe-url', (req) => (req.originalUrl || req.url).replace(/([?&]token=)[^&]*/gi, '$1[REDACTED]'));
+morgan.token('safe-referrer', (req) => (req.headers.referer || '-').replace(/([?&]token=)[^&]*/gi, '$1[REDACTED]'));
+app.use(morgan(':method :safe-url :status :response-time ms - :res[content-length]'));
+app.use(
+  morgan(
+    ':remote-addr - :remote-user [:date[clf]] ":method :safe-url HTTP/:http-version" :status :res[content-length] ":safe-referrer" ":user-agent"',
+    { stream: accessLogStream }
+  )
+);
 
 // ---------------------------------------------------------------------
 // Body parsing & compression
