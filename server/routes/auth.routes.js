@@ -1,7 +1,7 @@
 // =====================================================================
 // AUTH ROUTES
 // =====================================================================
-// All public routes are rate-limited with authLimiter. Controllers are
+// All public routes are rate-limited. Controllers are
 // wrapped with asyncHandler so thrown errors reach the central error
 // handler and we don't need try/catch blocks inside every controller.
 // =====================================================================
@@ -12,7 +12,13 @@ const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const requireAuth = require('../middleware/auth');
 const asyncHandler = require('../utils/asyncHandler');
-const { authLimiter } = require('../middleware/rateLimiter');
+const {
+  loginLimiter,
+  registerLimiter,
+  resendVerificationLimiter,
+  forgotPasswordLimiter,
+  resetPasswordLimiter,
+} = require('../middleware/rateLimiter');
 const {
   registerValidator,
   loginValidator,
@@ -24,16 +30,16 @@ const {
   handleValidationErrors,
 } = require('../validators/auth.validator');
 
-// Public routes — authLimiter caps attempts to slow brute-force/spam
-router.post('/register', authLimiter, registerValidator, handleValidationErrors, asyncHandler(authController.register));
+// Public routes — endpoint-specific limits slow brute-force and email spam
+router.post('/register', registerLimiter, registerValidator, handleValidationErrors, asyncHandler(authController.register));
 router.get('/google', authController.startGoogleAuth);
 router.get('/google/callback', authController.googleCallback);
 router.post('/verify-email', verifyEmailValidator, handleValidationErrors, asyncHandler(authController.verifyEmail));
-router.post('/resend-verification', authLimiter, resendVerificationValidator, handleValidationErrors, asyncHandler(authController.resendVerification));
-router.post('/login', authLimiter, loginValidator, handleValidationErrors, asyncHandler(authController.login));
+router.post('/resend-verification', resendVerificationLimiter, resendVerificationValidator, handleValidationErrors, asyncHandler(authController.resendVerification));
+router.post('/login', loginLimiter, loginValidator, handleValidationErrors, asyncHandler(authController.login));
 router.post('/refresh-token', refreshTokenValidator, handleValidationErrors, asyncHandler(authController.refreshToken));
-router.post('/forgot-password', authLimiter, forgotPasswordValidator, handleValidationErrors, asyncHandler(authController.forgotPassword));
-router.post('/reset-password', authLimiter, resetPasswordValidator, handleValidationErrors, asyncHandler(authController.resetPassword));
+router.post('/forgot-password', forgotPasswordLimiter, forgotPasswordValidator, handleValidationErrors, asyncHandler(authController.forgotPassword));
+router.post('/reset-password', resetPasswordLimiter, resetPasswordValidator, handleValidationErrors, asyncHandler(authController.resetPassword));
 
 // Protected routes — require a valid access token
 router.get('/me', requireAuth, asyncHandler(authController.me));

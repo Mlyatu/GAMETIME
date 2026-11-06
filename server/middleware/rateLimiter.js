@@ -1,10 +1,10 @@
 // =====================================================================
 // RATE LIMITING
 // =====================================================================
-// Two limiters:
+// Rate limits:
 //  - `generalLimiter`: applied to every request, generous ceiling.
-//  - `authLimiter`: applied only to auth routes (login/register/reset),
-//    much stricter — these are the endpoints brute-force attacks target.
+//  - Auth limiters: separate budgets for each endpoint so unrelated
+//    login, verification, and password-reset requests don't block each other.
 // =====================================================================
 
 const rateLimit = require('express-rate-limit');
@@ -25,15 +25,36 @@ const generalLimiter = rateLimit({
   },
 });
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,   // 15 minutes
-  max: Number(process.env.AUTH_RATE_LIMIT_MAX) || 10, // login/register/reset attempts per window
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many authentication attempts. Please try again in 15 minutes.',
-  },
-});
+const authWindowMs = 15 * 60 * 1000;
+const authMessage = {
+  success: false,
+  message: 'Too many authentication attempts. Please try again in 15 minutes.',
+};
 
-module.exports = { generalLimiter, authLimiter };
+function createAuthLimiter(max) {
+  return rateLimit({
+    windowMs: authWindowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: authMessage,
+  });
+}
+
+const defaultAuthMax = Number(process.env.AUTH_RATE_LIMIT_MAX) || 10;
+const emailAuthMax = Number(process.env.AUTH_EMAIL_RATE_LIMIT_MAX) || 5;
+
+const loginLimiter = createAuthLimiter(defaultAuthMax);
+const registerLimiter = createAuthLimiter(defaultAuthMax);
+const resendVerificationLimiter = createAuthLimiter(emailAuthMax);
+const forgotPasswordLimiter = createAuthLimiter(emailAuthMax);
+const resetPasswordLimiter = createAuthLimiter(defaultAuthMax);
+
+module.exports = {
+  generalLimiter,
+  loginLimiter,
+  registerLimiter,
+  resendVerificationLimiter,
+  forgotPasswordLimiter,
+  resetPasswordLimiter,
+};

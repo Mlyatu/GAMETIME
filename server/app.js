@@ -24,6 +24,7 @@ const { getUploadDirectory } = require('./config/storage');
 const { isAllowedOrigin } = require('./config/cors');
 
 const app = express();
+app.set('trust proxy', 1);
 
 // ---------------------------------------------------------------------
 // Security headers
