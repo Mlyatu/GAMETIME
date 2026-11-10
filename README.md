@@ -72,14 +72,17 @@ and user-uploaded files out of source control.
 ### Players
 
 1. Open the home page, register, and log in. Verify your email if the system requests it.
-2. Browse tournaments, open one accepting registrations, and select **Join Tournament**. Wait for staff approval.
-3. Open **Fixtures**, select your tournament, and check your opponent and scheduled time. Play with the tournament rules shown on its details page.
-4. After a scheduled match, submit the home and away scores with a clear final-score screenshot. A player on either approved side can submit; an admin or moderator reviews it.
-5. Check **Standings** on the tournament page for updated results. Use **Log Out** in the sidebar or profile menu to return to the home page.
+2. Browse tournaments, open one accepting registrations, and select **Join Tournament**. For a paid entry, pay using the organizer's mobile-money instructions, then submit the network and transaction reference. The reference is queued for staff verification; this is not an automatic mobile-money push integration.
+3. Wait for staff approval.
+4. Open **Fixtures**, select your tournament, and check your opponent and scheduled time. Play with the tournament rules shown on its details page.
+5. After a scheduled match, submit the home and away scores with a clear final-score screenshot. A player on either approved side can submit; an admin or moderator reviews it.
+6. Check **Standings** on the tournament page for updated results. Use **Log Out** in the sidebar or profile menu to return to the home page.
 
 ### Admins and moderators
 
 Use **Admin Panel** to manage tournament entries. Generate and schedule fixtures, then review pending result submissions and approve or reject them. Approved results update the match and standings.
+
+When creating or editing a tournament, admins and moderators can upload a JPG, PNG, or WebP banner image.
 
 ## Database scripts
 
@@ -90,6 +93,8 @@ npm run db:create-admin   # create the first admin (prompts for credentials)
 npm run db:clean-users    # DESTRUCTIVE: permanently delete all non-admin users
                           #   (add --dry-run to preview without deleting)
 ```
+
+Run `npm run db:migrate` against the production database before deploying code that uses the payment-registration association migration.
 
 ## Admin user management
 

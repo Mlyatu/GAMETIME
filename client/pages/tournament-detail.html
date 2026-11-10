@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tournament — EFootball Arena</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -26,6 +27,24 @@
       align-items: flex-end;
       padding: 24px;
       margin-bottom: -40px;
+      isolation: isolate;
+      overflow: hidden;
+    }
+    .tournament-hero__image {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .tournament-hero__content {
+      position: relative;
+      z-index: 1;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(5, 8, 15, .62);
+      backdrop-filter: blur(8px);
     }
     .detail-tabs .nav-link {
       color: var(--text-secondary);
@@ -82,7 +101,8 @@
       <main class="container-arena py-4">
 
         <div class="tournament-hero mb-5">
-          <div>
+          <img class="tournament-hero__image d-none" id="tournamentBanner" alt="" />
+          <div class="tournament-hero__content">
             <span class="badge-arena badge-arena--primary mb-2" id="tournamentStatusBadge"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Loading</span>
             <h2 class="mb-0" id="tournamentName">Tournament</h2>
           </div>
@@ -172,6 +192,43 @@
     </div>
   </div>
 
+  <div class="modal fade" id="tournamentPaymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-card border-0 p-2">
+        <div class="modal-header border-0">
+          <h5 class="modal-title"><i class="fa-solid fa-mobile-screen-button glow-text-primary"></i> Submit entry payment</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-secondary-arena text-sm">This form does not initiate a mobile-money payment. Pay using the organizer's instructions, then enter the network and transaction reference from your confirmation message. An admin will verify it. Never enter your mobile-money PIN here.</p>
+          <p class="fw-semibold" id="paymentEntryFee"></p>
+          <form id="tournamentPaymentForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label-arena" for="paymentNetwork">Mobile-money network</label>
+              <select class="form-control-arena" id="paymentNetwork" required>
+                <option value="">Choose your network</option>
+                <option value="mpesa">Vodacom M-Pesa</option>
+                <option value="airtel_money">Airtel Money</option>
+                <option value="tigo_pesa">Yas / Mixx by Yas</option>
+                <option value="halopesa">HaloPesa</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-arena" for="paymentReference">Payment reference number</label>
+              <input class="form-control-arena" id="paymentReference" maxlength="100" autocomplete="off" placeholder="Enter the transaction ID from your SMS" required />
+            </div>
+            <div class="text-xs text-muted mb-3">Never enter your mobile-money PIN on this website.</div>
+            <div id="tournamentPaymentError" class="form-error-arena d-none mb-3" role="alert"></div>
+            <button type="submit" class="btn-arena btn-arena--primary w-100" id="submitTournamentPayment">
+              <span>Submit registration</span>
+              <span class="spinner-arena d-none"></span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
   <script src="/assets/js/include.js"></script>
   <script src="/assets/js/config.js"></script>
@@ -191,6 +248,7 @@
 
       let tournament = null;
       let isStaff = false;
+      let hasJoined = false;
 
       function titleCase(str) {
         return String(str || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -213,6 +271,17 @@
         const d = new Date(iso);
         if (isNaN(d)) return iso;
         return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      }
+
+      function safeBannerUrl(value) {
+        if (!value) return '';
+        try {
+          const url = new URL(value, window.location.origin);
+          if (url.protocol !== 'https:' && url.origin !== window.location.origin) return '';
+          return url.href;
+        } catch {
+          return '';
+        }
       }
 
       function statusConfig(status) {
@@ -248,6 +317,16 @@
 
           document.title = `${ui.escapeHtml(tournament.name)} — EFootball Arena`;
           setText('tournamentName', tournament.name);
+          const bannerUrl = safeBannerUrl(tournament.banner_url);
+          const banner = document.getElementById('tournamentBanner');
+          if (bannerUrl) {
+            banner.src = bannerUrl;
+            banner.alt = `${tournament.name} tournament banner`;
+            banner.classList.remove('d-none');
+          } else {
+            banner.removeAttribute('src');
+            banner.classList.add('d-none');
+          }
           const cfg = statusConfig(tournament.status);
           const badge = document.getElementById('tournamentStatusBadge');
           if (badge) {
@@ -274,6 +353,13 @@
       function updateJoinButton() {
         const btn = document.getElementById('joinTournamentBtn');
         if (!btn || !tournament) return;
+        if (hasJoined) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Already Registered';
+          btn.classList.remove('btn-arena--primary');
+          btn.classList.add('btn-arena--secondary');
+          return;
+        }
         if (tournament.status !== 'registration_open') {
           btn.disabled = true;
           btn.innerHTML = '<i class="fa-solid fa-lock"></i> Registration Closed';
@@ -296,13 +382,29 @@
 
       async function handleJoin() {
         if (!tournament || tournament.status !== 'registration_open') return;
+        if (Number(tournament.entry_fee || 0) > 0) {
+          document.getElementById('paymentEntryFee').textContent = `Entry fee: ${formatMoney(tournament.entry_fee)}`;
+          document.getElementById('tournamentPaymentError').classList.add('d-none');
+          bootstrap.Modal.getOrCreateInstance(document.getElementById('tournamentPaymentModal')).show();
+          return;
+        }
+        await submitTournamentJoin({});
+      }
+
+      async function submitTournamentJoin(paymentDetails) {
         setJoinPending();
         try {
-          await api.post(`/tournament/${encodeURIComponent(tournamentUuid)}/join`, {});
-          ui.showToast('Registration submitted — awaiting approval', 'success');
+          const response = await api.post(`/tournament/${encodeURIComponent(tournamentUuid)}/join`, paymentDetails);
+          const hasPayment = Boolean(response.data.payment);
+          ui.showToast(
+            hasPayment ? 'Payment reference submitted — awaiting verification' : 'Registration submitted — awaiting approval',
+            'success'
+          );
+          const paymentModal = bootstrap.Modal.getInstance(document.getElementById('tournamentPaymentModal'));
+          if (paymentModal) paymentModal.hide();
           const btn = document.getElementById('joinTournamentBtn');
           if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Pending Approval';
+            btn.innerHTML = `<i class="fa-solid fa-hourglass-half"></i> ${hasPayment ? 'Payment Pending' : 'Pending Approval'}`;
             btn.classList.remove('btn-arena--primary');
             btn.classList.add('btn-arena--secondary');
           }
@@ -312,6 +414,32 @@
           updateJoinButton();
         }
       }
+
+      document.getElementById('tournamentPaymentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const network = document.getElementById('paymentNetwork').value;
+        const reference = document.getElementById('paymentReference').value.trim();
+        const error = document.getElementById('tournamentPaymentError');
+        const button = document.getElementById('submitTournamentPayment');
+        if (!network || !reference) {
+          error.textContent = 'Choose a network and enter the payment reference from your confirmation message.';
+          error.classList.remove('d-none');
+          return;
+        }
+
+        error.classList.add('d-none');
+        button.disabled = true;
+        button.querySelector('span:not(.spinner-arena)').textContent = 'Submitting...';
+        button.querySelector('.spinner-arena').classList.remove('d-none');
+        await submitTournamentJoin({ paymentMethod: network, transactionReference: reference });
+        button.disabled = false;
+        button.querySelector('span:not(.spinner-arena)').textContent = 'Submit registration';
+        button.querySelector('.spinner-arena').classList.add('d-none');
+        if (document.getElementById('joinTournamentBtn').textContent.includes('Payment Pending')) {
+          form.reset();
+        }
+      });
 
       async function loadFixtures() {
         const container = document.getElementById('fixturesContainer');
@@ -398,6 +526,12 @@
         try {
           const data = await api.get(`/tournament/${encodeURIComponent(tournamentUuid)}/participants`);
           const participants = data.data.participants || [];
+          const currentUser = auth.getUser();
+          hasJoined = Boolean(currentUser && participants.some((participant) =>
+            (participant.user_uuid === currentUser.uuid || participant.team_captain_uuid === currentUser.uuid) &&
+            participant.status !== 'withdrawn'
+          ));
+          updateJoinButton();
           if (participants.length === 0) {
             container.innerHTML = '<p class="text-secondary-arena p-3 mb-0">No participants yet.</p>';
             return;

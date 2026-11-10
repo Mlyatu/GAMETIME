@@ -2,7 +2,7 @@
 // TOURNAMENT MODEL
 // =====================================================================
 
-const { query } = require('../config/database');
+const { query, getClient } = require('../config/database');
 
 async function createTournament({
   uuid, name, description, bannerUrl, format, maxParticipants,
@@ -39,7 +39,7 @@ async function findByUuid(uuid) {
 
 /** Internal numeric id + status — used by controllers needing the id for joins/updates. */
 async function getInternalId(uuid) {
-  const result = await query('SELECT id, status, max_participants, registration_deadline FROM tournaments WHERE uuid = $1', [uuid]);
+  const result = await query('SELECT id, status, max_participants, registration_deadline, entry_fee FROM tournaments WHERE uuid = $1', [uuid]);
   return result.rows[0] || null;
 }
 
@@ -135,6 +135,43 @@ async function addParticipant(tournamentId, { userId = null, teamId = null }) {
   return result.rows[0];
 }
 
+async function createRegistration(tournamentId, { userId = null, teamId = null, payment = null }) {
+  const client = await getClient();
+  try {
+    await client.query('BEGIN');
+    const participantResult = await client.query(
+      `INSERT INTO tournament_participants (tournament_id, user_id, team_id, status)
+       VALUES ($1, $2, $3, 'pending')
+       RETURNING id, uuid, status, joined_at`,
+      [tournamentId, userId, teamId]
+    );
+    const participant = participantResult.rows[0];
+
+    let paymentRecord = null;
+    if (payment) {
+      const paymentResult = await client.query(
+        `INSERT INTO payments
+           (uuid, user_id, tournament_id, participant_id, amount, currency, method, transaction_reference, status)
+         VALUES ($1, $2, $3, $4, $5, 'TZS', $6, $7, 'pending')
+         RETURNING uuid, amount, currency, method, transaction_reference, status, created_at`,
+        [payment.uuid, payment.userId, tournamentId, participant.id, payment.amount, payment.method, payment.transactionReference]
+      );
+      paymentRecord = paymentResult.rows[0];
+    }
+
+    await client.query('COMMIT');
+    return {
+      participant: { uuid: participant.uuid, status: participant.status, joined_at: participant.joined_at },
+      payment: paymentRecord,
+    };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 async function listParticipants(tournamentId, { status = null } = {}) {
   const params = [tournamentId];
   let where = 'WHERE tp.tournament_id = $1';
@@ -146,10 +183,12 @@ async function listParticipants(tournamentId, { status = null } = {}) {
   const result = await query(
     `SELECT tp.uuid, tp.status, tp.seed, tp.group_label, tp.joined_at,
             u.uuid AS user_uuid, u.username AS user_username,
-            tm.uuid AS team_uuid, tm.name AS team_name
+            tm.uuid AS team_uuid, tm.name AS team_name,
+            captain.uuid AS team_captain_uuid
      FROM tournament_participants tp
      LEFT JOIN users u ON u.id = tp.user_id
      LEFT JOIN teams tm ON tm.id = tp.team_id
+     LEFT JOIN users captain ON captain.id = tm.captain_id
      ${where}
      ORDER BY tp.joined_at ASC`,
     params
@@ -213,6 +252,7 @@ module.exports = {
   getParticipantByUuid,
   getParticipantByInternalId,
   addParticipant,
+  createRegistration,
   listParticipants,
   updateParticipantStatusByUuid,
   updateParticipantStatusById,

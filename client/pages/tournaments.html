@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tournaments — EFootball Arena</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -78,8 +79,22 @@
     .tournament-banner {
       height: 150px;
       position: relative;
+      overflow: hidden;
     }
-    .tournament-banner .badge-arena { position: absolute; top: 14px; left: 14px; }
+    .tournament-banner__image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .tournament-banner .badge-arena {
+      position: absolute;
+      z-index: 1;
+      top: 14px;
+      left: 14px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .45);
+    }
     .tournament-meta { margin: 10px 0 16px; }
     .tournament-meta span { font-size: var(--text-xs); color: var(--text-muted); margin-right: 16px; display: inline-block; }
     .tournament-meta span i { margin-right: 6px; }
@@ -169,6 +184,17 @@
         return `<span class="badge-arena ${cfg.class}">${cfg.label}</span>`;
       }
 
+      function safeBannerUrl(value) {
+        if (!value) return '';
+        try {
+          const url = new URL(value, window.location.origin);
+          if (url.protocol !== 'https:' && url.origin !== window.location.origin) return '';
+          return url.href;
+        } catch {
+          return '';
+        }
+      }
+
       function bannerGradient(status) {
         switch (status) {
           case 'registration_open':
@@ -191,11 +217,13 @@
         }
         grid.innerHTML = tournaments.map((t) => {
           const entrants = `${Number(t.approved_count || 0)} / ${t.max_participants || '∞'}`;
+          const bannerUrl = safeBannerUrl(t.banner_url);
           return `
             <div class="col-md-6 col-lg-4">
               <a href="/pages/tournament-detail.html?id=${encodeURIComponent(t.uuid)}" class="text-decoration-none">
                 <div class="glass-card glass-card--interactive overflow-hidden h-100">
                   <div class="tournament-banner" style="background:${bannerGradient(t.status)};">
+                    ${bannerUrl ? `<img class="tournament-banner__image" src="${ui.escapeHtml(bannerUrl)}" alt="${ui.escapeHtml(t.name)} tournament banner" loading="lazy" />` : ''}
                     ${statusBadge(t.status)}
                   </div>
                   <div class="p-4">

@@ -111,9 +111,9 @@ async function transitionPayment(req, res, targetStatus, allowedFromStatuses) {
   });
 
   // Auto-approve the pending tournament registration this payment was for.
-  if (targetStatus === 'approved' && payment.tournament_id) {
-    const participant = await tournamentModel.findParticipant(payment.tournament_id, { userId: payment.user_id });
-    if (participant && participant.status === 'pending') {
+  if (targetStatus === 'approved' && payment.participant_id) {
+    const participant = await tournamentModel.getParticipantByInternalId(payment.participant_id);
+    if (participant && participant.tournament_id === payment.tournament_id && participant.status === 'pending') {
       await tournamentModel.updateParticipantStatusById(participant.id, 'approved');
     }
   }

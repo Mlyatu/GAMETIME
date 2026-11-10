@@ -7,6 +7,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const tournamentModel = require('../models/tournament.model');
 const teamModel = require('../models/team.model');
 const userModel = require('../models/user.model');
+const { VALID_METHODS } = require('../validators/payment.validator');
 const auditLogModel = require('../models/auditLog.model');
 const { notifyUser } = require('../services/notification.service');
 
@@ -116,11 +117,34 @@ const joinTournament = asyncHandler(async (req, res) => {
     return res.status(409).json({ success: false, message: 'Already registered for this tournament' });
   }
 
-  const participant = await tournamentModel.addParticipant(tournament.id, { userId, teamId });
+  const entryFee = Number(tournament.entry_fee || 0);
+  let payment = null;
+  if (entryFee > 0) {
+    if (!req.body.paymentMethod || !req.body.transactionReference) {
+      return res.status(422).json({
+        success: false,
+        message: 'Choose a mobile-money network and enter the payment reference for this paid tournament',
+      });
+    }
+    if (!VALID_METHODS.includes(req.body.paymentMethod) || req.body.paymentMethod === 'bank') {
+      return res.status(422).json({ success: false, message: 'Choose a supported mobile-money network' });
+    }
+    payment = {
+      uuid: uuidv4(),
+      userId: actingUser.id,
+      amount: entryFee,
+      method: req.body.paymentMethod,
+      transactionReference: req.body.transactionReference.trim(),
+    };
+  }
+
+  const registration = await tournamentModel.createRegistration(tournament.id, { userId, teamId, payment });
   res.status(201).json({
     success: true,
-    message: 'Registration submitted — awaiting approval',
-    data: { participant },
+    message: payment
+      ? 'Registration and payment reference submitted — awaiting payment verification'
+      : 'Registration submitted — awaiting approval',
+    data: registration,
   });
 });
 

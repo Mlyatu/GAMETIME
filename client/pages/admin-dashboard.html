@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Command Center — EFootball Arena</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -97,6 +98,13 @@
       border-radius: 50%;
       color: var(--color-primary);
       background: rgba(var(--color-primary-rgb), .12);
+    }
+    .tournament-image-preview {
+      display: block;
+      width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
     }
     @keyframes adminOrbit {
       to { transform: rotate(360deg); }
@@ -306,6 +314,12 @@
                     <div class="col-md-3"><label class="form-label-arena" for="tournamentEntryFee">Entry fee (TZS)</label><input class="form-control-arena" id="tournamentEntryFee" type="number" min="0" step="1" value="0" /></div>
                     <div class="col-md-3"><label class="form-label-arena" for="tournamentPrizePool">Prize pool (TZS)</label><input class="form-control-arena" id="tournamentPrizePool" type="number" min="0" step="1" value="0" /></div>
                     <div class="col-md-3"><label class="form-label-arena" for="tournamentStatus">Status</label><select class="form-control-arena" id="tournamentStatus"><option value="draft">Draft</option><option value="registration_open">Registration Open</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
+                    <div class="col-12">
+                      <label class="form-label-arena" for="tournamentBannerFile">Tournament image</label>
+                      <input class="form-control-arena" id="tournamentBannerFile" type="file" accept="image/jpeg,image/png,image/webp" />
+                      <div class="text-xs text-muted mt-1">Upload a JPG, PNG, or WebP image. Leave empty to keep the current image.</div>
+                      <img id="tournamentBannerPreview" class="tournament-image-preview d-none mt-2" alt="Tournament image preview" />
+                    </div>
                     <div class="col-md-4"><label class="form-label-arena" for="tournamentDeadline">Registration deadline</label><input class="form-control-arena" id="tournamentDeadline" type="datetime-local" /></div>
                     <div class="col-md-4"><label class="form-label-arena" for="tournamentStart">Start date</label><input class="form-control-arena" id="tournamentStart" type="datetime-local" /></div>
                     <div class="col-md-4"><label class="form-label-arena" for="tournamentEnd">End date</label><input class="form-control-arena" id="tournamentEnd" type="datetime-local" /></div>
@@ -423,9 +437,16 @@
     function renderPayments(payments) {
       const queue = document.getElementById('paymentQueue');
       document.getElementById('paymentCount').textContent = payments.length;
+      const methodLabels = {
+        mpesa: 'Vodacom M-Pesa',
+        airtel_money: 'Airtel Money',
+        tigo_pesa: 'Yas / Mixx by Yas',
+        halopesa: 'HaloPesa',
+        bank: 'Bank',
+      };
       queue.innerHTML = payments.length ? payments.slice(0, 6).map((payment) => `
         <div class="admin-queue-row" data-payment="${ui.escapeHtml(payment.uuid)}">
-          <div class="admin-queue-copy"><strong>${ui.escapeHtml(payment.currency || 'TZS')} ${Number(payment.amount || 0).toLocaleString()}</strong><span class="text-xs text-muted">${ui.escapeHtml(payment.method || 'Payment')} · ${ui.escapeHtml(payment.transaction_reference || 'No reference')}</span></div>
+          <div class="admin-queue-copy"><strong>${ui.escapeHtml(payment.currency || 'TZS')} ${Number(payment.amount || 0).toLocaleString()}</strong><span class="text-xs text-muted">@${ui.escapeHtml(payment.username || 'Unknown')} · ${ui.escapeHtml(payment.tournament_name || 'Payment')}</span><span class="text-xs text-muted">${ui.escapeHtml(methodLabels[payment.method] || payment.method || 'Payment')} · Ref: ${ui.escapeHtml(payment.transaction_reference || 'No reference')}</span></div>
           <div class="admin-queue-actions"><button class="btn-arena btn-arena--success btn-arena--sm" data-action="approve-payment" data-id="${ui.escapeHtml(payment.uuid)}" aria-label="Approve payment"><i class="fa-solid fa-check"></i></button><button class="btn-arena btn-arena--danger btn-arena--sm" data-action="reject-payment" data-id="${ui.escapeHtml(payment.uuid)}" aria-label="Reject payment"><i class="fa-solid fa-xmark"></i></button></div>
         </div>`).join('') : renderQueueEmpty('No pending payments.');
     }
@@ -494,14 +515,35 @@
       document.getElementById('tournamentDeadline').value = dateTimeInputValue(tournament?.registration_deadline);
       document.getElementById('tournamentStart').value = dateTimeInputValue(tournament?.start_date);
       document.getElementById('tournamentEnd').value = dateTimeInputValue(tournament?.end_date);
+      const bannerPreview = document.getElementById('tournamentBannerPreview');
+      bannerPreview.src = tournament?.banner_url || '';
+      bannerPreview.classList.toggle('d-none', !tournament?.banner_url);
       (bootstrap.Modal.getInstance(document.getElementById('tournamentModal')) || new bootstrap.Modal(document.getElementById('tournamentModal'))).show();
     }
+
+    document.getElementById('tournamentBannerFile').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      const preview = document.getElementById('tournamentBannerPreview');
+      if (!file) return;
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        event.target.value = '';
+        preview.classList.add('d-none');
+        document.getElementById('tournamentFormError').textContent = 'Choose a JPG, PNG, or WebP image.';
+        document.getElementById('tournamentFormError').classList.remove('d-none');
+        return;
+      }
+      preview.src = URL.createObjectURL(file);
+      preview.classList.remove('d-none');
+      document.getElementById('tournamentFormError').classList.add('d-none');
+    });
 
     document.getElementById('tournamentForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       const button = document.getElementById('saveTournamentButton');
       const errorBox = document.getElementById('tournamentFormError');
-      const uuid = document.getElementById('tournamentUuid').value;
+      let uuid = document.getElementById('tournamentUuid').value;
+      const wasEditing = Boolean(uuid);
+      const bannerFile = document.getElementById('tournamentBannerFile').files[0];
       const value = (id) => document.getElementById(id).value;
       const dateValue = (id) => value(id) ? new Date(value(id)).toISOString() : null;
       const payload = {
@@ -528,11 +570,26 @@
         if (uuid) {
           await api.patch(`/tournament/${encodeURIComponent(uuid)}`, payload);
         } else {
-          await api.post('/tournament', payload);
+          const response = await api.post('/tournament', payload);
+          uuid = response.data.tournament.uuid;
+          document.getElementById('tournamentUuid').value = uuid;
+          document.getElementById('tournamentModalTitle').textContent = 'Update Tournament';
         }
+
+        if (bannerFile) {
+          const formData = new FormData();
+          formData.append('file', bannerFile);
+          formData.append('type', 'banner');
+          formData.append('tournamentUuid', uuid);
+          const uploadResponse = await api.upload('/media', formData);
+          await api.patch(`/tournament/${encodeURIComponent(uuid)}`, {
+            bannerUrl: uploadResponse.data.media.file_url,
+          });
+        }
+
         bootstrap.Modal.getInstance(document.getElementById('tournamentModal')).hide();
         await Promise.all([loadAdminTournaments(), loadAdminOverview()]);
-        ui.showToast(uuid ? 'Tournament updated' : 'Tournament created', 'success');
+        ui.showToast(wasEditing ? 'Tournament updated' : 'Tournament created', 'success');
       } catch (error) {
         errorBox.textContent = error.message || 'Could not save tournament.';
         errorBox.classList.remove('d-none');

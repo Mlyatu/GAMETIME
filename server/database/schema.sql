@@ -304,6 +304,7 @@ CREATE TABLE payments (
     uuid                    UUID            NOT NULL UNIQUE,
     user_id                 BIGINT          NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     tournament_id           BIGINT          REFERENCES tournaments(id) ON DELETE SET NULL,  -- entry-fee payment; NULL for other types
+    participant_id          BIGINT          REFERENCES tournament_participants(id) ON DELETE SET NULL,
     amount                  NUMERIC(12,2)   NOT NULL CHECK (amount >= 0),
     currency                VARCHAR(10)     NOT NULL DEFAULT 'TZS',
     method                  payment_method  NOT NULL,

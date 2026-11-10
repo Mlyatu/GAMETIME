@@ -36,14 +36,14 @@ async function findByUuid(uuid) {
 
 /** Internal id + owning user id + tournament id — needed for ownership checks and auto-approving registration. */
 async function getInternalId(uuid) {
-  const result = await query('SELECT id, user_id, tournament_id, status FROM payments WHERE uuid = $1', [uuid]);
+  const result = await query('SELECT id, user_id, tournament_id, participant_id, status FROM payments WHERE uuid = $1', [uuid]);
   return result.rows[0] || null;
 }
 
 async function listByUser(userId, { page = 1, limit = 20 } = {}) {
   const offset = (page - 1) * limit;
   const result = await query(
-    `SELECT p.uuid, p.amount, p.currency, p.method, p.status, p.created_at,
+    `SELECT p.uuid, p.amount, p.currency, p.method, p.transaction_reference, p.status, p.created_at,
             t.uuid AS tournament_uuid, t.name AS tournament_name
      FROM payments p
      LEFT JOIN tournaments t ON t.id = p.tournament_id
@@ -71,7 +71,7 @@ async function listAll({ page = 1, limit = 20, status = null, method = null }) {
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const result = await query(
-    `SELECT p.uuid, p.amount, p.currency, p.method, p.status, p.created_at,
+    `SELECT p.uuid, p.amount, p.currency, p.method, p.transaction_reference, p.status, p.created_at,
             u.username, t.name AS tournament_name
      FROM payments p
      JOIN users u ON u.id = p.user_id
