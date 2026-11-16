@@ -32,7 +32,7 @@ async function findByUuid(uuid) {
  * transaction — if the profile insert fails, the user insert is rolled
  * back too, so we never end up with a "player" who has no profile.
  */
-async function createPlayer({ uuid, fullName, username, email, passwordHash, gamerTag, isEmailVerified = false }) {
+async function createPlayer({ uuid, fullName, username, email, passwordHash, gamerTag, phoneNumber = null, isEmailVerified = false }) {
   const client = await getClient();
   try {
     await client.query('BEGIN');
@@ -46,8 +46,8 @@ async function createPlayer({ uuid, fullName, username, email, passwordHash, gam
     const user = userResult.rows[0];
 
     await client.query(
-      `INSERT INTO player_profiles (user_id, gamer_tag) VALUES ($1, $2)`,
-      [user.id, gamerTag]
+      `INSERT INTO player_profiles (user_id, gamer_tag, phone_number) VALUES ($1, $2, $3)`,
+      [user.id, gamerTag || username, phoneNumber]
     );
 
     await client.query('COMMIT');
@@ -174,12 +174,13 @@ async function listAdminUsers({ page = 1, limit = 20, search = null }) {
     where += ` AND (u.full_name ILIKE $${params.length}
       OR u.username ILIKE $${params.length}
       OR u.email ILIKE $${params.length}
-      OR p.gamer_tag ILIKE $${params.length})`;
+      OR p.gamer_tag ILIKE $${params.length}
+      OR p.phone_number ILIKE $${params.length})`;
   }
 
   const result = await query(
     `SELECT u.uuid, u.full_name, u.username, u.email, u.role,
-            u.is_email_verified, u.created_at, p.gamer_tag
+            u.is_email_verified, u.created_at, p.gamer_tag, p.phone_number
      FROM users u
      LEFT JOIN player_profiles p ON p.user_id = u.id
      ${where}

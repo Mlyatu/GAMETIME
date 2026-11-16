@@ -47,6 +47,12 @@
                     <div class="form-error-arena d-none" data-error-for="gamerTag"></div>
                   </div>
                   <div class="col-12 col-sm-6">
+                    <label class="form-label-arena" for="phoneNumber">Phone Number</label>
+                    <input type="tel" id="phoneNumber" class="form-control-arena" autocomplete="tel" inputmode="tel" maxlength="24" />
+                    <div class="form-error-arena d-none" data-error-for="phoneNumber"></div>
+                    <div class="text-xs text-muted mt-1">Visible only to you and admins.</div>
+                  </div>
+                  <div class="col-12 col-sm-6">
                     <label class="form-label-arena" for="platform">Platform</label>
                     <select id="platform" class="form-control-arena">
                       <option value="mobile">Mobile</option>
@@ -133,6 +139,7 @@
           var p = res.data.profile;
           document.getElementById('fullName').value = p.full_name || '';
           document.getElementById('gamerTag').value = p.gamer_tag || '';
+          document.getElementById('phoneNumber').value = p.phone_number || '';
           document.getElementById('platform').value = p.platform || 'mobile';
           document.getElementById('country').value = p.country || '';
           document.getElementById('bio').value = p.bio || '';
@@ -152,6 +159,7 @@
         var payload = {
           fullName: document.getElementById('fullName').value.trim(),
           gamerTag: document.getElementById('gamerTag').value.trim(),
+          phoneNumber: document.getElementById('phoneNumber').value.trim(),
           platform: document.getElementById('platform').value,
           country: document.getElementById('country').value.trim(),
           bio: document.getElementById('bio').value.trim(),

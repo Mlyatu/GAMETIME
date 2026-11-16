@@ -1,8 +1,11 @@
 const { body, query: queryValidator } = require('express-validator');
+const { normalizePhoneNumber } = require('./auth.validator');
 
 const updateProfileValidator = [
   body('fullName').optional().trim().isLength({ max: 100 }).withMessage('Full name must be under 100 characters'),
   body('gamerTag').optional().trim().isLength({ max: 50 }).withMessage('Gamer tag must be under 50 characters'),
+  body('phoneNumber').optional({ checkFalsy: true }).trim().customSanitizer(normalizePhoneNumber)
+    .matches(/^\+[1-9]\d{7,14}$/).withMessage('Enter a valid phone number'),
   body('platform').optional().isIn(['mobile', 'ps', 'xbox', 'pc']).withMessage('Invalid platform'),
   body('country').optional().trim().isLength({ max: 60 }).withMessage('Country must be under 60 characters'),
   body('bio').optional().trim().isLength({ max: 1000 }).withMessage('Bio must be under 1000 characters'),

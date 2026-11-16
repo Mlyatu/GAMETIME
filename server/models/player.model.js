@@ -12,7 +12,7 @@ const { query } = require('../config/database');
 const PROFILE_SELECT = `
   SELECT
     u.uuid, u.full_name, u.username, u.email, u.avatar_url, u.status, u.created_at,
-    p.gamer_tag, p.platform, p.country, p.bio,
+    p.gamer_tag, p.phone_number, p.platform, p.country, p.bio,
     COALESCE(stats.total_matches, 0)::int AS total_matches,
     COALESCE(stats.wins, 0)::int AS wins,
     COALESCE(stats.draws, 0)::int AS draws,
@@ -53,12 +53,12 @@ async function getPublicProfileByUsername(username) {
   const row = result.rows[0];
   if (!row) return null;
   // Strip the email before returning — other players shouldn't see it.
-  const { email, ...publicFields } = row;
+  const { email, phone_number, ...publicFields } = row;
   return publicFields;
 }
 
 /** Update the mutable parts of a player's profile. Only non-undefined fields are changed. */
-async function updateProfile(userUuid, { fullName, avatarUrl, gamerTag, platform, country, bio }) {
+async function updateProfile(userUuid, { fullName, avatarUrl, gamerTag, phoneNumber, platform, country, bio }) {
   await query(
     `UPDATE users SET
        full_name = COALESCE($2, full_name),
@@ -72,10 +72,11 @@ async function updateProfile(userUuid, { fullName, avatarUrl, gamerTag, platform
        gamer_tag = COALESCE($2, gamer_tag),
        platform = COALESCE($3, platform),
        country = COALESCE($4, country),
-       bio = COALESCE($5, bio)
+       bio = COALESCE($5, bio),
+       phone_number = COALESCE($6, phone_number)
      WHERE user_id = (SELECT id FROM users WHERE uuid = $1)
      RETURNING user_id`,
-    [userUuid, gamerTag, platform, country, bio]
+    [userUuid, gamerTag, platform, country, bio, phoneNumber]
   );
 
   return result.rows[0] || null;
@@ -96,7 +97,7 @@ async function listPlayers({ page = 1, limit = 20, search = null }) {
     `${PROFILE_SELECT} ${where} ORDER BY u.created_at DESC LIMIT $1 OFFSET $2`,
     params
   );
-  return result.rows.map(({ email, ...rest }) => rest); // never expose emails in a list view
+  return result.rows.map(({ email, phone_number, ...rest }) => rest); // never expose contact details in a public list
 }
 
 module.exports = { getOwnProfile, getPublicProfileByUsername, updateProfile, listPlayers };

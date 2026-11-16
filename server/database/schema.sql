@@ -92,6 +92,7 @@ CREATE TABLE player_profiles (
     id              BIGSERIAL PRIMARY KEY,
     user_id         BIGINT          NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     gamer_tag       VARCHAR(50)     NOT NULL,          -- in-game / PSN / Konami ID
+    phone_number    VARCHAR(16),
     platform        player_platform NOT NULL DEFAULT 'mobile',
     country         VARCHAR(60),
     bio             TEXT,

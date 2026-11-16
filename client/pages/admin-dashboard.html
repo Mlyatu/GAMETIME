@@ -203,7 +203,7 @@
                 <button class="btn-arena btn-arena--primary btn-arena--sm" id="openAddUserBtn"><i class="fa-solid fa-user-plus"></i> Add User</button>
               </div>
               <div class="d-flex gap-2 mb-3">
-                <input type="search" id="userSearch" class="form-control-arena" placeholder="Search by username or gamer tag..." aria-label="Search users" />
+                <input type="search" id="userSearch" class="form-control-arena" placeholder="Search by username, gamer tag, or phone..." aria-label="Search users" />
               </div>
               <div id="userQueue"><div class="skeleton-arena" style="height:64px;"></div></div>
               <div class="d-flex justify-content-center mt-3" id="userPagination"></div>
@@ -401,7 +401,7 @@
       document.getElementById('userCount').textContent = `(${users.length} shown)`;
       queue.innerHTML = users.length ? users.map((user) => `
         <div class="admin-queue-row" data-user="${ui.escapeHtml(user.uuid)}" data-username="${ui.escapeHtml(user.username || '')}" data-role="${ui.escapeHtml(user.role || 'player')}">
-          <div class="admin-queue-copy"><strong>${ui.escapeHtml(user.full_name || user.username || 'Player')}</strong><span class="text-xs text-muted">@${ui.escapeHtml(user.username || 'unknown')} · ${ui.escapeHtml(user.role || 'player')}${user.is_email_verified === false ? ' · unverified' : ''}</span></div>
+          <div class="admin-queue-copy"><strong>${ui.escapeHtml(user.full_name || user.username || 'Player')}</strong><span class="text-xs text-muted">@${ui.escapeHtml(user.username || 'unknown')} · ${ui.escapeHtml(user.role || 'player')}${user.is_email_verified === false ? ' · unverified' : ''}</span>${user.phone_number ? `<span class="text-xs text-muted"><i class="fa-solid fa-phone"></i> ${ui.escapeHtml(user.phone_number)}</span>` : ''}</div>
           <div class="admin-queue-actions">
             <a class="btn-arena btn-arena--ghost btn-arena--sm" href="/pages/profile.html?username=${encodeURIComponent(user.username || '')}" aria-label="View profile"><i class="fa-solid fa-eye"></i></a>
             <select class="form-control-arena" data-role-select aria-label="Role for ${ui.escapeHtml(user.username || 'user')}" style="width:auto; min-width:105px; padding:6px 28px 6px 10px;" ${user.uuid === currentAdminUuid ? 'disabled' : ''}>

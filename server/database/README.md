@@ -13,6 +13,10 @@ For a database created before Step 9, also run the migration in
 above already include these columns — the migration is only for
 already-deployed databases).
 
+For databases deployed before the player phone-number field was added,
+run `migrations/003_add_player_phone_number.sql` (or use the migration
+runner with `npm run db:migrate`).
+
 ## Entity relationship summary
 
 ```

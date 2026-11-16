@@ -71,7 +71,7 @@ and user-uploaded files out of source control.
 
 ### Players
 
-1. Open the home page, register, and log in. Verify your email if the system requests it.
+1. Open the home page, register with your phone number, and log in. Verify your email if the system requests it. Phone numbers are stored in international format and shown only to the account owner and admins.
 2. Browse tournaments, open one accepting registrations, and select **Join Tournament**. For a paid entry, pay using the organizer's mobile-money instructions, then submit the network and transaction reference. The reference is queued for staff verification; this is not an automatic mobile-money push integration.
 3. Wait for staff approval.
 4. Open **Fixtures**, select your tournament, and check your opponent and scheduled time. Play with the tournament rules shown on its details page.

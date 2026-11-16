@@ -65,9 +65,10 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label-arena" for="gamerTag">Gamer Tag</label>
-          <input type="text" id="gamerTag" name="gamerTag" class="form-control-arena" placeholder="StrikerX" required maxlength="50" />
-          <div class="form-error-arena d-none" data-error-for="gamerTag"></div>
+          <label class="form-label-arena" for="phoneNumber">Phone Number</label>
+          <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control-arena" placeholder="07XX XXX XXX or +2557XX XXX XXX" autocomplete="tel" inputmode="tel" required maxlength="24" />
+          <div class="form-error-arena d-none" data-error-for="phoneNumber"></div>
+          <div class="text-xs text-muted mt-1">You can add your Gamer Tag later in Settings.</div>
         </div>
 
         <div class="mb-3">
@@ -127,14 +128,18 @@
 
       const fullName = document.getElementById('fullName').value.trim();
       const username = document.getElementById('username').value.trim();
-      const gamerTag = document.getElementById('gamerTag').value.trim();
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
 
       let hasError = false;
       if (!fullName) { showFieldError('fullName', 'Full name is required'); hasError = true; }
       if (!/^[a-zA-Z0-9_]{3,50}$/.test(username)) { showFieldError('username', 'Letters, numbers, and underscores only (3-50 chars)'); hasError = true; }
-      if (!gamerTag) { showFieldError('gamerTag', 'Gamer tag is required'); hasError = true; }
+      if (!phoneNumber) { showFieldError('phoneNumber', 'Phone number is required'); hasError = true; }
+      else if (!/^(?:\+?[1-9]\d{7,14}|00\d{6,14}|0\d{9})$/.test(phoneNumber.replace(/[\s().-]/g, ''))) {
+        showFieldError('phoneNumber', 'Enter a valid phone number, e.g. 07XX XXX XXX or +2557XX XXX XXX');
+        hasError = true;
+      }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError('email', 'Enter a valid email address'); hasError = true; }
       if (password.length < 8 || !/\d/.test(password)) { showFieldError('password', 'Minimum 8 characters, must include a number'); hasError = true; }
       if (!document.getElementById('agreeTerms').checked) {
@@ -152,7 +157,7 @@
       ui.setButtonLoading(btn, true);
 
       try {
-        const result = await auth.register({ fullName, username, gamerTag, email, password });
+        const result = await auth.register({ fullName, username, phoneNumber, email, password });
         ui.showModal({
           title: 'Account created',
           message: (result && result.message) || 'Your account is ready. You can log in now.',

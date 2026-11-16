@@ -151,7 +151,7 @@ async function googleCallback(req, res, next) {
 // ---------------------------------------------------------------------
 async function register(req, res, next) {
   try {
-    const { fullName, username, email, password, gamerTag } = req.body;
+    const { fullName, username, email, password, phoneNumber } = req.body;
 
     const [existingEmail, existingUsername] = await Promise.all([
       userModel.findByEmail(email),
@@ -178,7 +178,8 @@ async function register(req, res, next) {
       username,
       email,
       passwordHash,
-      gamerTag,
+      gamerTag: username.slice(0, 50),
+      phoneNumber,
       isEmailVerified: autoVerify,
     });
 

@@ -8,6 +8,14 @@
 
 const { body, validationResult } = require('express-validator');
 
+function normalizePhoneNumber(value) {
+  const compact = value.replace(/[\s().-]/g, '');
+  if (/^0\d{9}$/.test(compact)) return `+255${compact.slice(1)}`;
+  if (/^255\d{9}$/.test(compact)) return `+${compact}`;
+  if (/^00\d+$/.test(compact)) return `+${compact.slice(2)}`;
+  return compact;
+}
+
 const registerValidator = [
   body('fullName').trim().notEmpty().withMessage('Full name is required')
     .isLength({ max: 100 }).withMessage('Full name must be under 100 characters'),
@@ -17,8 +25,9 @@ const registerValidator = [
   body('email').trim().isEmail().withMessage('A valid email is required').normalizeEmail(),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
     .matches(/\d/).withMessage('Password must contain at least one number'),
-  body('gamerTag').trim().notEmpty().withMessage('Gamer tag is required')
-    .isLength({ max: 50 }).withMessage('Gamer tag must be under 50 characters'),
+  body('phoneNumber').trim().notEmpty().withMessage('Phone number is required').bail()
+    .customSanitizer(normalizePhoneNumber)
+    .matches(/^\+[1-9]\d{7,14}$/).withMessage('Enter a valid phone number, e.g. 07XX XXX XXX or +2557XX XXX XXX'),
 ];
 
 const loginValidator = [
@@ -70,4 +79,5 @@ module.exports = {
   resetPasswordValidator,
   refreshTokenValidator,
   handleValidationErrors,
+  normalizePhoneNumber,
 };
