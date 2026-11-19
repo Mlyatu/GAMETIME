@@ -144,7 +144,7 @@
           document.getElementById('country').value = p.country || '';
           document.getElementById('bio').value = p.bio || '';
           var avatar = document.getElementById('settingsAvatar');
-          if (p.avatar_url) avatar.src = p.avatar_url;
+          avatar.src = ui.avatarUrl(p.avatar_url);
         } catch (err) {
           ui.showToast(err.message || 'Could not load your profile', 'error');
         }
@@ -191,8 +191,9 @@
         setLoading('avatarBtn', 'avatarSpinner', true);
         try {
           var res = await api.upload('/player/me/avatar', fd);
-          document.getElementById('settingsAvatar').src = res.data.avatarUrl;
+          document.getElementById('settingsAvatar').src = ui.avatarUrl(res.data.avatarUrl);
           await auth.fetchCurrentUser();
+          await auth.updateAuthUI();
           ui.showToast('Avatar updated', 'success');
           input.value = '';
         } catch (err) {

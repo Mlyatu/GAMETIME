@@ -44,11 +44,13 @@ async function listByTournament(tournamentId) {
   const result = await query(
     `SELECT s.rank, s.played, s.won, s.drawn, s.lost, s.goals_for, s.goals_against,
             s.goal_difference, s.points,
-            u.username AS player_username, t.name AS team_name
+            u.username AS player_username, t.name AS team_name,
+            COALESCE(t.logo_url, u.avatar_url, captain.avatar_url) AS entrant_avatar_url
      FROM standings s
      JOIN tournament_participants tp ON tp.id = s.participant_id
      LEFT JOIN users u ON u.id = tp.user_id
      LEFT JOIN teams t ON t.id = tp.team_id
+     LEFT JOIN users captain ON captain.id = t.captain_id
      WHERE s.tournament_id = $1
      ORDER BY s.rank ASC`,
     [tournamentId]

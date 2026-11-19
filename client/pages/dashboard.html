@@ -216,7 +216,7 @@
         matchesContainer.innerHTML = upcoming.length ? upcoming.map((match) => `
           <div class="match-row">
             <div>
-              <div class="text-sm fw-semibold">${ui.escapeHtml(match.home_team_name || match.home_username || 'TBD')} <span class="text-muted">vs</span> ${ui.escapeHtml(match.away_team_name || match.away_username || 'TBD')}</div>
+              <div class="text-sm fw-semibold d-flex align-items-center gap-2"><img src="${ui.escapeHtml(ui.avatarUrl(match.home_avatar_url))}" class="avatar-arena" width="24" height="24" alt="" /> ${ui.escapeHtml(match.home_team_name || match.home_username || 'TBD')} <span class="text-muted">vs</span> <img src="${ui.escapeHtml(ui.avatarUrl(match.away_avatar_url))}" class="avatar-arena" width="24" height="24" alt="" /> ${ui.escapeHtml(match.away_team_name || match.away_username || 'TBD')}</div>
               <div class="text-xs text-muted">${ui.escapeHtml(match.tournamentName)} · ${ui.escapeHtml(match.round || 'Round TBD')}</div>
             </div>
             <span class="badge-arena badge-arena--primary">${ui.escapeHtml(formatMatchDate(match.scheduled_at))}</span>

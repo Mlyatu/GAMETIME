@@ -167,9 +167,9 @@
               return `
                 <div class="fixture-row">
                   <div class="text-xs text-muted">${formatDateTime(m.scheduled_at)}</div>
-                  <div class="player"${homeClass}><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> ${ui.escapeHtml(homeName)}</div>
+                  <div class="player"${homeClass}><img src="${ui.escapeHtml(ui.avatarUrl(m.home_avatar_url))}" class="avatar-arena" width="32" height="32" alt="" /> ${ui.escapeHtml(homeName)}</div>
                   <div class="fixture-score${!isCompleted ? ' text-muted' : ''}">${scoreText}</div>
-                  <div class="player away"${awayClass}><img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" /> ${ui.escapeHtml(awayName)}</div>
+                  <div class="player away"${awayClass}><img src="${ui.escapeHtml(ui.avatarUrl(m.away_avatar_url))}" class="avatar-arena" width="32" height="32" alt="" /> ${ui.escapeHtml(awayName)}</div>
                   <div class="text-end">${badge}</div>
                 </div>
                 ${adminControls}

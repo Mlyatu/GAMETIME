@@ -121,15 +121,11 @@
                   <div class="team-crest">${initials(t.name || 'T')}</div>
                   <div>
                     <h6 class="mb-0">${ui.escapeHtml(t.name)}</h6>
-                    <span class="text-xs text-muted">Captain: ${ui.escapeHtml(t.captain_username || 'Unknown')}</span>
+                    <span class="text-xs text-muted d-flex align-items-center gap-1"><img src="${ui.escapeHtml(ui.avatarUrl(t.captain_avatar_url))}" class="avatar-arena" width="20" height="20" alt="" /> Captain: ${ui.escapeHtml(t.captain_username || 'Unknown')}</span>
                     ${t.tag ? `<div class="text-xs text-muted">Tag: ${ui.escapeHtml(t.tag)}</div>` : ''}
                   </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                  <div class="team-avatars">
-                    <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
-                    <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" alt="" />
-                  </div>
                   <span class="text-xs text-muted">${memberCount} member${memberCount === 1 ? '' : 's'}</span>
                 </div>
               </div>

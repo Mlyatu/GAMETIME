@@ -46,15 +46,19 @@ async function findByUuid(uuid) {
   const result = await query(
     `SELECT m.uuid, m.round, m.scheduled_at, m.home_score, m.away_score, m.status, m.created_at,
             hp.uuid AS home_participant_uuid, hu.username AS home_username, ht.name AS home_team_name,
+            COALESCE(ht.logo_url, hu.avatar_url, hcaptain.avatar_url) AS home_avatar_url,
             ap.uuid AS away_participant_uuid, au.username AS away_username, at.name AS away_team_name,
+            COALESCE(at.logo_url, au.avatar_url, acaptain.avatar_url) AS away_avatar_url,
             wp.uuid AS winner_participant_uuid
      FROM matches m
      LEFT JOIN tournament_participants hp ON hp.id = m.home_participant_id
      LEFT JOIN users hu ON hu.id = hp.user_id
      LEFT JOIN teams ht ON ht.id = hp.team_id
+     LEFT JOIN users hcaptain ON hcaptain.id = ht.captain_id
      LEFT JOIN tournament_participants ap ON ap.id = m.away_participant_id
      LEFT JOIN users au ON au.id = ap.user_id
      LEFT JOIN teams at ON at.id = ap.team_id
+     LEFT JOIN users acaptain ON acaptain.id = at.captain_id
      LEFT JOIN tournament_participants wp ON wp.id = m.winner_participant_id
      WHERE m.uuid = $1`,
     [uuid]
@@ -79,14 +83,18 @@ async function listByTournament(tournamentId, { round = null } = {}) {
   const result = await query(
     `SELECT m.uuid, m.round, m.scheduled_at, m.home_score, m.away_score, m.status,
             hu.username AS home_username, ht.name AS home_team_name,
-            au.username AS away_username, at.name AS away_team_name
+            COALESCE(ht.logo_url, hu.avatar_url, hcaptain.avatar_url) AS home_avatar_url,
+            au.username AS away_username, at.name AS away_team_name,
+            COALESCE(at.logo_url, au.avatar_url, acaptain.avatar_url) AS away_avatar_url
      FROM matches m
      LEFT JOIN tournament_participants hp ON hp.id = m.home_participant_id
      LEFT JOIN users hu ON hu.id = hp.user_id
      LEFT JOIN teams ht ON ht.id = hp.team_id
+     LEFT JOIN users hcaptain ON hcaptain.id = ht.captain_id
      LEFT JOIN tournament_participants ap ON ap.id = m.away_participant_id
      LEFT JOIN users au ON au.id = ap.user_id
      LEFT JOIN teams at ON at.id = ap.team_id
+     LEFT JOIN users acaptain ON acaptain.id = at.captain_id
      ${where}
      ORDER BY m.round, m.scheduled_at NULLS LAST, m.id`,
     params

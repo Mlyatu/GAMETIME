@@ -142,6 +142,7 @@ function initSocket(httpServer) {
           createdAt: saved.created_at,
           senderUuid: uuid,
           senderUsername: username,
+          senderAvatarUrl: sender.avatar_url || null,
         });
 
         if (typeof callback === 'function') callback({ success: true });

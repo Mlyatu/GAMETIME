@@ -101,7 +101,7 @@ async function listTeams({ page = 1, limit = 20, search = null }) {
 
   const result = await query(
     `SELECT t.uuid, t.name, t.tag, t.logo_url, t.created_at,
-            u.username AS captain_username,
+            u.username AS captain_username, u.avatar_url AS captain_avatar_url,
             (SELECT COUNT(*) FROM team_members tm WHERE tm.team_id = t.id) AS member_count
      FROM teams t
      JOIN users u ON u.id = t.captain_id

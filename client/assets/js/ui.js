@@ -161,6 +161,20 @@
       .replace(/'/g, '&#039;');
   }
 
+  function avatarUrl(value) {
+    const fallback = '/assets/images/avatar-placeholder.svg';
+    if (!value) return fallback;
+    try {
+      const url = new URL(String(value), root.location.origin);
+      if (url.origin === root.location.origin && !url.username && !url.password) {
+        return url.href;
+      }
+    } catch {
+      return fallback;
+    }
+    return fallback;
+  }
+
   root.ui = {
     showToast,
     showModal,
@@ -169,5 +183,6 @@
     setButtonLoading,
     handleApiFormError,
     escapeHtml,
+    avatarUrl,
   };
 })(window);

@@ -129,11 +129,11 @@
 
   async function updateAuthUI() {
     let user = getStoredUser();
-    if (!user && isAuthenticated()) {
+    if ((!user || !Object.prototype.hasOwnProperty.call(user, 'avatarUrl')) && isAuthenticated()) {
       try {
         user = await fetchCurrentUser();
       } catch {
-        return;
+        if (!user) return;
       }
     }
     if (!user) return;
@@ -142,7 +142,7 @@
     if (topbarUsername) topbarUsername.textContent = user.username || user.fullName || 'Player';
 
     const topbarAvatar = document.getElementById('topbarAvatar');
-    if (topbarAvatar && user.avatarUrl) topbarAvatar.src = user.avatarUrl;
+    if (topbarAvatar) topbarAvatar.src = root.ui.avatarUrl(user.avatarUrl);
 
     document.querySelectorAll('.sidebar-admin-only').forEach((el) => {
       const shouldShow = user && (user.role === 'admin' || user.role === 'moderator');

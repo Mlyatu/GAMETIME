@@ -105,7 +105,7 @@
           const name = row.player_username || row.team_name || 'Unknown entrant';
           return `<tr>
             <td class="rank-cell${Number(row.rank) <= 3 ? ' top3' : ''}">${Number(row.rank)}</td>
-            <td>${ui.escapeHtml(name)}</td>
+            <td><span class="d-inline-flex align-items-center gap-2"><img src="${ui.escapeHtml(ui.avatarUrl(row.entrant_avatar_url))}" class="avatar-arena" width="28" height="28" alt="" /> ${ui.escapeHtml(name)}</span></td>
             <td>${played}</td><td>${Number(row.won || 0)}</td><td>${Number(row.drawn || 0)}</td><td>${Number(row.lost || 0)}</td>
             <td>${winRate}</td><td><strong>${Number(row.points || 0)}</strong></td>
           </tr>`;
@@ -118,7 +118,7 @@
           const rankContent = rank === 1 ? '<i class="fa-solid fa-crown"></i>' : rank;
           return `<div class="glass-card podium-card podium-card--${place}${rank === 1 ? ' glow-primary' : ''}">
             <div class="podium-rank">${rankContent}</div>
-            <img src="/assets/images/avatar-placeholder.svg" class="avatar-arena mb-2" width="${rank === 1 ? 72 : 56}" height="${rank === 1 ? 72 : 56}" alt="" />
+            <img src="${ui.escapeHtml(ui.avatarUrl(row.entrant_avatar_url))}" class="avatar-arena mb-2" width="${rank === 1 ? 72 : 56}" height="${rank === 1 ? 72 : 56}" alt="" />
             <h6 class="mb-0">${ui.escapeHtml(row.player_username || row.team_name || 'Unknown entrant')}</h6>
             <p class="text-xs text-muted mb-0">${Number(row.points || 0)} pts</p>
           </div>`;

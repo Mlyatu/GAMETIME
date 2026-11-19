@@ -32,6 +32,7 @@ function toPublicUser(user) {
     email: user.email,
     role: user.role,
     isEmailVerified: user.is_email_verified,
+    avatarUrl: user.avatar_url || null,
   };
 }
 

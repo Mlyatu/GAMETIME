@@ -28,7 +28,8 @@ async function listMessages(channelId, { limit = 50, before = null } = {}) {
   }
 
   const result = await query(
-    `SELECT cm.id, cm.message, cm.created_at, u.uuid AS sender_uuid, u.username AS sender_username
+    `SELECT cm.id, cm.message, cm.created_at, u.uuid AS sender_uuid, u.username AS sender_username,
+            u.avatar_url AS sender_avatar_url
      FROM chat_messages cm
      JOIN users u ON u.id = cm.sender_id
      WHERE cm.channel_id = $1 AND cm.is_deleted = FALSE ${cursorClause}

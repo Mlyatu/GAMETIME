@@ -85,7 +85,7 @@
         const response = await api.get(`/player/${encodeURIComponent(username)}`);
         const profile = response.data.profile;
         document.title = `${profile.full_name || profile.username} — EFootball Arena`;
-        document.getElementById('profileAvatar').src = profile.avatar_url || '/assets/images/avatar-placeholder.svg';
+        document.getElementById('profileAvatar').src = ui.avatarUrl(profile.avatar_url);
         document.getElementById('profileName').textContent = profile.full_name || profile.username;
         document.getElementById('profileHandle').textContent = `@${profile.username} · ${profile.gamer_tag || 'Arena player'}`;
         document.getElementById('profileLocation').textContent = [profile.country, profile.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}` : ''].filter(Boolean).join(' · ');

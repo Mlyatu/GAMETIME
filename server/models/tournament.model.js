@@ -184,6 +184,7 @@ async function listParticipants(tournamentId, { status = null } = {}) {
     `SELECT tp.uuid, tp.status, tp.seed, tp.group_label, tp.joined_at,
             u.uuid AS user_uuid, u.username AS user_username,
             tm.uuid AS team_uuid, tm.name AS team_name,
+            COALESCE(tm.logo_url, u.avatar_url, captain.avatar_url) AS avatar_url,
             captain.uuid AS team_captain_uuid
      FROM tournament_participants tp
      LEFT JOIN users u ON u.id = tp.user_id

@@ -94,7 +94,7 @@
         var wrap = document.createElement('div');
         wrap.className = 'chat-msg' + (mine ? ' is-mine' : '');
         wrap.innerHTML =
-          '<img src="/assets/images/avatar-placeholder.svg" class="avatar-arena" width="32" height="32" alt="" style="flex-shrink:0;" />' +
+          '<img src="' + ui.escapeHtml(ui.avatarUrl(msg.avatarUrl)) + '" class="avatar-arena" width="32" height="32" alt="" style="flex-shrink:0;" />' +
           '<div class="bubble">' +
             '<div class="meta">' + ui.escapeHtml(msg.username || 'Player') + ' · ' + timeOf(msg.createdAt || msg.created_at) + '</div>' +
             '<div class="text">' + ui.escapeHtml(msg.message) + '</div>' +
@@ -110,7 +110,7 @@
           return;
         }
         messages.forEach(function (m) {
-          appendMessage({ username: m.sender_username, message: m.message, createdAt: m.created_at }, false);
+          appendMessage({ username: m.sender_username, avatarUrl: m.sender_avatar_url, message: m.message, createdAt: m.created_at }, false);
         });
       }
 
@@ -139,7 +139,7 @@
         socket.on('chat:message', function (msg) {
           var placeholder = messagesEl.querySelector('p.text-secondary-arena');
           if (placeholder) messagesEl.innerHTML = '';
-          appendMessage({ username: msg.senderUsername, message: msg.message, createdAt: msg.createdAt }, msg.senderUuid === myUuid);
+          appendMessage({ username: msg.senderUsername, avatarUrl: msg.senderAvatarUrl, message: msg.message, createdAt: msg.createdAt }, msg.senderUuid === myUuid);
         });
       }
 
