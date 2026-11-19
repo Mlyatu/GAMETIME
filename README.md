@@ -63,6 +63,9 @@ rejects localhost database hosts, non-HTTPS URLs, example JWT secrets, and
 relative upload paths. Production requires either `RESEND_API_KEY` or real SMTP
 credentials to deliver verification and password-reset emails. Run
 `npm run db:migrate` against the production database before serving traffic.
+Player profile avatars are stored in Cloudinary. Configure `CLOUDINARY_CLOUD_NAME`,
+`CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` in the hosting environment;
+other uploaded files still use `UPLOAD_DIR`.
 Configure automated database and persistent-volume backups in the hosting
 provider; the application does not create offsite backups itself. Keep `.env`
 and user-uploaded files out of source control.

@@ -166,7 +166,9 @@
     if (!value) return fallback;
     try {
       const url = new URL(String(value), root.location.origin);
-      if (url.origin === root.location.origin && !url.username && !url.password) {
+      const sameOrigin = url.origin === root.location.origin;
+      const cloudinaryImage = url.protocol === 'https:' && url.hostname === 'res.cloudinary.com';
+      if ((sameOrigin || cloudinaryImage) && !url.username && !url.password) {
         return url.href;
       }
     } catch {

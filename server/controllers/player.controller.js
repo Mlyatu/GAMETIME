@@ -4,13 +4,14 @@
 
 const asyncHandler = require('../utils/asyncHandler');
 const playerModel = require('../models/player.model');
+const avatarStorage = require('../services/avatarStorage.service');
 
 /** POST /api/player/me/avatar — upload/replace the logged-in player's avatar image. */
 const uploadAvatar = asyncHandler(async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'An image file is required' });
   }
-  const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+  const avatarUrl = await avatarStorage.uploadAvatar(req.file.buffer, req.user.uuid);
   await playerModel.updateProfile(req.user.uuid, { avatarUrl });
   res.status(200).json({ success: true, message: 'Avatar updated', data: { avatarUrl } });
 });

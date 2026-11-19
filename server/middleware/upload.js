@@ -54,13 +54,30 @@ function makeImageUploader(subfolder) {
   return makeUploader(subfolder, ALLOWED_IMAGE_TYPES, MAX_SIZE_BYTES);
 }
 
+function makeMemoryImageUploader() {
+  const fileFilter = (req, file, cb) => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+      const err = new Error(`Unsupported file type. Allowed: ${ALLOWED_IMAGE_TYPES.join(', ')}`);
+      err.statusCode = 400;
+      return cb(err);
+    }
+    return cb(null, true);
+  };
+
+  return multer({
+    storage: multer.memoryStorage(),
+    fileFilter,
+    limits: { fileSize: MAX_SIZE_BYTES },
+  });
+}
+
 // One uploader per purpose:
 //  - paymentProofUpload: payment screenshots (images only, 10MB default)
 //  - resultScreenshotUpload: match result screenshots for OCR (images only, 10MB default)
 //  - mediaUpload: tournament posters/banners/logos/gallery/video (images + video, 50MB default)
 const paymentProofUpload = makeImageUploader('payments');
 const resultScreenshotUpload = makeImageUploader('results');
-const avatarUpload = makeImageUploader('avatars');
+const avatarUpload = makeMemoryImageUploader();
 const mediaUpload = makeUploader('media', ALLOWED_MEDIA_TYPES, MEDIA_MAX_SIZE_BYTES);
 
 module.exports = { paymentProofUpload, resultScreenshotUpload, avatarUpload, mediaUpload };
